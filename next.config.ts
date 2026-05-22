@@ -1,0 +1,63 @@
+import type { NextConfig } from 'next';
+
+/** Comma-separated hostnames, e.g. cdn.example.com,xyz.cloudfront.net */
+function buildImageRemotePatterns(): NonNullable<
+  NextConfig['images']
+>['remotePatterns'] {
+  const patterns: NonNullable<NextConfig['images']>['remotePatterns'] = [
+    // Local API / storage during development
+    {
+      protocol: 'http',
+      hostname: 'localhost',
+      port: '7000',
+      pathname: '/**',
+    },
+    {
+      protocol: 'http',
+      hostname: '127.0.0.1',
+      port: '7000',
+      pathname: '/**',
+    },
+  ];
+
+  const extraHosts = process.env.NEXT_PUBLIC_IMAGE_REMOTE_HOSTS?.split(',')
+    .map((host) => host.trim())
+    .filter(Boolean);
+
+  for (const hostname of extraHosts ?? []) {
+    patterns.push({
+      protocol: 'https',
+      hostname,
+      pathname: '/**',
+    });
+  }
+
+  return patterns;
+}
+
+const config: NextConfig = {
+  // React Compiler (already enabled in this project)
+  reactCompiler: true,
+
+  // Bundle only what's used from large icon/chart/UI packages
+  experimental: {
+    optimizePackageImports: ['lucide-react', 'recharts', 'radix-ui'],
+  },
+
+  // Image optimization
+  images: {
+    formats: ['image/avif', 'image/webp'],
+    remotePatterns: buildImageRemotePatterns(),
+  },
+
+  // Security & compression
+  compress: true,
+  poweredByHeader: false,
+
+  // Compiler options
+  compiler: {
+    removeConsole: process.env.NODE_ENV === 'production',
+  },
+};
+
+export default config;
