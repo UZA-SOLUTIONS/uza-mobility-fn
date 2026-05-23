@@ -1,5 +1,5 @@
 import Link from 'next/link';
-import { marketingFooterNav } from '@/config/nav';
+import { marketingFooterNav } from '@/config/navigation';
 import { siteConfig } from '@/config/site';
 
 export function MarketingFooter() {

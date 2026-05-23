@@ -1,8 +1,8 @@
 import Link from 'next/link';
-import { marketingNav } from '@/config/nav';
+import { marketingNav } from '@/config/navigation';
 import { siteConfig } from '@/config/site';
+import { NavbarAuth } from '@/components/marketing/navbar-auth';
 import { ThemeToggle } from '@/components/shared/theme-toggle';
-import { Button } from '@/components/ui/button';
 
 export function MarketingNavbar() {
   return (
@@ -24,12 +24,7 @@ export function MarketingNavbar() {
         </nav>
         <div className="flex items-center gap-2">
           <ThemeToggle />
-          <Button variant="ghost" size="sm" asChild>
-            <Link href="/login">Log in</Link>
-          </Button>
-          <Button size="sm" asChild>
-            <Link href="/register">Get started</Link>
-          </Button>
+          <NavbarAuth />
         </div>
       </div>
     </header>

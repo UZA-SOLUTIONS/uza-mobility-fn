@@ -1,0 +1,14 @@
+export const PLATFORM_ROLES = [
+  'SUPER_ADMIN',
+  'MARKETPLACE_ADMIN',
+  'FINANCE_ADMIN',
+  'LOGISTICS_ADMIN',
+  'FLEET_ADMIN',
+  'SUSTAINABILITY_ADMIN',
+  'ADVERTISING_ADMIN',
+  'SALES_AGENT',
+  'SELLER',
+  'BUYER',
+] as const;
+
+export type PlatformRole = (typeof PLATFORM_ROLES)[number];

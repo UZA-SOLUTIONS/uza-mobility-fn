@@ -1,0 +1,31 @@
+import { getMe } from '@/lib/api/auth';
+import { sessionCredentialsSchema } from '@/schemas/auth';
+import type { AuthTokens } from '@/types/auth/auth-tokens';
+import type { MeUser } from '@/types/auth/me-user';
+import type { AuthUser } from '@/types/auth/session';
+
+function toAuthUser(me: MeUser, tokens: AuthTokens): AuthUser {
+  return { ...me, ...tokens };
+}
+
+/**
+ * NextAuth Credentials `authorize` — runs after API login/register already succeeded.
+ * Validates `SessionCredentialsInput` and loads the user profile with the access token.
+ */
+export async function authorizeCredentials(
+  credentials: Record<string, unknown> | undefined,
+): Promise<AuthUser | null> {
+  const parsed = sessionCredentialsSchema.safeParse(credentials);
+  if (!parsed.success) {
+    return null;
+  }
+
+  const { accessToken, refreshToken } = parsed.data;
+
+  try {
+    const me = await getMe(accessToken);
+    return toAuthUser(me, { accessToken, refreshToken });
+  } catch {
+    return null;
+  }
+}
