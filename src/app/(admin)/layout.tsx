@@ -1,6 +1,5 @@
 import { AdminAccess } from '@/components/auth/admin-access';
-import { Workspace } from '@/components/auth/workspace';
-import { adminNav } from '@/config/navigation';
+import { AdminShell } from '@/components/admin/shell';
 
 export default function AdminLayout({
   children,
@@ -9,9 +8,7 @@ export default function AdminLayout({
 }) {
   return (
     <AdminAccess>
-      <Workspace title="Admin" navItems={adminNav}>
-        {children}
-      </Workspace>
+      <AdminShell>{children}</AdminShell>
     </AdminAccess>
   );
 }

@@ -1,10 +1,9 @@
-import { PageHeader } from '@/components/shared/page-header';
+import { AdminDashboard } from '@/components/admin/dashboard';
+import { AdminHome } from '@/components/admin/home';
+import { AdminPageGate } from '@/components/admin/page-gate';
 
-export default function AdminOverviewPage() {
+export default function AdminPage() {
   return (
-    <PageHeader
-      title="Admin"
-      description="Platform operations — modules appear based on your permissions."
-    />
+    <AdminPageGate superAdmin={<AdminDashboard />} default={<AdminHome />} />
   );
 }
