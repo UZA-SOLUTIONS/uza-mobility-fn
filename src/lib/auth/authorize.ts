@@ -1,11 +1,12 @@
 import { getMe } from '@/lib/api/auth';
+import { normalizeMeUser } from '@/lib/auth/seller-profiles';
 import { sessionCredentialsSchema } from '@/schemas/auth';
 import type { AuthTokens } from '@/types/auth/auth-tokens';
 import type { MeUser } from '@/types/auth/me-user';
 import type { AuthUser } from '@/types/auth/session';
 
 function toAuthUser(me: MeUser, tokens: AuthTokens): AuthUser {
-  return { ...me, ...tokens };
+  return { ...normalizeMeUser(me), ...tokens };
 }
 
 /**

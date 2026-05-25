@@ -21,6 +21,10 @@ export function usePermissions() {
     canAny: (actions: string[]) => canAny(permissions, actions),
     isSuperAdmin: isSuperAdmin(permissions),
     hasAdminAccess: hasAdminAccess(permissions),
-    hasSellerWorkspace: hasSellerWorkspace(permissions, user?.seller),
+    hasSellerWorkspace: hasSellerWorkspace(
+      permissions,
+      user?.seller,
+      user?.sellers,
+    ),
   };
 }

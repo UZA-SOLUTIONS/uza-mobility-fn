@@ -5,10 +5,15 @@ import { toast } from 'sonner';
 import {
   activatePart,
   approveListing,
+  createAdminListing,
+  createPart,
+  toAdminCreateListingBody,
   deactivatePart,
   deleteListing,
+  deletePart,
   featureListing,
   getAdminListings,
+  getAdminPart,
   getAdminParts,
   getAdminSeller,
   getAdminSellers,
@@ -18,15 +23,22 @@ import {
   reactivateSeller,
   rejectListing,
   suspendSeller,
+  updateListingVerification,
+  updatePart,
   verifySeller,
 } from '@/lib/api/admin';
 import {
   addSubcategory,
   createCategory,
   deactivateCategory,
-  getCategories,
+  deleteSubcategory,
+  getAdminCategories,
+  permanentlyDeleteCategory,
+  reactivateCategory,
   updateCategory,
+  updateSubcategory,
 } from '@/lib/api/categories';
+import type { AdminCategoriesFilters } from '@/lib/api/categories';
 import { ApiClientError } from '@/lib/api';
 import type {
   AdminListingsFilters,
@@ -34,10 +46,16 @@ import type {
   AdminSellersFilters,
 } from '@/types/admin/marketplace';
 import type {
+  AdminCreateListingInput,
   CreateCategoryInput,
+  CreatePartInput,
   CreateSubcategoryInput,
   RejectListingInput,
   SuspendSellerInput,
+  UpdateCategoryInput,
+  UpdatePartInput,
+  UpdateSubcategoryInput,
+  UpdateVerificationInput,
 } from '@/schemas/admin';
 
 export const adminKeys = {
@@ -50,7 +68,9 @@ export const adminKeys = {
   seller: (id: string) => [...adminKeys.all, 'seller', id] as const,
   parts: (filters: AdminPartsFilters) =>
     [...adminKeys.all, 'parts', filters] as const,
-  categories: () => [...adminKeys.all, 'categories'] as const,
+  part: (id: string) => [...adminKeys.all, 'part', id] as const,
+  categories: (filters: AdminCategoriesFilters = {}) =>
+    [...adminKeys.all, 'categories', filters] as const,
 };
 
 function mutationError(error: unknown) {
@@ -77,6 +97,25 @@ export function useAdminListings(
     queryFn: () => getAdminListings(filters),
     enabled,
     placeholderData: (previous) => previous,
+  });
+}
+
+export function useCreateAdminListing() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: ({
+      body,
+      photos = [],
+    }: {
+      body: AdminCreateListingInput;
+      photos?: File[];
+    }) => createAdminListing(toAdminCreateListingBody(body), photos),
+    onSuccess: () => {
+      toast.success('Listing created');
+      void queryClient.invalidateQueries({ queryKey: adminKeys.all });
+    },
+    onError: (error) => toast.error(mutationError(error)),
   });
 }
 
@@ -153,6 +192,27 @@ export function useDeleteListing() {
     mutationFn: deleteListing,
     onSuccess: () => {
       toast.success('Listing deleted');
+      void queryClient.invalidateQueries({ queryKey: adminKeys.all });
+    },
+    onError: (error) => toast.error(mutationError(error)),
+  });
+}
+
+export function useUpdateListingVerification() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: ({
+      id,
+      body,
+      files,
+    }: {
+      id: string;
+      body: UpdateVerificationInput;
+      files?: { report?: File; batteryReport?: File };
+    }) => updateListingVerification(id, body, files),
+    onSuccess: () => {
+      toast.success('Verification updated');
       void queryClient.invalidateQueries({ queryKey: adminKeys.all });
     },
     onError: (error) => toast.error(mutationError(error)),
@@ -251,12 +311,76 @@ export function useDeactivatePart() {
   });
 }
 
-export function useCategories(enabled = true) {
+export function useAdminPart(id: string | null) {
   return useQuery({
-    queryKey: adminKeys.categories(),
-    queryFn: getCategories,
+    queryKey: adminKeys.part(id ?? ''),
+    queryFn: () => getAdminPart(id!),
+    enabled: Boolean(id),
+  });
+}
+
+export function useCreatePart() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: ({
+      body,
+      photos = [],
+    }: {
+      body: CreatePartInput;
+      photos?: File[];
+    }) => createPart(body, photos),
+    onSuccess: () => {
+      toast.success('Part created');
+      void queryClient.invalidateQueries({ queryKey: adminKeys.all });
+    },
+    onError: (error) => toast.error(mutationError(error)),
+  });
+}
+
+export function useUpdatePart() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: ({
+      id,
+      body,
+      photos = [],
+    }: {
+      id: string;
+      body: UpdatePartInput;
+      photos?: File[];
+    }) => updatePart(id, body, photos),
+    onSuccess: () => {
+      toast.success('Part updated');
+      void queryClient.invalidateQueries({ queryKey: adminKeys.all });
+    },
+    onError: (error) => toast.error(mutationError(error)),
+  });
+}
+
+export function useDeletePart() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: deletePart,
+    onSuccess: () => {
+      toast.success('Part deleted');
+      void queryClient.invalidateQueries({ queryKey: adminKeys.all });
+    },
+    onError: (error) => toast.error(mutationError(error)),
+  });
+}
+
+export function useAdminCategories(
+  filters: AdminCategoriesFilters = {},
+  enabled = true,
+) {
+  return useQuery({
+    queryKey: adminKeys.categories(filters),
+    queryFn: () => getAdminCategories(filters),
     enabled,
-    staleTime: 120_000,
+    staleTime: 30_000,
   });
 }
 
@@ -267,7 +391,7 @@ export function useCreateCategory() {
     mutationFn: (body: CreateCategoryInput) => createCategory(body),
     onSuccess: () => {
       toast.success('Category created');
-      void queryClient.invalidateQueries({ queryKey: adminKeys.categories() });
+      void queryClient.invalidateQueries({ queryKey: adminKeys.all });
     },
     onError: (error) => toast.error(mutationError(error)),
   });
@@ -277,16 +401,32 @@ export function useUpdateCategory() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: ({
-      id,
-      body,
-    }: {
-      id: string;
-      body: Partial<CreateCategoryInput> & { isActive?: boolean };
-    }) => updateCategory(id, body),
+    mutationFn: ({ id, body }: { id: string; body: UpdateCategoryInput }) =>
+      updateCategory(id, body),
     onSuccess: () => {
       toast.success('Category updated');
-      void queryClient.invalidateQueries({ queryKey: adminKeys.categories() });
+      void queryClient.invalidateQueries({ queryKey: adminKeys.all });
+    },
+    onError: (error) => toast.error(mutationError(error)),
+  });
+}
+
+export function useUpdateSubcategory() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: ({
+      categoryId,
+      subId,
+      body,
+    }: {
+      categoryId: string;
+      subId: string;
+      body: UpdateSubcategoryInput;
+    }) => updateSubcategory(categoryId, subId, body),
+    onSuccess: () => {
+      toast.success('Subcategory updated');
+      void queryClient.invalidateQueries({ queryKey: adminKeys.all });
     },
     onError: (error) => toast.error(mutationError(error)),
   });
@@ -299,7 +439,33 @@ export function useDeactivateCategory() {
     mutationFn: deactivateCategory,
     onSuccess: () => {
       toast.success('Category deactivated');
-      void queryClient.invalidateQueries({ queryKey: adminKeys.categories() });
+      void queryClient.invalidateQueries({ queryKey: adminKeys.all });
+    },
+    onError: (error) => toast.error(mutationError(error)),
+  });
+}
+
+export function useReactivateCategory() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: reactivateCategory,
+    onSuccess: () => {
+      toast.success('Category reactivated');
+      void queryClient.invalidateQueries({ queryKey: adminKeys.all });
+    },
+    onError: (error) => toast.error(mutationError(error)),
+  });
+}
+
+export function usePermanentlyDeleteCategory() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: permanentlyDeleteCategory,
+    onSuccess: () => {
+      toast.success('Category deleted permanently');
+      void queryClient.invalidateQueries({ queryKey: adminKeys.all });
     },
     onError: (error) => toast.error(mutationError(error)),
   });
@@ -318,7 +484,26 @@ export function useAddSubcategory() {
     }) => addSubcategory(categoryId, body),
     onSuccess: () => {
       toast.success('Subcategory added');
-      void queryClient.invalidateQueries({ queryKey: adminKeys.categories() });
+      void queryClient.invalidateQueries({ queryKey: adminKeys.all });
+    },
+    onError: (error) => toast.error(mutationError(error)),
+  });
+}
+
+export function useDeleteSubcategory() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: ({
+      categoryId,
+      subId,
+    }: {
+      categoryId: string;
+      subId: string;
+    }) => deleteSubcategory(categoryId, subId),
+    onSuccess: () => {
+      toast.success('Subcategory deleted');
+      void queryClient.invalidateQueries({ queryKey: adminKeys.all });
     },
     onError: (error) => toast.error(mutationError(error)),
   });

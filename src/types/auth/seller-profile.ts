@@ -17,8 +17,13 @@ export type MeSellerProfile = {
   sellerType: SellerType;
   status: SellerStatus;
   businessName: string;
+  contactPerson?: string | null;
+  phone?: string | null;
+  email?: string | null;
+  address?: string | null;
   city: string | null;
   country: string;
+  description?: string | null;
   isVerified: boolean;
   verifiedAt: string | null;
 };

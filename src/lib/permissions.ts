@@ -47,8 +47,15 @@ export function hasAdminAccess(permissions: string[]): boolean {
 
 export function hasSellerWorkspace(
   permissions: string[],
-  seller: { id: string } | null | undefined,
+  seller: { id: string; sellerType?: string } | null | undefined,
+  sellers?: { id: string; sellerType?: string }[] | null,
 ): boolean {
-  if (!seller) return false;
+  const profiles = sellers?.length ? sellers : seller ? [seller] : [];
+  const marketplace = profiles.find(
+    (s) =>
+      s.sellerType === 'LOCAL_SELLER' ||
+      s.sellerType === 'INTERNATIONAL_SELLER',
+  );
+  if (!marketplace) return false;
   return canAny(permissions, ['listings:create', 'parts:create']);
 }

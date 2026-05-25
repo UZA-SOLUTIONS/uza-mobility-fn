@@ -16,7 +16,10 @@ export type MeUser = {
   roles: PlatformRole[];
   permissions: string[];
   buyerProfile: MeBuyerProfile | null;
+  /** Primary profile (marketplace seller if any, else first channel). */
   seller: MeSellerProfile | null;
+  /** One row per inventory channel (e.g. Rwanda stock + China sourcing). */
+  sellers?: MeSellerProfile[];
   createdAt: string;
   updatedAt: string;
 };

@@ -3,12 +3,15 @@
 import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
+import { ConfirmDialog } from '@/components/admin/shared/confirm-dialog';
 import { usePermissions } from '@/hooks/permissions';
 import { PageHeader } from '@/components/shared/page-header';
+import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Skeleton } from '@/components/ui/skeleton';
+import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import {
   Card,
   CardContent,
@@ -30,17 +33,27 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
+import type { AdminCategoriesFilters } from '@/lib/api/categories';
 import {
   useAddSubcategory,
-  useCategories,
+  useAdminCategories,
   useCreateCategory,
   useDeactivateCategory,
+  useDeleteSubcategory,
+  usePermanentlyDeleteCategory,
+  useReactivateCategory,
+  useUpdateCategory,
+  useUpdateSubcategory,
 } from '@/queries/admin';
 import {
   createCategorySchema,
+  updateCategorySchema,
+  updateSubcategorySchema,
   type CreateCategoryInput,
+  type UpdateCategoryInput,
+  type UpdateSubcategoryInput,
 } from '@/schemas/admin';
-import type { Category } from '@/types/admin/marketplace';
+import type { Category, Subcategory } from '@/types/admin/marketplace';
 
 const categoryTypes = [
   { value: 'PASSENGER_EV', label: 'Passenger EV' },
@@ -50,55 +63,250 @@ const categoryTypes = [
   { value: 'EV_INFRASTRUCTURE_ENERGY', label: 'Infrastructure & energy' },
 ] as const;
 
-function CategoryCard({ category }: { category: Category }) {
-  const { isSuperAdmin } = usePermissions();
+type ViewFilter = 'active' | 'inactive' | 'all';
+
+const viewToApiFilter: Record<ViewFilter, AdminCategoriesFilters> = {
+  active: { isActive: true },
+  inactive: { isActive: false },
+  all: {},
+};
+
+type CategoryCardProps = {
+  category: Category;
+};
+
+function CategoryCard({ category }: CategoryCardProps) {
+  const { isSuperAdmin, hasAdminAccess } = usePermissions();
   const deactivate = useDeactivateCategory();
-  const [subOpen, setSubOpen] = useState(false);
+  const reactivate = useReactivateCategory();
+  const deletePermanent = usePermanentlyDeleteCategory();
+  const deleteSub = useDeleteSubcategory();
   const addSub = useAddSubcategory();
+  const updateCategory = useUpdateCategory();
+  const updateSub = useUpdateSubcategory();
+
+  const [subOpen, setSubOpen] = useState(false);
+  const [editOpen, setEditOpen] = useState(false);
+  const [editSub, setEditSub] = useState<Subcategory | null>(null);
   const [subName, setSubName] = useState('');
+  const [confirm, setConfirm] = useState<
+    | 'deactivate-category'
+    | 'reactivate-category'
+    | 'delete-category'
+    | { type: 'delete-sub'; sub: Subcategory }
+    | null
+  >(null);
+
+  const listingCount = category._count?.listings ?? 0;
+  const busy =
+    deactivate.isPending ||
+    reactivate.isPending ||
+    deletePermanent.isPending ||
+    deleteSub.isPending ||
+    updateCategory.isPending ||
+    updateSub.isPending;
+
+  const closeConfirm = () => setConfirm(null);
+
+  const handleConfirm = () => {
+    if (confirm === 'deactivate-category') {
+      deactivate.mutate(category.id, { onSuccess: closeConfirm });
+      return;
+    }
+    if (confirm === 'reactivate-category') {
+      reactivate.mutate(category.id, { onSuccess: closeConfirm });
+      return;
+    }
+    if (confirm === 'delete-category') {
+      deletePermanent.mutate(category.id, { onSuccess: closeConfirm });
+      return;
+    }
+    if (
+      confirm &&
+      typeof confirm === 'object' &&
+      confirm.type === 'delete-sub'
+    ) {
+      deleteSub.mutate(
+        { categoryId: category.id, subId: confirm.sub.id },
+        { onSuccess: closeConfirm },
+      );
+    }
+  };
+
+  const confirmCopy = (() => {
+    if (confirm === 'deactivate-category') {
+      return {
+        title: 'Deactivate category?',
+        description: `"${category.name}" will be hidden from the public marketplace. You can reactivate it later.`,
+        confirmLabel: 'Deactivate',
+        variant: 'destructive' as const,
+      };
+    }
+    if (confirm === 'reactivate-category') {
+      return {
+        title: 'Reactivate category?',
+        description: `"${category.name}" will be visible on the marketplace again.`,
+        confirmLabel: 'Reactivate',
+        variant: 'default' as const,
+      };
+    }
+    if (confirm === 'delete-category') {
+      return {
+        title: 'Delete category permanently?',
+        description: `"${category.name}" and its subcategories will be removed. This cannot be undone.`,
+        confirmLabel: 'Delete permanently',
+        variant: 'destructive' as const,
+      };
+    }
+    if (
+      confirm &&
+      typeof confirm === 'object' &&
+      confirm.type === 'delete-sub'
+    ) {
+      return {
+        title: 'Delete subcategory?',
+        description: `"${confirm.sub.name}" will be removed. This cannot be undone.`,
+        confirmLabel: 'Delete',
+        variant: 'destructive' as const,
+      };
+    }
+    return null;
+  })();
 
   return (
-    <Card>
-      <CardHeader className="pb-2">
-        <div className="flex items-start justify-between gap-2">
-          <div>
-            <CardTitle className="text-base">{category.name}</CardTitle>
-            <CardDescription>
-              {category.slug} · {category.type.replaceAll('_', ' ')}
-            </CardDescription>
+    <>
+      <Card className={!category.isActive ? 'opacity-80' : undefined}>
+        <CardHeader className="pb-2">
+          <div className="flex items-start justify-between gap-2">
+            <div className="space-y-1">
+              <div className="flex flex-wrap items-center gap-2">
+                <CardTitle className="text-base">{category.name}</CardTitle>
+                {!category.isActive ? (
+                  <Badge variant="secondary">Inactive</Badge>
+                ) : null}
+              </div>
+              <CardDescription>
+                {category.slug} · {category.type.replaceAll('_', ' ')}
+                {listingCount > 0 ? ` · ${listingCount} listing(s)` : null}
+              </CardDescription>
+            </div>
+            {hasAdminAccess ? (
+              <div className="flex flex-wrap justify-end gap-1">
+                <Button
+                  size="sm"
+                  variant="ghost"
+                  disabled={busy}
+                  onClick={() => setEditOpen(true)}
+                >
+                  Edit
+                </Button>
+                {category.isActive ? (
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    disabled={busy}
+                    onClick={() => setConfirm('deactivate-category')}
+                  >
+                    Deactivate
+                  </Button>
+                ) : (
+                  <Button
+                    size="sm"
+                    disabled={busy}
+                    onClick={() => setConfirm('reactivate-category')}
+                  >
+                    Reactivate
+                  </Button>
+                )}
+                {isSuperAdmin && listingCount === 0 ? (
+                  <Button
+                    size="sm"
+                    variant="destructive"
+                    disabled={busy}
+                    onClick={() => setConfirm('delete-category')}
+                  >
+                    Delete
+                  </Button>
+                ) : null}
+              </div>
+            ) : null}
           </div>
-          {isSuperAdmin ? (
-            <Button
-              size="sm"
-              variant="outline"
-              disabled={deactivate.isPending}
-              onClick={() => {
-                if (window.confirm(`Deactivate category "${category.name}"?`)) {
-                  deactivate.mutate(category.id);
-                }
-              }}
-            >
-              Deactivate
+        </CardHeader>
+        <CardContent className="space-y-3">
+          {category.subcategories?.length ? (
+            <ul className="space-y-2 text-sm">
+              {category.subcategories.map((sub) => (
+                <li
+                  key={sub.id}
+                  className="flex flex-wrap items-center justify-between gap-2 rounded-md border px-2 py-1.5"
+                >
+                  <span className="text-muted-foreground">
+                    {sub.name} <span className="text-xs">({sub.slug})</span>
+                  </span>
+                  {hasAdminAccess ? (
+                    <div className="flex gap-1">
+                      <Button
+                        size="sm"
+                        variant="ghost"
+                        className="h-7 text-xs"
+                        disabled={busy}
+                        onClick={() => setEditSub(sub)}
+                      >
+                        Edit
+                      </Button>
+                      <Button
+                        size="sm"
+                        variant="ghost"
+                        className="h-7 text-xs text-destructive"
+                        disabled={busy}
+                        onClick={() => setConfirm({ type: 'delete-sub', sub })}
+                      >
+                        Delete
+                      </Button>
+                    </div>
+                  ) : null}
+                </li>
+              ))}
+            </ul>
+          ) : (
+            <p className="text-sm text-muted-foreground">
+              No subcategories yet.
+            </p>
+          )}
+          {category.isActive ? (
+            <Button size="sm" variant="ghost" onClick={() => setSubOpen(true)}>
+              Add subcategory
             </Button>
           ) : null}
-        </div>
-      </CardHeader>
-      <CardContent className="space-y-3">
-        {category.subcategories?.length ? (
-          <ul className="space-y-1 text-sm">
-            {category.subcategories.map((sub) => (
-              <li key={sub.id} className="text-muted-foreground">
-                {sub.name} <span className="text-xs">({sub.slug})</span>
-              </li>
-            ))}
-          </ul>
-        ) : (
-          <p className="text-sm text-muted-foreground">No subcategories yet.</p>
-        )}
-        <Button size="sm" variant="ghost" onClick={() => setSubOpen(true)}>
-          Add subcategory
-        </Button>
-      </CardContent>
+        </CardContent>
+      </Card>
+
+      <EditCategoryDialog
+        category={category}
+        open={editOpen}
+        onOpenChange={setEditOpen}
+        onSave={(body) =>
+          updateCategory.mutate(
+            { id: category.id, body },
+            { onSuccess: () => setEditOpen(false) },
+          )
+        }
+        loading={updateCategory.isPending}
+      />
+
+      <EditSubcategoryDialog
+        subcategory={editSub}
+        open={editSub !== null}
+        onOpenChange={(open) => !open && setEditSub(null)}
+        onSave={(body) => {
+          if (!editSub) return;
+          updateSub.mutate(
+            { categoryId: category.id, subId: editSub.id, body },
+            { onSuccess: () => setEditSub(null) },
+          );
+        }}
+        loading={updateSub.isPending}
+      />
 
       <Dialog open={subOpen} onOpenChange={setSubOpen}>
         <DialogContent>
@@ -140,12 +348,178 @@ function CategoryCard({ category }: { category: Category }) {
           </DialogFooter>
         </DialogContent>
       </Dialog>
-    </Card>
+
+      {confirmCopy ? (
+        <ConfirmDialog
+          open={confirm !== null}
+          onOpenChange={(open) => !open && closeConfirm()}
+          title={confirmCopy.title}
+          description={confirmCopy.description}
+          confirmLabel={confirmCopy.confirmLabel}
+          variant={confirmCopy.variant}
+          loading={busy}
+          onConfirm={handleConfirm}
+        />
+      ) : null}
+    </>
+  );
+}
+
+function EditCategoryDialog({
+  category,
+  open,
+  onOpenChange,
+  onSave,
+  loading,
+}: {
+  category: Category;
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+  onSave: (body: UpdateCategoryInput) => void;
+  loading: boolean;
+}) {
+  const form = useForm<UpdateCategoryInput>({
+    resolver: zodResolver(updateCategorySchema),
+    defaultValues: {
+      name: category.name,
+      type: category.type,
+      description: category.description ?? '',
+      displayOrder: category.displayOrder,
+    },
+  });
+
+  return (
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent>
+        <DialogHeader>
+          <DialogTitle>Edit category</DialogTitle>
+        </DialogHeader>
+        <form onSubmit={form.handleSubmit(onSave)} className="space-y-4">
+          <div className="space-y-1.5">
+            <Label>Name</Label>
+            <Input {...form.register('name')} />
+          </div>
+          <div className="space-y-1.5">
+            <Label>Type</Label>
+            <Select
+              value={form.watch('type') ?? category.type}
+              onValueChange={(value) =>
+                form.setValue('type', value as CreateCategoryInput['type'])
+              }
+            >
+              <SelectTrigger>
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                {categoryTypes.map((type) => (
+                  <SelectItem key={type.value} value={type.value}>
+                    {type.label}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+          <div className="space-y-1.5">
+            <Label>Description</Label>
+            <Input {...form.register('description')} />
+          </div>
+          <div className="space-y-1.5">
+            <Label>Display order</Label>
+            <Input
+              type="number"
+              min={0}
+              {...form.register('displayOrder', { valueAsNumber: true })}
+            />
+          </div>
+          <DialogFooter>
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => onOpenChange(false)}
+            >
+              Cancel
+            </Button>
+            <Button type="submit" disabled={loading}>
+              Save
+            </Button>
+          </DialogFooter>
+        </form>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
+function EditSubcategoryDialog({
+  subcategory,
+  open,
+  onOpenChange,
+  onSave,
+  loading,
+}: {
+  subcategory: Subcategory | null;
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+  onSave: (body: UpdateSubcategoryInput) => void;
+  loading: boolean;
+}) {
+  const form = useForm<UpdateSubcategoryInput>({
+    resolver: zodResolver(updateSubcategorySchema),
+    values: subcategory
+      ? {
+          name: subcategory.name,
+          description: subcategory.description ?? '',
+          displayOrder: subcategory.displayOrder,
+        }
+      : undefined,
+  });
+
+  if (!subcategory) return null;
+
+  return (
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent>
+        <DialogHeader>
+          <DialogTitle>Edit subcategory</DialogTitle>
+        </DialogHeader>
+        <form onSubmit={form.handleSubmit(onSave)} className="space-y-4">
+          <div className="space-y-1.5">
+            <Label>Name</Label>
+            <Input {...form.register('name')} />
+          </div>
+          <div className="space-y-1.5">
+            <Label>Description</Label>
+            <Input {...form.register('description')} />
+          </div>
+          <div className="space-y-1.5">
+            <Label>Display order</Label>
+            <Input
+              type="number"
+              min={0}
+              {...form.register('displayOrder', { valueAsNumber: true })}
+            />
+          </div>
+          <DialogFooter>
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => onOpenChange(false)}
+            >
+              Cancel
+            </Button>
+            <Button type="submit" disabled={loading}>
+              Save
+            </Button>
+          </DialogFooter>
+        </form>
+      </DialogContent>
+    </Dialog>
   );
 }
 
 export function AdminCategoriesPanel() {
-  const { data, isLoading, isError, error } = useCategories();
+  const [view, setView] = useState<ViewFilter>('all');
+  const filters = viewToApiFilter[view];
+  const { data, isLoading, isError, error } = useAdminCategories(filters);
   const createCategory = useCreateCategory();
   const [createOpen, setCreateOpen] = useState(false);
 
@@ -163,6 +537,7 @@ export function AdminCategoriesPanel() {
       onSuccess: () => {
         setCreateOpen(false);
         form.reset();
+        setView('active');
       },
     });
   });
@@ -172,10 +547,18 @@ export function AdminCategoriesPanel() {
       <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
         <PageHeader
           title="Categories"
-          description="Manage marketplace categories and subcategories."
+          description="Manage marketplace categories and subcategories. Deactivated items are hidden from the public catalog."
         />
         <Button onClick={() => setCreateOpen(true)}>New category</Button>
       </div>
+
+      <Tabs value={view} onValueChange={(v) => setView(v as ViewFilter)}>
+        <TabsList>
+          <TabsTrigger value="active">Active</TabsTrigger>
+          <TabsTrigger value="inactive">Inactive</TabsTrigger>
+          <TabsTrigger value="all">All</TabsTrigger>
+        </TabsList>
+      </Tabs>
 
       {isError ? (
         <p className="text-sm text-destructive">
@@ -191,6 +574,10 @@ export function AdminCategoriesPanel() {
             <Skeleton key={index} className="h-40 rounded-xl" />
           ))}
         </div>
+      ) : data?.length === 0 ? (
+        <p className="text-sm text-muted-foreground">
+          No categories in this view.
+        </p>
       ) : (
         <div className="grid gap-4 md:grid-cols-2">
           {data?.map((category) => (

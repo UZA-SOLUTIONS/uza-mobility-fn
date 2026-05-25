@@ -7,7 +7,7 @@ export function authRedirect(me: MeUser): string {
     return workspaceRoutes.admin;
   }
 
-  if (hasSellerWorkspace(me.permissions, me.seller)) {
+  if (hasSellerWorkspace(me.permissions, me.seller, me.sellers)) {
     return workspaceRoutes.seller;
   }
 

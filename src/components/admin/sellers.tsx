@@ -138,7 +138,6 @@ export function AdminSellersPanel() {
   const [filters, setFilters] = useState<AdminSellersFilters>({
     page: 1,
     limit: 25,
-    status: 'PENDING',
   });
   const [search, setSearch] = useState('');
   const debouncedSearch = useDebounce(search, 400);
@@ -154,7 +153,7 @@ export function AdminSellersPanel() {
     <div className="space-y-6">
       <PageHeader
         title="Sellers"
-        description="Verify new sellers and suspend accounts that violate policy."
+        description="Verify and suspend marketplace dealers (not UZA platform inventory profiles)."
       />
 
       <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-end">

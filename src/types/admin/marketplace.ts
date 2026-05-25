@@ -39,6 +39,13 @@ export type AdminListingSeller = {
   userId: string;
 };
 
+export type AdminListingCreatedBy = {
+  id: string;
+  firstName: string;
+  lastName: string;
+  email: string;
+};
+
 export type AdminListingCategory = {
   id: string;
   name: string;
@@ -52,6 +59,36 @@ export type AdminListingPricing = {
   currency: string;
 };
 
+export const verificationLevels = [
+  'BASIC_LISTED',
+  'UZA_REVIEWED',
+  'UZA_VERIFIED',
+  'UZA_INSPECTED',
+  'BATTERY_VERIFIED',
+  'PREMIUM_VERIFIED',
+] as const;
+
+export type VerificationLevel = (typeof verificationLevels)[number];
+
+export type AdminListingPhoto = {
+  id: string;
+  url: string;
+  altText: string | null;
+  isPrimary: boolean;
+  displayOrder: number;
+};
+
+export type AdminVerificationReport = {
+  id: string;
+  verificationLevel: VerificationLevel;
+  inspectionStatus: string | null;
+  batteryReportStatus: string | null;
+  documentStatus: string | null;
+  reportUrl: string | null;
+  batteryReportUrl: string | null;
+  verifiedAt: string | null;
+};
+
 export type AdminListing = {
   id: string;
   listingTitle: string;
@@ -59,7 +96,15 @@ export type AdminListing = {
   status: ListingStatus;
   brand: string;
   model: string;
+  trim: string | null;
+  manufacturingYear: number;
+  mileageKm: number | null;
+  description: string | null;
+  vehicleLocation: string | null;
+  city: string | null;
+  country: string;
   sellerType: SellerType;
+  verificationLevel: VerificationLevel;
   isFeatured: boolean;
   isHotDeal: boolean;
   createdAt: string;
@@ -70,11 +115,22 @@ export type AdminListing = {
   category: AdminListingCategory;
   subcategory: { id: string; name: string; slug: string } | null;
   listingPricing: AdminListingPricing | null;
+  photos: AdminListingPhoto[];
+  verificationReport: AdminVerificationReport | null;
+  createdBy: AdminListingCreatedBy | null;
 };
+
+export const adminListingChannelTypes = [
+  'UZA_RWANDA_STOCK',
+  'UZA_CHINA_SOURCING',
+] as const;
+
+export type AdminListingChannelType = (typeof adminListingChannelTypes)[number];
 
 export type AdminListingsFilters = {
   status?: ListingStatus;
   sellerId?: string;
+  sellerType?: AdminListingChannelType;
   page?: number;
   limit?: number;
 };
@@ -115,18 +171,29 @@ export type AdminSellersFilters = {
   limit?: number;
 };
 
+export type PartCondition = 'NEW' | 'USED' | 'REFURBISHED';
+
 export type AdminPart = {
   id: string;
+  sellerId: string | null;
   name: string;
   slug: string;
   categorySlug: string;
-  condition: string;
+  compatibleBrands: string[];
+  compatibleModels: string[];
+  condition: PartCondition;
   priceUsd: number;
   stockQuantity: number;
   stockLabel: string;
+  deliveryEstimate: string | null;
+  hasWarranty: boolean;
+  warrantyDetails: string | null;
+  description: string | null;
   isActive: boolean;
   createdAt: string;
   updatedAt: string;
+  photos?: { id: string; url: string; isPrimary: boolean }[];
+  seller?: { id: string; businessName: string } | null;
 };
 
 export type AdminPartsFilters = {
@@ -155,6 +222,7 @@ export type Category = {
   createdAt: string;
   updatedAt: string;
   subcategories?: Subcategory[];
+  _count?: { listings: number };
 };
 
 export type Subcategory = {

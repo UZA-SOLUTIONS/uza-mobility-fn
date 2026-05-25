@@ -9,7 +9,8 @@ import { ApiClientError } from '@/lib/api';
 import { authRoutes } from '@/config/routes';
 import { signInWithSession } from '@/lib/auth/sign-in';
 import { authRedirect } from '@/lib/auth/redirect';
-const authKeys = {
+import { normalizeMeUser } from '@/lib/auth/seller-profiles';
+export const authKeys = {
   all: ['auth'] as const,
   me: () => [...authKeys.all, 'me'] as const,
 };
@@ -124,10 +125,12 @@ export function useMe() {
 
   return useQuery({
     queryKey: authKeys.me(),
-    queryFn: () => authenticatedFetch<MeUser>('/auth/me'),
+    queryFn: async () =>
+      normalizeMeUser(await authenticatedFetch<MeUser>('/auth/me')),
     enabled:
       status === 'authenticated' &&
       session?.error !== 'RefreshAccessTokenError',
     staleTime: 60_000,
+    refetchOnWindowFocus: false,
   });
 }

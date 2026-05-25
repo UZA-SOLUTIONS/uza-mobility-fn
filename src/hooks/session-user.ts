@@ -12,7 +12,9 @@ export function useSessionUser() {
     user: sessionExpired ? null : (meQuery.data ?? session?.user ?? null),
     accessToken: sessionExpired ? null : (session?.accessToken ?? null),
     isAuthenticated: status === 'authenticated' && !sessionExpired,
-    isLoading: status === 'loading' || meQuery.isFetching,
+    /** Only block UI before first profile load — not on background refetches. */
+    isLoading:
+      status === 'loading' || (meQuery.isLoading && meQuery.data === undefined),
     refetch: meQuery.refetch,
     sessionExpired,
   };

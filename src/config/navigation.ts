@@ -58,6 +58,7 @@ export const adminNavGroups: NavGroup[] = [
           'listings:reject',
           'listings:delete',
           'listings:create',
+          'listings:feature',
         ],
       },
       {
@@ -129,6 +130,10 @@ export const adminNavGroups: NavGroup[] = [
         label: 'Users',
         href: adminRoutes.users,
         superAdminOnly: true,
+      },
+      {
+        label: 'Profile',
+        href: adminRoutes.settings,
       },
     ],
   },

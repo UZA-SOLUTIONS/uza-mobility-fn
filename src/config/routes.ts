@@ -26,6 +26,7 @@ export const adminRoutes = {
   promotions: '/admin/promotions',
   sustainability: '/admin/sustainability',
   users: '/admin/users',
+  settings: '/admin/settings',
 } as const;
 
 export const publicOnlyAuthPaths = [

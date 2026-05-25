@@ -2,6 +2,11 @@ import {
   authenticatedFetch,
   authenticatedPaginatedFetch,
 } from '@/lib/api/authenticated';
+import {
+  authenticatedMultipartFetch,
+  buildMultipartFormData,
+  buildVerificationFormData,
+} from '@/lib/api/multipart';
 import { toSearchParams } from '@/lib/api/query-params';
 import type { AdminDashboard } from '@/types/admin/dashboard';
 import type {
@@ -12,10 +17,62 @@ import type {
   AdminSeller,
   AdminSellersFilters,
 } from '@/types/admin/marketplace';
-import type { RejectListingInput, SuspendSellerInput } from '@/schemas/admin';
+import type {
+  AdminCreateListingInput,
+  CreatePartInput,
+  RejectListingInput,
+  SuspendSellerInput,
+  UpdatePartInput,
+  UpdateVerificationInput,
+} from '@/schemas/admin';
 
 export function getDashboard() {
   return authenticatedFetch<AdminDashboard>('/admin/dashboard');
+}
+
+export type AdminCreateListingBody = AdminCreateListingInput & {
+  pricing: {
+    basePriceUsd?: number;
+    fobPriceUsd?: number;
+  };
+};
+
+export function toAdminCreateListingBody(
+  input: AdminCreateListingInput,
+): AdminCreateListingBody {
+  const {
+    basePriceUsd,
+    fobPriceUsd,
+    subcategoryId,
+    description,
+    trim,
+    mileageKm,
+    ...rest
+  } = input;
+
+  return {
+    ...rest,
+    subcategoryId: subcategoryId?.trim() || undefined,
+    description: description?.trim() || undefined,
+    trim: trim?.trim() || undefined,
+    mileageKm,
+    pricing: {
+      basePriceUsd:
+        input.sellerType === 'UZA_RWANDA_STOCK' ? basePriceUsd : undefined,
+      fobPriceUsd:
+        input.sellerType === 'UZA_CHINA_SOURCING' ? fobPriceUsd : undefined,
+    },
+  };
+}
+
+export function createAdminListing(
+  body: AdminCreateListingBody,
+  photos: File[] = [],
+) {
+  const form = buildMultipartFormData(body, [
+    { field: 'photos', files: photos },
+  ]);
+  return authenticatedMultipartFetch<AdminListing>('/admin/listings', form);
 }
 
 export function getAdminListings(filters: AdminListingsFilters = {}) {
@@ -61,6 +118,19 @@ export function deleteListing(id: string) {
   });
 }
 
+export function updateListingVerification(
+  id: string,
+  body: UpdateVerificationInput,
+  files?: { report?: File; batteryReport?: File },
+) {
+  const form = buildVerificationFormData(body, files);
+  return authenticatedMultipartFetch<AdminListing>(
+    `/admin/listings/${id}/verification`,
+    form,
+    { method: 'PATCH' },
+  );
+}
+
 export function getAdminSellers(filters: AdminSellersFilters = {}) {
   const params = toSearchParams({
     ...filters,
@@ -99,6 +169,36 @@ export function reactivateSeller(id: string) {
 export function getAdminParts(filters: AdminPartsFilters = {}) {
   return authenticatedPaginatedFetch<AdminPart>('/admin/parts', {
     searchParams: toSearchParams(filters),
+  });
+}
+
+export function getAdminPart(id: string) {
+  return authenticatedFetch<AdminPart>(`/admin/parts/${id}`);
+}
+
+export function createPart(body: CreatePartInput, photos: File[] = []) {
+  const form = buildMultipartFormData(body, [
+    { field: 'photos', files: photos },
+  ]);
+  return authenticatedMultipartFetch<AdminPart>('/admin/parts', form);
+}
+
+export function updatePart(
+  id: string,
+  body: UpdatePartInput,
+  photos: File[] = [],
+) {
+  const form = buildMultipartFormData(body, [
+    { field: 'photos', files: photos },
+  ]);
+  return authenticatedMultipartFetch<AdminPart>(`/admin/parts/${id}`, form, {
+    method: 'PATCH',
+  });
+}
+
+export function deletePart(id: string) {
+  return authenticatedFetch<{ message: string }>(`/admin/parts/${id}`, {
+    method: 'DELETE',
   });
 }
 
