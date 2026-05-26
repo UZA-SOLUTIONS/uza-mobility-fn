@@ -1,3 +1,18 @@
+import type { PlatformRole } from '@/types/auth/role';
+
+/** Staff roles that use the /admin workspace (not marketplace sellers or buyers). */
+export const PLATFORM_STAFF_ROLES: PlatformRole[] = [
+  'SUPER_ADMIN',
+  'MARKETPLACE_ADMIN',
+  'FINANCE_ADMIN',
+  'LOGISTICS_ADMIN',
+  'FLEET_ADMIN',
+  'SUSTAINABILITY_ADMIN',
+  'ADVERTISING_ADMIN',
+  'SALES_AGENT',
+];
+
+/** Permissions that only platform staff hold — excludes buyer/seller overlaps (e.g. orders:read). */
 const ADMIN_PERMISSION_MARKERS = [
   'listings:approve',
   'listings:reject',
@@ -20,7 +35,6 @@ const ADMIN_PERMISSION_MARKERS = [
   'sellers:suspend',
   'users:manage-roles',
   'users:read',
-  'orders:read',
   'orders:update-status',
   'invoices:read',
   'parts:manage',
@@ -39,8 +53,19 @@ export function isSuperAdmin(permissions: string[]): boolean {
   return permissions.includes('*');
 }
 
-export function hasAdminAccess(permissions: string[]): boolean {
+export function hasAdminAccess(
+  permissions: string[],
+  roles?: readonly string[] | null,
+): boolean {
   if (isSuperAdmin(permissions)) return true;
+
+  if (
+    roles?.some((role) =>
+      (PLATFORM_STAFF_ROLES as readonly string[]).includes(role),
+    )
+  ) {
+    return true;
+  }
 
   return permissions.some((permission) =>
     (ADMIN_PERMISSION_MARKERS as readonly string[]).includes(permission),
@@ -60,4 +85,25 @@ export function hasSellerWorkspace(
   );
   if (!marketplace) return false;
   return canAny(permissions, ['listings:create', 'parts:create']);
+}
+
+const BUYER_WORKSPACE_PERMISSIONS = [
+  'orders:read',
+  'invoices:create',
+  'payments:submit',
+  'financing:submit',
+] as const;
+
+export function hasBuyerWorkspace(
+  permissions: string[],
+  roles?: readonly string[] | null,
+): boolean {
+  // Platform staff (incl. super admin with `*`) use /admin, not the buyer workspace.
+  if (hasAdminAccess(permissions, roles)) {
+    return false;
+  }
+  if (roles?.includes('BUYER')) {
+    return true;
+  }
+  return canAny(permissions, [...BUYER_WORKSPACE_PERMISSIONS]);
 }

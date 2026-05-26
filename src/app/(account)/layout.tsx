@@ -1,5 +1,5 @@
-import { Workspace } from '@/components/auth/workspace';
-import { accountNav } from '@/config/navigation';
+import { BuyerAccess } from '@/components/auth/buyer-access';
+import { BuyerShell } from '@/components/buyer/shell';
 
 export default function AccountLayout({
   children,
@@ -7,8 +7,8 @@ export default function AccountLayout({
   children: React.ReactNode;
 }) {
   return (
-    <Workspace title="Account" navItems={accountNav}>
-      {children}
-    </Workspace>
+    <BuyerAccess>
+      <BuyerShell>{children}</BuyerShell>
+    </BuyerAccess>
   );
 }

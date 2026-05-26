@@ -1,7 +1,6 @@
-import { PageHeader } from '@/components/shared/page-header';
+import { redirect } from 'next/navigation';
+import { workspaceRoutes } from '@/config/routes';
 
-export default function AccountBillingPage() {
-  return (
-    <PageHeader title="Billing" description="Invoices and payment history." />
-  );
+export default function AccountBillingRedirectPage() {
+  redirect(workspaceRoutes.accountInvoices);
 }

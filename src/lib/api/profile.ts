@@ -37,3 +37,9 @@ export function updateSellerProfile(body: UpdateSellerProfileInput) {
     body: JSON.stringify(body),
   });
 }
+
+export {
+  getSellerProfiles,
+  getSellerProfile,
+  createSellerProfile,
+} from '@/lib/api/seller';

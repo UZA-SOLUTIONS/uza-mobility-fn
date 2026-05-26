@@ -25,8 +25,19 @@ async function refreshSessionOnce() {
   return refreshInFlight;
 }
 
+async function resolveSession(
+  explicitToken?: string | null,
+): Promise<AppSession | null> {
+  if (explicitToken) {
+    return null;
+  }
+  return (await getSession()) as AppSession | null;
+}
+
 /**
  * API call using the current session access token.
+ * Pass `token` from `useSession().data.accessToken` in React Query hooks to avoid
+ * hammering `/api/auth/session` (which can race and return HTML errors in dev).
  * On 401, refreshes the session via NextAuth and retries once.
  */
 export async function authenticatedFetch<T>(
@@ -34,7 +45,7 @@ export async function authenticatedFetch<T>(
   options: AuthenticatedOptions = {},
 ): Promise<T> {
   const { _retried, token: explicitToken, ...rest } = options;
-  const session = await getSession();
+  let session = await resolveSession(explicitToken);
   const token = explicitToken ?? session?.accessToken ?? null;
 
   if (!token) {
@@ -48,6 +59,10 @@ export async function authenticatedFetch<T>(
   try {
     return await apiFetch<T>(path, { ...rest, token });
   } catch (error) {
+    if (!session) {
+      session = (await getSession()) as AppSession | null;
+    }
+
     const canRetry =
       !_retried &&
       error instanceof ApiClientError &&
@@ -83,7 +98,7 @@ export async function authenticatedPaginatedFetch<T>(
   options: AuthenticatedOptions = {},
 ): Promise<PaginatedResult<T>> {
   const { _retried, token: explicitToken, ...rest } = options;
-  const session = await getSession();
+  let session = await resolveSession(explicitToken);
   const token = explicitToken ?? session?.accessToken ?? null;
 
   if (!token) {
@@ -97,6 +112,10 @@ export async function authenticatedPaginatedFetch<T>(
   try {
     return await apiFetchPaginated<T>(path, { ...rest, token });
   } catch (error) {
+    if (!session) {
+      session = (await getSession()) as AppSession | null;
+    }
+
     const canRetry =
       !_retried &&
       error instanceof ApiClientError &&

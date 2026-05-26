@@ -39,6 +39,7 @@ function isAppJwt(token: unknown): token is AppJwt {
 }
 
 export const { handlers, auth, signIn, signOut } = NextAuth({
+  secret: process.env.AUTH_SECRET,
   providers: [
     Credentials({
       id: 'credentials',

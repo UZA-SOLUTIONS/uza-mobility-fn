@@ -1,4 +1,5 @@
 import { auth, authRedirect } from '@/lib/auth';
+import { hasAdminAccess } from '@/lib/permissions';
 import {
   authRoutes,
   protectedWorkspacePrefixes,
@@ -42,6 +43,17 @@ export default auth((req) => {
     const login = new URL(authRoutes.login, req.nextUrl.origin);
     login.searchParams.set('callbackUrl', pathname);
     return NextResponse.redirect(login);
+  }
+
+  if (
+    isMeUser(user) &&
+    (pathname === workspaceRoutes.admin ||
+      pathname.startsWith(`${workspaceRoutes.admin}/`)) &&
+    !hasAdminAccess(user.permissions, user.roles)
+  ) {
+    return NextResponse.redirect(
+      new URL(authRedirect(user), req.nextUrl.origin),
+    );
   }
 
   return NextResponse.next();

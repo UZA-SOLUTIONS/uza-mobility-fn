@@ -6,9 +6,19 @@ export const authRoutes = {
 
 export const workspaceRoutes = {
   account: '/account',
-  accountSettings: '/account/settings',
-  accountBilling: '/account/billing',
+  accountOrders: '/account/orders',
+  accountInvoices: '/account/invoices',
+  accountPayments: '/account/payments',
+  accountFinancing: '/account/financing',
+  accountProfile: '/account/profile',
+  /** @deprecated Use accountProfile */
+  accountSettings: '/account/profile',
+  /** @deprecated Use accountInvoices */
+  accountBilling: '/account/invoices',
   seller: '/seller',
+  sellerListings: '/seller/listings',
+  sellerParts: '/seller/parts',
+  sellerProfile: '/seller/profile',
   admin: '/admin',
 } as const;
 

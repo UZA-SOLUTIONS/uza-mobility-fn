@@ -4,6 +4,7 @@ import {
   can,
   canAny,
   hasAdminAccess,
+  hasBuyerWorkspace,
   hasSellerWorkspace,
   isSuperAdmin,
 } from '@/lib/permissions';
@@ -20,11 +21,12 @@ export function usePermissions() {
     can: (action: string) => can(permissions, action),
     canAny: (actions: string[]) => canAny(permissions, actions),
     isSuperAdmin: isSuperAdmin(permissions),
-    hasAdminAccess: hasAdminAccess(permissions),
+    hasAdminAccess: hasAdminAccess(permissions, user?.roles),
     hasSellerWorkspace: hasSellerWorkspace(
       permissions,
       user?.seller,
       user?.sellers,
     ),
+    hasBuyerWorkspace: hasBuyerWorkspace(permissions, user?.roles),
   };
 }

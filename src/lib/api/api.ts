@@ -31,7 +31,22 @@ export async function apiFetch<T>(
     },
   });
 
-  const body = (await response.json()) as ApiResponse<T>;
+  const raw = await response.text();
+  let body: ApiResponse<T>;
+  try {
+    body = JSON.parse(raw) as ApiResponse<T>;
+  } catch {
+    if (raw.trimStart().startsWith('<')) {
+      throw new ApiClientError(
+        'API returned HTML instead of JSON. Check that NEXT_PUBLIC_API_URL points at the backend API.',
+        response.status,
+      );
+    }
+    throw new ApiClientError(
+      response.statusText || 'Invalid API response',
+      response.status,
+    );
+  }
 
   if (!response.ok || !body.success) {
     const message =
@@ -61,9 +76,22 @@ export async function apiFetchPaginated<T>(
     },
   });
 
-  const body = (await response.json()) as ApiResponse<T[]> & {
-    meta?: PaginationMeta;
-  };
+  const raw = await response.text();
+  let body: ApiResponse<T[]> & { meta?: PaginationMeta };
+  try {
+    body = JSON.parse(raw) as ApiResponse<T[]> & { meta?: PaginationMeta };
+  } catch {
+    if (raw.trimStart().startsWith('<')) {
+      throw new ApiClientError(
+        'API returned HTML instead of JSON. Check that NEXT_PUBLIC_API_URL points at the backend API.',
+        response.status,
+      );
+    }
+    throw new ApiClientError(
+      response.statusText || 'Invalid API response',
+      response.status,
+    );
+  }
 
   if (!response.ok || !body.success) {
     const message =

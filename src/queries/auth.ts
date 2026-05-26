@@ -1,9 +1,9 @@
 'use client';
 
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { getSession, signOut, useSession } from 'next-auth/react';
+import { signOut, useSession } from 'next-auth/react';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { login, logout, register } from '@/lib/api/auth';
+import { getMe, login, logout, register } from '@/lib/api/auth';
 import { authenticatedFetch } from '@/lib/api/authenticated';
 import { ApiClientError } from '@/lib/api';
 import { authRoutes } from '@/config/routes';
@@ -16,8 +16,6 @@ export const authKeys = {
 };
 import type { LoginInput, RegisterInput } from '@/schemas/auth';
 import type { MeUser } from '@/types/auth/me-user';
-import { isMeUser } from '@/types/auth/me-user';
-
 export function useLogin() {
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -25,6 +23,7 @@ export function useLogin() {
   return useMutation({
     mutationFn: async (input: LoginInput) => {
       const tokens = await login(input);
+      const me = normalizeMeUser(await getMe(tokens.accessToken));
       const result = await signInWithSession({
         ...tokens,
         email: input.email,
@@ -38,9 +37,9 @@ export function useLogin() {
         );
       }
 
-      return result;
+      return me;
     },
-    onSuccess: async () => {
+    onSuccess: async (me) => {
       const callbackUrl = searchParams.get('callbackUrl');
       if (callbackUrl && callbackUrl.startsWith('/')) {
         router.replace(callbackUrl);
@@ -48,14 +47,7 @@ export function useLogin() {
         return;
       }
 
-      const session = await getSession();
-
-      if (isMeUser(session?.user)) {
-        router.replace(authRedirect(session.user));
-      } else {
-        router.replace('/account');
-      }
-
+      router.replace(authRedirect(me));
       router.refresh();
     },
   });
@@ -67,6 +59,7 @@ export function useRegister() {
   return useMutation({
     mutationFn: async (input: RegisterInput) => {
       const tokens = await register(input);
+      const me = normalizeMeUser(await getMe(tokens.accessToken));
       const result = await signInWithSession({
         ...tokens,
         email: input.email,
@@ -80,17 +73,10 @@ export function useRegister() {
         );
       }
 
-      return result;
+      return me;
     },
-    onSuccess: async () => {
-      const session = await getSession();
-
-      if (isMeUser(session?.user)) {
-        router.replace(authRedirect(session.user));
-      } else {
-        router.replace('/account');
-      }
-
+    onSuccess: async (me) => {
+      router.replace(authRedirect(me));
       router.refresh();
     },
   });
@@ -122,13 +108,17 @@ export function useLogout() {
 
 export function useMe() {
   const { data: session, status } = useSession();
+  const accessToken = session?.accessToken;
 
   return useQuery({
     queryKey: authKeys.me(),
     queryFn: async () =>
-      normalizeMeUser(await authenticatedFetch<MeUser>('/auth/me')),
+      normalizeMeUser(
+        await authenticatedFetch<MeUser>('/auth/me', { token: accessToken }),
+      ),
     enabled:
       status === 'authenticated' &&
+      Boolean(accessToken) &&
       session?.error !== 'RefreshAccessTokenError',
     staleTime: 60_000,
     refetchOnWindowFocus: false,

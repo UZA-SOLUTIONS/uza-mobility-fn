@@ -1,5 +1,6 @@
-import { ProfileSettingsForm } from '@/components/account/profile-settings-form';
+import { redirect } from 'next/navigation';
+import { workspaceRoutes } from '@/config/routes';
 
-export default function AccountSettingsPage() {
-  return <ProfileSettingsForm />;
+export default function AccountSettingsRedirectPage() {
+  redirect(workspaceRoutes.accountProfile);
 }

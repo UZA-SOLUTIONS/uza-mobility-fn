@@ -1,6 +1,5 @@
 import { SellerAccess } from '@/components/auth/seller-access';
-import { Workspace } from '@/components/auth/workspace';
-import { sellerNav } from '@/config/navigation';
+import { SellerShell } from '@/components/seller/shell';
 
 export default function SellerLayout({
   children,
@@ -9,9 +8,7 @@ export default function SellerLayout({
 }) {
   return (
     <SellerAccess>
-      <Workspace title="Seller workspace" navItems={sellerNav}>
-        {children}
-      </Workspace>
+      <SellerShell>{children}</SellerShell>
     </SellerAccess>
   );
 }

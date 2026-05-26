@@ -31,7 +31,6 @@ export function useUpdateProfile() {
     onSuccess: async (updated) => {
       toast.success('Profile updated');
       void queryClient.setQueryData(authKeys.me(), updated);
-      void queryClient.invalidateQueries({ queryKey: authKeys.me() });
       try {
         await refreshSession();
       } catch {

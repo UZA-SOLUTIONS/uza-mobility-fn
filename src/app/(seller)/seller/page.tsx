@@ -1,10 +1,5 @@
-import { PageHeader } from '@/components/shared/page-header';
+import { SellerOverviewPanel } from '@/components/seller/overview-panel';
 
 export default function SellerOverviewPage() {
-  return (
-    <PageHeader
-      title="Seller"
-      description="Manage listings, parts, and seller profile."
-    />
-  );
+  return <SellerOverviewPanel />;
 }

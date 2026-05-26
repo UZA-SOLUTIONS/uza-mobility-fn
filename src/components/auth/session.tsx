@@ -8,7 +8,11 @@ import {
   setSessionUpdate,
 } from '@/lib/auth/session-update';
 
-/** Proactively refresh JWT before access token expiry (backend default: 15m). */
+/**
+ * Keeps the NextAuth JWT fresh (backend access token ~15m).
+ * `SessionProvider` has refetchOnWindowFocus disabled — this component is the
+ * only place that should call `session.update()` on a schedule / window focus.
+ */
 const REFRESH_INTERVAL_MS = 4 * 60 * 1000;
 
 export function SessionRefresh() {
@@ -34,6 +38,7 @@ export function SessionRefresh() {
     }, REFRESH_INTERVAL_MS);
 
     const onFocus = () => {
+      if (session?.error) return;
       void update();
     };
 

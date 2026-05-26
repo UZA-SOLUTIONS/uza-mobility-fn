@@ -1,4 +1,4 @@
-import { adminRoutes } from '@/config/routes';
+import { adminRoutes, workspaceRoutes } from '@/config/routes';
 
 export type NavItem = {
   label: string;
@@ -29,12 +29,61 @@ export const marketingFooterNav: NavItem[] = [
 ];
 
 export const accountNav: NavItem[] = [
-  { label: 'Overview', href: '/account' },
-  { label: 'Settings', href: '/account/settings' },
-  { label: 'Billing', href: '/account/billing' },
+  { label: 'Overview', href: workspaceRoutes.account },
+  { label: 'Orders', href: workspaceRoutes.accountOrders },
+  { label: 'Invoices', href: workspaceRoutes.accountInvoices },
+  { label: 'Payments', href: workspaceRoutes.accountPayments },
+  { label: 'Financing', href: workspaceRoutes.accountFinancing },
+  { label: 'Profile', href: workspaceRoutes.accountProfile },
 ];
 
-export const sellerNav: NavItem[] = [{ label: 'Overview', href: '/seller' }];
+export const buyerNavGroups: NavGroup[] = [
+  {
+    items: [{ label: 'Overview', href: workspaceRoutes.account }],
+  },
+  {
+    label: 'Purchases',
+    items: [
+      { label: 'Orders', href: workspaceRoutes.accountOrders },
+      { label: 'Invoices', href: workspaceRoutes.accountInvoices },
+      { label: 'Payments', href: workspaceRoutes.accountPayments },
+      { label: 'Financing', href: workspaceRoutes.accountFinancing },
+    ],
+  },
+  {
+    label: 'Account',
+    items: [{ label: 'Profile', href: workspaceRoutes.accountProfile }],
+  },
+];
+
+export const sellerNav: NavItem[] = [
+  { label: 'Overview', href: workspaceRoutes.seller },
+  { label: 'Listings', href: workspaceRoutes.sellerListings },
+  { label: 'Parts', href: workspaceRoutes.sellerParts },
+  { label: 'Profile', href: workspaceRoutes.sellerProfile },
+];
+
+/** Seller sidebar — same structure as admin nav groups. */
+export const sellerNavGroups: NavGroup[] = [
+  {
+    items: [{ label: 'Overview', href: workspaceRoutes.seller }],
+  },
+  {
+    label: 'Marketplace',
+    items: [
+      { label: 'Listings', href: workspaceRoutes.sellerListings },
+      { label: 'Parts', href: workspaceRoutes.sellerParts },
+    ],
+  },
+  {
+    label: 'Account',
+    items: [{ label: 'Profile', href: workspaceRoutes.sellerProfile }],
+  },
+  {
+    label: 'Buying',
+    items: [{ label: 'Buyer workspace', href: workspaceRoutes.account }],
+  },
+];
 
 /** Full admin sidebar; filter with `useAdminNav()`. */
 export const adminNavGroups: NavGroup[] = [
