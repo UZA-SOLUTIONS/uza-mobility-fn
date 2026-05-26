@@ -1,10 +1,13 @@
 'use client';
 
 import Image from 'next/image';
+import { useSession } from 'next-auth/react';
 import { ListingActions } from '@/components/admin/listing-actions';
+import { canAdminEditOwnListing } from '@/lib/admin/listing-form';
 import { StatusBadge } from '@/components/admin/shared/status-badge';
 import { formatSellerChannel } from '@/lib/auth/seller-profiles';
 import type { AdminListing } from '@/types/admin/marketplace';
+import { Button } from '@/components/ui/button';
 import {
   Sheet,
   SheetContent,
@@ -26,13 +29,24 @@ type ListingDetailSheetProps = {
   listing: AdminListing | null;
   open: boolean;
   onOpenChange: (open: boolean) => void;
+  onEdit?: (listing: AdminListing) => void;
+  canEdit?: boolean;
 };
 
 export function ListingDetailSheet({
   listing,
   open,
   onOpenChange,
+  onEdit,
+  canEdit = false,
 }: ListingDetailSheetProps) {
+  const { data: session } = useSession();
+  const showEdit =
+    canEdit &&
+    listing &&
+    onEdit &&
+    canAdminEditOwnListing(listing, session?.user?.id);
+
   if (!listing) return null;
 
   return (
@@ -141,6 +155,17 @@ export function ListingDetailSheet({
               <p className="font-medium text-destructive">Admin notes</p>
               <p className="mt-1 whitespace-pre-wrap">{listing.adminNotes}</p>
             </div>
+          ) : null}
+
+          {showEdit ? (
+            <Button
+              type="button"
+              variant="secondary"
+              className="w-full sm:w-auto"
+              onClick={() => onEdit(listing)}
+            >
+              Edit listing
+            </Button>
           ) : null}
 
           <div className="space-y-3 rounded-lg border bg-muted/30 p-4">

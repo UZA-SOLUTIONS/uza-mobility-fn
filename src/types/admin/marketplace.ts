@@ -57,6 +57,8 @@ export type AdminListingPricing = {
   finalPriceUsd: number;
   finalPriceRwf: number | null;
   currency: string;
+  basePriceUsd?: number | null;
+  fobPriceUsd?: number | null;
 };
 
 export const verificationLevels = [
@@ -98,6 +100,8 @@ export type AdminListing = {
   model: string;
   trim: string | null;
   manufacturingYear: number;
+  isNew: boolean;
+  condition: string;
   mileageKm: number | null;
   description: string | null;
   vehicleLocation: string | null;

@@ -56,6 +56,9 @@ function formatDate(value: string) {
 export function AdminListingsPanel() {
   const { can } = usePermissions();
   const [createOpen, setCreateOpen] = useState(false);
+  const [editingListing, setEditingListing] = useState<AdminListing | null>(
+    null,
+  );
   const [filters, setFilters] = useState<AdminListingsFilters>({
     page: 1,
     limit: 25,
@@ -267,9 +270,22 @@ export function AdminListingsPanel() {
         listing={selectedListing}
         open={detailOpen}
         onOpenChange={setDetailOpen}
+        canEdit={can('listings:create')}
+        onEdit={(listing) => {
+          setDetailOpen(false);
+          setEditingListing(listing);
+        }}
       />
 
       <ListingFormDialog open={createOpen} onOpenChange={setCreateOpen} />
+
+      <ListingFormDialog
+        open={Boolean(editingListing)}
+        onOpenChange={(open) => {
+          if (!open) setEditingListing(null);
+        }}
+        listing={editingListing}
+      />
     </div>
   );
 }

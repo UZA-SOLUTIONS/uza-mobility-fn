@@ -19,6 +19,7 @@ import type {
 } from '@/types/admin/marketplace';
 import type {
   AdminCreateListingInput,
+  AdminUpdateListingInput,
   CreatePartInput,
   RejectListingInput,
   SuspendSellerInput,
@@ -37,8 +38,15 @@ export type AdminCreateListingBody = AdminCreateListingInput & {
   };
 };
 
-export function toAdminCreateListingBody(
-  input: AdminCreateListingInput,
+export type AdminUpdateListingBody = AdminUpdateListingInput & {
+  pricing: {
+    basePriceUsd?: number;
+    fobPriceUsd?: number;
+  };
+};
+
+export function toAdminListingBody(
+  input: AdminCreateListingInput | AdminUpdateListingInput,
 ): AdminCreateListingBody {
   const {
     basePriceUsd,
@@ -62,7 +70,13 @@ export function toAdminCreateListingBody(
       fobPriceUsd:
         input.sellerType === 'UZA_CHINA_SOURCING' ? fobPriceUsd : undefined,
     },
-  };
+  } as AdminCreateListingBody;
+}
+
+export function toAdminCreateListingBody(
+  input: AdminCreateListingInput,
+): AdminCreateListingBody {
+  return toAdminListingBody(input);
 }
 
 export function createAdminListing(
@@ -73,6 +87,23 @@ export function createAdminListing(
     { field: 'photos', files: photos },
   ]);
   return authenticatedMultipartFetch<AdminListing>('/admin/listings', form);
+}
+
+export function updateAdminListing(
+  id: string,
+  body: AdminUpdateListingBody,
+  photos: File[] = [],
+) {
+  const form = buildMultipartFormData(toAdminListingBody(body), [
+    { field: 'photos', files: photos },
+  ]);
+  return authenticatedMultipartFetch<AdminListing>(
+    `/admin/listings/${id}`,
+    form,
+    {
+      method: 'PATCH',
+    },
+  );
 }
 
 export function getAdminListings(filters: AdminListingsFilters = {}) {

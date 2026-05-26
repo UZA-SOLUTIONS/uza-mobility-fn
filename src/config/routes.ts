@@ -27,6 +27,8 @@ export const adminRoutes = {
   promotions: '/admin/promotions',
   sustainability: '/admin/sustainability',
   users: '/admin/users',
+  activityLogs: '/admin/activity-logs',
+  pricingRules: '/admin/pricing-rules',
   settings: '/admin/settings',
 } as const;
 

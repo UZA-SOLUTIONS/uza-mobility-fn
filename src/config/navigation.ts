@@ -137,6 +137,16 @@ export const adminNavGroups: NavGroup[] = [
         superAdminOnly: true,
       },
       {
+        label: 'Activity logs',
+        href: adminRoutes.activityLogs,
+        superAdminOnly: true,
+      },
+      {
+        label: 'Pricing rules',
+        href: adminRoutes.pricingRules,
+        superAdminOnly: true,
+      },
+      {
         label: 'Profile',
         href: adminRoutes.settings,
       },

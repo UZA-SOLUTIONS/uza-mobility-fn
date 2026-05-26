@@ -48,49 +48,75 @@ export const adminListingInitialStatuses = [
   'PUBLISHED',
 ] as const;
 
-export const adminCreateListingSchema = z
-  .object({
-    sellerType: z.enum(adminListingSellerTypes),
-    initialStatus: z.enum(adminListingInitialStatuses),
-    listingTitle: z.string().min(1).max(200),
-    categoryId: z.string().min(1, 'Category is required'),
-    subcategoryId: z.string().optional(),
-    brand: z.string().min(1).max(100),
-    model: z.string().min(1).max(100),
-    trim: z.string().max(100).optional(),
-    manufacturingYear: z.number().int().min(1990).max(2100),
-    isNew: z.boolean(),
-    condition: z.enum(listingConditions),
-    vehicleLocation: z.string().min(1).max(255),
-    city: z.string().min(1).max(100),
-    country: z.string().length(2),
-    description: z.string().max(5000).optional(),
-    mileageKm: z.number().min(0).optional(),
-    basePriceUsd: z.number().min(0).optional(),
-    fobPriceUsd: z.number().min(0).optional(),
+const adminListingFormFieldsSchema = z.object({
+  sellerType: z.enum(adminListingSellerTypes),
+  listingTitle: z.string().min(1).max(200),
+  categoryId: z.string().min(1, 'Category is required'),
+  subcategoryId: z.string().optional(),
+  brand: z.string().min(1).max(100),
+  model: z.string().min(1).max(100),
+  trim: z.string().max(100).optional(),
+  manufacturingYear: z.number().int().min(1990).max(2100),
+  isNew: z.boolean(),
+  condition: z.enum(listingConditions),
+  vehicleLocation: z.string().min(1).max(255),
+  city: z.string().min(1).max(100),
+  country: z.string().length(2),
+  description: z.string().max(5000).optional(),
+  mileageKm: z.number().min(0).optional(),
+  basePriceUsd: z.number().min(0).optional(),
+  fobPriceUsd: z.number().min(0).optional(),
+});
+
+function refineAdminListingPricing(
+  data: z.infer<typeof adminListingFormFieldsSchema>,
+  ctx: z.RefinementCtx,
+) {
+  if (
+    data.sellerType === 'UZA_RWANDA_STOCK' &&
+    (data.basePriceUsd == null || data.basePriceUsd <= 0)
+  ) {
+    ctx.addIssue({
+      code: 'custom',
+      message: 'Base price (USD) is required for Rwanda stock',
+      path: ['basePriceUsd'],
+    });
+  }
+  if (
+    data.sellerType === 'UZA_CHINA_SOURCING' &&
+    (data.fobPriceUsd == null || data.fobPriceUsd <= 0)
+  ) {
+    ctx.addIssue({
+      code: 'custom',
+      message: 'FOB price (USD) is required for China sourcing',
+      path: ['fobPriceUsd'],
+    });
+  }
+}
+
+/** Shared react-hook-form shape for create + edit listing dialogs. */
+export const adminListingFormSchema = adminListingFormFieldsSchema
+  .extend({
+    initialStatus: z.enum(adminListingInitialStatuses).optional(),
+    removePhotoIds: z.array(z.string().min(1)).optional(),
   })
-  .superRefine((data, ctx) => {
-    if (
-      data.sellerType === 'UZA_RWANDA_STOCK' &&
-      (data.basePriceUsd == null || data.basePriceUsd <= 0)
-    ) {
-      ctx.addIssue({
-        code: 'custom',
-        message: 'Base price (USD) is required for Rwanda stock',
-        path: ['basePriceUsd'],
-      });
-    }
-    if (
-      data.sellerType === 'UZA_CHINA_SOURCING' &&
-      (data.fobPriceUsd == null || data.fobPriceUsd <= 0)
-    ) {
-      ctx.addIssue({
-        code: 'custom',
-        message: 'FOB price (USD) is required for China sourcing',
-        path: ['fobPriceUsd'],
-      });
-    }
-  });
+  .superRefine(refineAdminListingPricing);
+
+export type AdminListingFormInput = z.infer<typeof adminListingFormSchema>;
+
+export const adminUpdateListingSchema = adminListingFormFieldsSchema
+  .extend({
+    removePhotoIds: z.array(z.string().min(1)).optional(),
+  })
+  .superRefine(refineAdminListingPricing);
+
+export type AdminUpdateListingInput = z.infer<typeof adminUpdateListingSchema>;
+
+export const adminCreateListingSchema = adminListingFormFieldsSchema
+  .extend({
+    initialStatus: z.enum(adminListingInitialStatuses),
+  })
+  .superRefine(refineAdminListingPricing);
 
 export type AdminCreateListingInput = z.infer<typeof adminCreateListingSchema>;
 

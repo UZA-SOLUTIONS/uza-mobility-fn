@@ -2,6 +2,7 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
+import { NotificationBell } from '@/components/notifications/notification-bell';
 import { ThemeToggle } from '@/components/shared/theme-toggle';
 import { Button } from '@/components/ui/button';
 import { siteConfig } from '@/config/site';
@@ -65,6 +66,7 @@ export function Workspace({ title, navItems, children }: WorkspaceProps) {
               </span>
             </div>
           ) : null}
+          <NotificationBell />
           <ThemeToggle />
           <Button
             variant="outline"

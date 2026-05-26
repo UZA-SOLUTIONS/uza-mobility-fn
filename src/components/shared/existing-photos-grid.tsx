@@ -1,6 +1,8 @@
 'use client';
 
 import Image from 'next/image';
+import { X } from 'lucide-react';
+import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
 import { cn } from '@/lib/utils';
 
@@ -15,6 +17,8 @@ type ExistingPhotosGridProps = {
   label?: string;
   hint?: string;
   className?: string;
+  /** When set, shows a remove control on each photo. */
+  onRemovePhoto?: (photoId: string) => void;
 };
 
 export function ExistingPhotosGrid({
@@ -22,6 +26,7 @@ export function ExistingPhotosGrid({
   label = 'Current photos',
   hint,
   className,
+  onRemovePhoto,
 }: ExistingPhotosGridProps) {
   if (photos.length === 0) return null;
 
@@ -49,6 +54,18 @@ export function ExistingPhotosGrid({
               <span className="absolute top-1.5 left-1.5 rounded bg-background/90 px-1.5 py-0.5 text-[10px] font-medium shadow-sm">
                 Cover
               </span>
+            ) : null}
+            {onRemovePhoto ? (
+              <Button
+                type="button"
+                variant="secondary"
+                size="icon"
+                className="hover:text-destructive-foreground absolute top-1.5 right-1.5 size-7 bg-background/90 shadow-sm hover:bg-destructive"
+                aria-label="Remove photo"
+                onClick={() => onRemovePhoto(photo.id)}
+              >
+                <X className="size-4" />
+              </Button>
             ) : null}
           </li>
         ))}

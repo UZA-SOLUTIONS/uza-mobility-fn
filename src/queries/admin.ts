@@ -8,6 +8,8 @@ import {
   createAdminListing,
   createPart,
   toAdminCreateListingBody,
+  toAdminListingBody,
+  updateAdminListing,
   deactivatePart,
   deleteListing,
   deletePart,
@@ -47,6 +49,7 @@ import type {
 } from '@/types/admin/marketplace';
 import type {
   AdminCreateListingInput,
+  AdminUpdateListingInput,
   CreateCategoryInput,
   CreatePartInput,
   CreateSubcategoryInput,
@@ -113,6 +116,27 @@ export function useCreateAdminListing() {
     }) => createAdminListing(toAdminCreateListingBody(body), photos),
     onSuccess: () => {
       toast.success('Listing created');
+      void queryClient.invalidateQueries({ queryKey: adminKeys.all });
+    },
+    onError: (error) => toast.error(mutationError(error)),
+  });
+}
+
+export function useUpdateAdminListing() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: ({
+      id,
+      body,
+      photos = [],
+    }: {
+      id: string;
+      body: AdminUpdateListingInput;
+      photos?: File[];
+    }) => updateAdminListing(id, toAdminListingBody(body), photos),
+    onSuccess: () => {
+      toast.success('Listing updated');
       void queryClient.invalidateQueries({ queryKey: adminKeys.all });
     },
     onError: (error) => toast.error(mutationError(error)),

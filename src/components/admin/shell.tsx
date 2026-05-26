@@ -2,6 +2,7 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
+import { NotificationBell } from '@/components/notifications/notification-bell';
 import { ThemeToggle } from '@/components/shared/theme-toggle';
 import { Button } from '@/components/ui/button';
 import { ScrollArea } from '@/components/ui/scroll-area';
@@ -89,6 +90,7 @@ export function AdminShell({ children }: AdminShellProps) {
 
       <div className="flex min-h-0 min-w-0 flex-1 flex-col">
         <header className="flex h-14 shrink-0 items-center justify-end gap-2 border-b px-4 lg:px-6">
+          <NotificationBell />
           <ThemeToggle />
           <Button
             variant="outline"

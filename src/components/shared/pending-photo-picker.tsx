@@ -35,10 +35,20 @@ export function PendingPhotoPicker({
 
   const addFiles = (files: FileList | null) => {
     if (!files?.length) return;
-    const imageFiles = Array.from(files).filter((f) =>
-      f.type.startsWith('image/'),
-    );
-    if (!imageFiles.length) return;
+    const allowed = new Set([
+      'image/jpeg',
+      'image/jpg',
+      'image/png',
+      'image/webp',
+      'image/gif',
+      'image/heic',
+      'image/heif',
+    ]);
+    const imageFiles = Array.from(files).filter((f) => allowed.has(f.type));
+    if (!imageFiles.length) {
+      window.alert('Use JPEG, PNG, WebP, or GIF photos (max 5MB each).');
+      return;
+    }
 
     const { photos: next, skipped } = appendPendingPhotos(
       photos,
@@ -105,7 +115,7 @@ export function PendingPhotoPicker({
         ref={inputRef}
         id={inputId}
         type="file"
-        accept="image/jpeg,image/png,image/webp,image/gif"
+        accept="image/jpeg,image/png,image/webp,image/gif,image/heic,image/heif"
         multiple
         className="sr-only"
         disabled={atMax}

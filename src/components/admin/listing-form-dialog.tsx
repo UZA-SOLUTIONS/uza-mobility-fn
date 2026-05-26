@@ -1,14 +1,17 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
+import { toast } from 'sonner';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
+import { ExistingPhotosGrid } from '@/components/shared/existing-photos-grid';
 import { PendingPhotoPicker } from '@/components/shared/pending-photo-picker';
 import {
   pendingPhotoFiles,
   revokePendingPhotos,
   type PendingPhoto,
 } from '@/lib/pending-photos';
+import { adminListingToFormValues } from '@/lib/admin/listing-form';
 import { Button } from '@/components/ui/button';
 import {
   Dialog,
@@ -27,31 +30,52 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { useAdminCategories, useCreateAdminListing } from '@/queries/admin';
+import {
+  useAdminCategories,
+  useCreateAdminListing,
+  useUpdateAdminListing,
+} from '@/queries/admin';
 import {
   adminCreateListingSchema,
+  adminListingFormSchema,
   adminListingInitialStatuses,
-  adminListingSellerTypes,
+  adminUpdateListingSchema,
   listingConditions,
   MAX_LISTING_PHOTOS,
-  type AdminCreateListingInput,
+  type AdminListingFormInput,
 } from '@/schemas/admin';
+import type { AdminListing } from '@/types/admin/marketplace';
 
 type ListingFormDialogProps = {
   open: boolean;
   onOpenChange: (open: boolean) => void;
+  listing?: AdminListing | null;
 };
 
 export function ListingFormDialog({
   open,
   onOpenChange,
+  listing = null,
 }: ListingFormDialogProps) {
+  const isEdit = Boolean(listing);
   const create = useCreateAdminListing();
+  const update = useUpdateAdminListing();
   const { data: categories } = useAdminCategories({ isActive: true }, open);
   const [photos, setPhotos] = useState<PendingPhoto[]>([]);
+  const [removedPhotoIds, setRemovedPhotoIds] = useState<string[]>([]);
+  const existingPhotos = listing?.photos ?? [];
+  const keptExistingPhotos = useMemo(
+    () => existingPhotos.filter((photo) => !removedPhotoIds.includes(photo.id)),
+    [existingPhotos, removedPhotoIds],
+  );
+  const remainingPhotoSlots = Math.max(
+    0,
+    MAX_LISTING_PHOTOS - keptExistingPhotos.length - photos.length,
+  );
+  const busy = create.isPending || update.isPending;
 
-  const form = useForm<AdminCreateListingInput>({
-    resolver: zodResolver(adminCreateListingSchema),
+  const form = useForm<AdminListingFormInput>({
+    resolver: zodResolver(adminListingFormSchema),
     defaultValues: {
       sellerType: 'UZA_RWANDA_STOCK',
       initialStatus: 'PUBLISHED',
@@ -80,32 +104,69 @@ export function ListingFormDialog({
 
   useEffect(() => {
     if (!open) return;
-    form.reset({
-      sellerType: 'UZA_RWANDA_STOCK',
-      initialStatus: 'PUBLISHED',
-      listingTitle: '',
-      categoryId: '',
-      subcategoryId: '',
-      brand: '',
-      model: '',
-      trim: '',
-      manufacturingYear: new Date().getFullYear(),
-      isNew: true,
-      condition: 'NEW',
-      vehicleLocation: '',
-      city: 'Kigali',
-      country: 'RW',
-      description: '',
-    });
     setPhotos((current) => {
       revokePendingPhotos(current);
       return [];
     });
-  }, [open, form]);
+    setRemovedPhotoIds([]);
+    if (listing) {
+      form.reset(adminListingToFormValues(listing));
+    } else {
+      form.reset({
+        sellerType: 'UZA_RWANDA_STOCK',
+        initialStatus: 'PUBLISHED',
+        listingTitle: '',
+        categoryId: '',
+        subcategoryId: '',
+        brand: '',
+        model: '',
+        trim: '',
+        manufacturingYear: new Date().getFullYear(),
+        isNew: true,
+        condition: 'NEW',
+        vehicleLocation: '',
+        city: 'Kigali',
+        country: 'RW',
+        description: '',
+      });
+    }
+  }, [open, listing, form]);
 
   const onSubmit = form.handleSubmit((values) => {
+    const newPhotos = pendingPhotoFiles(photos);
+
+    if (isEdit && listing) {
+      const totalPhotosAfterSave = keptExistingPhotos.length + newPhotos.length;
+      if (totalPhotosAfterSave < 1) {
+        toast.error('Keep at least one photo, or upload a replacement.');
+        return;
+      }
+
+      const body = adminUpdateListingSchema.parse({
+        ...values,
+        removePhotoIds:
+          removedPhotoIds.length > 0 ? removedPhotoIds : undefined,
+      });
+
+      update.mutate(
+        {
+          id: listing.id,
+          body,
+          photos: newPhotos,
+        },
+        {
+          onSuccess: () => {
+            revokePendingPhotos(photos);
+            setPhotos([]);
+            onOpenChange(false);
+          },
+        },
+      );
+      return;
+    }
+
     create.mutate(
-      { body: values, photos: pendingPhotoFiles(photos) },
+      { body: adminCreateListingSchema.parse(values), photos: newPhotos },
       {
         onSuccess: () => {
           revokePendingPhotos(photos);
@@ -120,12 +181,14 @@ export function ListingFormDialog({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-h-[90vh] overflow-y-auto sm:max-w-2xl">
         <DialogHeader>
-          <DialogTitle>New platform listing</DialogTitle>
+          <DialogTitle>
+            {isEdit ? 'Edit platform listing' : 'New platform listing'}
+          </DialogTitle>
         </DialogHeader>
         <p className="text-sm text-muted-foreground">
-          Each inventory channel uses its own seller profile on your account
-          (e.g. Rwanda stock vs China sourcing). The listing is created under
-          the profile for the channel you select.
+          {isEdit
+            ? 'Update your UZA stock or sourcing listing. New photos are added to existing ones.'
+            : 'Each inventory channel uses its own seller profile on your account (e.g. Rwanda stock vs China sourcing).'}
         </p>
         <form onSubmit={onSubmit} className="space-y-4">
           <div className="grid gap-4 sm:grid-cols-2">
@@ -133,10 +196,11 @@ export function ListingFormDialog({
               <Label>Inventory channel</Label>
               <Select
                 value={sellerType}
+                disabled={isEdit}
                 onValueChange={(value) => {
                   form.setValue(
                     'sellerType',
-                    value as AdminCreateListingInput['sellerType'],
+                    value as AdminListingFormInput['sellerType'],
                   );
                 }}
               >
@@ -153,29 +217,31 @@ export function ListingFormDialog({
                 </SelectContent>
               </Select>
             </div>
-            <div className="space-y-1.5">
-              <Label>Initial status</Label>
-              <Select
-                value={form.watch('initialStatus')}
-                onValueChange={(value) =>
-                  form.setValue(
-                    'initialStatus',
-                    value as AdminCreateListingInput['initialStatus'],
-                  )
-                }
-              >
-                <SelectTrigger>
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  {adminListingInitialStatuses.map((status) => (
-                    <SelectItem key={status} value={status}>
-                      {status.replaceAll('_', ' ')}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
+            {!isEdit ? (
+              <div className="space-y-1.5">
+                <Label>Initial status</Label>
+                <Select
+                  value={form.watch('initialStatus')}
+                  onValueChange={(value) =>
+                    form.setValue(
+                      'initialStatus',
+                      value as AdminListingFormInput['initialStatus'],
+                    )
+                  }
+                >
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {adminListingInitialStatuses.map((status) => (
+                      <SelectItem key={status} value={status}>
+                        {status.replaceAll('_', ' ')}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            ) : null}
           </div>
 
           <div className="space-y-1.5">
@@ -256,7 +322,7 @@ export function ListingFormDialog({
                 onValueChange={(value) =>
                   form.setValue(
                     'condition',
-                    value as AdminCreateListingInput['condition'],
+                    value as AdminListingFormInput['condition'],
                   )
                 }
               >
@@ -337,11 +403,32 @@ export function ListingFormDialog({
             />
           </div>
 
+          {isEdit ? (
+            <ExistingPhotosGrid
+              photos={keptExistingPhotos}
+              hint="Remove photos with ×, or add more below. At least one photo is required."
+              onRemovePhoto={(photoId) =>
+                setRemovedPhotoIds((current) =>
+                  current.includes(photoId) ? current : [...current, photoId],
+                )
+              }
+            />
+          ) : null}
+
+          {isEdit &&
+          existingPhotos.length > 0 &&
+          keptExistingPhotos.length === 0 ? (
+            <p className="text-xs text-muted-foreground">
+              All current photos marked for removal. Upload at least one new
+              photo before saving.
+            </p>
+          ) : null}
+
           <PendingPhotoPicker
             photos={photos}
             onChange={setPhotos}
-            maxPhotos={MAX_LISTING_PHOTOS}
-            label="Listing photos"
+            maxPhotos={isEdit ? remainingPhotoSlots : MAX_LISTING_PHOTOS}
+            label={isEdit ? 'Add photos' : 'Listing photos'}
           />
 
           <DialogFooter>
@@ -352,8 +439,8 @@ export function ListingFormDialog({
             >
               Cancel
             </Button>
-            <Button type="submit" disabled={create.isPending}>
-              Create listing
+            <Button type="submit" disabled={busy}>
+              {busy ? 'Saving…' : isEdit ? 'Save changes' : 'Create listing'}
             </Button>
           </DialogFooter>
         </form>
