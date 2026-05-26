@@ -23,6 +23,7 @@ export const adminRoutes = {
   invoices: '/admin/invoices',
   financing: '/admin/financing',
   fleet: '/admin/fleet',
+  energy: '/admin/energy',
   promotions: '/admin/promotions',
   sustainability: '/admin/sustainability',
   users: '/admin/users',

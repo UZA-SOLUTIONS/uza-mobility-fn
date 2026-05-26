@@ -112,6 +112,11 @@ export const adminNavGroups: NavGroup[] = [
         permissions: ['fleet:read', 'fleet:update-status'],
       },
       {
+        label: 'Energy',
+        href: adminRoutes.energy,
+        permissions: ['parts:manage', 'fleet:read', 'fleet:update-status'],
+      },
+      {
         label: 'Promotions',
         href: adminRoutes.promotions,
         permissions: ['promotions:create', 'promotions:manage'],
