@@ -2,22 +2,6 @@ export const adminModulePages: Record<
   string,
   { title: string; description: string }
 > = {
-  orders: {
-    title: 'Orders',
-    description: 'Track orders and update fulfillment status.',
-  },
-  payments: {
-    title: 'Payments',
-    description: 'Verify, reject, or refund buyer payments.',
-  },
-  invoices: {
-    title: 'Invoices',
-    description: 'Send and cancel invoices.',
-  },
-  financing: {
-    title: 'Financing',
-    description: 'Review financing requests and bank assignments.',
-  },
   fleet: {
     title: 'Fleet',
     description: 'Manage fleet requests and status updates.',

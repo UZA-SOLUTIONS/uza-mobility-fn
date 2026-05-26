@@ -131,6 +131,7 @@ export type AdminListingsFilters = {
   status?: ListingStatus;
   sellerId?: string;
   sellerType?: AdminListingChannelType;
+  q?: string;
   page?: number;
   limit?: number;
 };

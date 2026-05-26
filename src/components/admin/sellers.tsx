@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { useDebounce } from '@/hooks/use-debounce';
 import { usePermissions } from '@/hooks/permissions';
 import { PageHeader } from '@/components/shared/page-header';
+import { SellerDetailSheet } from '@/components/admin/seller-detail-sheet';
 import { PaginationBar } from '@/components/admin/shared/pagination-bar';
 import { StatusBadge } from '@/components/admin/shared/status-badge';
 import { Button } from '@/components/ui/button';
@@ -52,7 +53,13 @@ function formatDate(value: string) {
   );
 }
 
-function SellerActions({ seller }: { seller: AdminSeller }) {
+function SellerActions({
+  seller,
+  onView,
+}: {
+  seller: AdminSeller;
+  onView: () => void;
+}) {
   const { can } = usePermissions();
   const verify = useVerifySeller();
   const suspend = useSuspendSeller();
@@ -65,6 +72,9 @@ function SellerActions({ seller }: { seller: AdminSeller }) {
   return (
     <>
       <div className="flex flex-wrap justify-end gap-1">
+        <Button size="sm" variant="ghost" disabled={busy} onClick={onView}>
+          View
+        </Button>
         {!seller.isVerified &&
         seller.status !== 'SUSPENDED' &&
         can('sellers:verify') ? (
@@ -140,6 +150,8 @@ export function AdminSellersPanel() {
     limit: 25,
   });
   const [search, setSearch] = useState('');
+  const [selectedSellerId, setSelectedSellerId] = useState<string | null>(null);
+  const [detailOpen, setDetailOpen] = useState(false);
   const debouncedSearch = useDebounce(search, 400);
 
   const queryFilters: AdminSellersFilters = {
@@ -296,7 +308,13 @@ export function AdminSellersPanel() {
                       {formatDate(seller.createdAt)}
                     </TableCell>
                     <TableCell>
-                      <SellerActions seller={seller} />
+                      <SellerActions
+                        seller={seller}
+                        onView={() => {
+                          setSelectedSellerId(seller.id);
+                          setDetailOpen(true);
+                        }}
+                      />
                     </TableCell>
                   </TableRow>
                 ))
@@ -304,6 +322,15 @@ export function AdminSellersPanel() {
           </TableBody>
         </Table>
       </div>
+
+      <SellerDetailSheet
+        sellerId={selectedSellerId}
+        open={detailOpen}
+        onOpenChange={(open) => {
+          setDetailOpen(open);
+          if (!open) setSelectedSellerId(null);
+        }}
+      />
 
       {data?.meta ? (
         <PaginationBar

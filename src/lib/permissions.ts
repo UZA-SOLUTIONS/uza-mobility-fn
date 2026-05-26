@@ -20,7 +20,9 @@ const ADMIN_PERMISSION_MARKERS = [
   'sellers:suspend',
   'users:manage-roles',
   'users:read',
+  'orders:read',
   'orders:update-status',
+  'invoices:read',
   'parts:manage',
 ] as const;
 
