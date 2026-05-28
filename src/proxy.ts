@@ -63,6 +63,7 @@ export const config = {
   matcher: [
     '/account/:path*',
     '/seller/:path*',
+    '/operator/:path*',
     '/admin/:path*',
     '/login',
     '/register',

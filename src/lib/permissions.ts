@@ -38,6 +38,10 @@ const ADMIN_PERMISSION_MARKERS = [
   'orders:update-status',
   'invoices:read',
   'parts:manage',
+  'stations:read-all',
+  'stations:approve',
+  'stations:reject',
+  'stations:suspend',
 ] as const;
 
 export function can(permissions: string[], action: string): boolean {
@@ -85,6 +89,26 @@ export function hasSellerWorkspace(
   );
   if (!marketplace) return false;
   return canAny(permissions, ['listings:create', 'parts:create']);
+}
+
+const OPERATOR_WORKSPACE_PERMISSIONS = [
+  'stations:create',
+  'stations:update',
+  'stations:submit',
+  'stations:read-own',
+] as const;
+
+export function hasOperatorWorkspace(
+  permissions: string[],
+  roles?: readonly string[] | null,
+): boolean {
+  if (hasAdminAccess(permissions, roles)) {
+    return false;
+  }
+  if (roles?.includes('CHARGING_OPERATOR')) {
+    return true;
+  }
+  return canAny(permissions, [...OPERATOR_WORKSPACE_PERMISSIONS]);
 }
 
 const BUYER_WORKSPACE_PERMISSIONS = [

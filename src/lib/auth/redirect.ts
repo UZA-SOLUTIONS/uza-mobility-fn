@@ -2,6 +2,7 @@ import { workspaceRoutes } from '@/config/routes';
 import {
   hasAdminAccess,
   hasBuyerWorkspace,
+  hasOperatorWorkspace,
   hasSellerWorkspace,
 } from '@/lib/permissions';
 import type { MeUser } from '@/types/auth/me-user';
@@ -14,9 +15,14 @@ export function authRedirect(me: MeUser): string {
 
   const isSeller = hasSellerWorkspace(me.permissions, me.seller, me.sellers);
   const isBuyer = hasBuyerWorkspace(me.permissions, me.roles);
+  const isOperator = hasOperatorWorkspace(me.permissions, me.roles);
 
   if (isSeller && !isBuyer) {
     return workspaceRoutes.seller;
+  }
+
+  if (isOperator && !isSeller && !isBuyer) {
+    return workspaceRoutes.operator;
   }
 
   if (isBuyer && !isSeller) {

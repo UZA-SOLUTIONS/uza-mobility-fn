@@ -19,6 +19,9 @@ export const workspaceRoutes = {
   sellerListings: '/seller/listings',
   sellerParts: '/seller/parts',
   sellerProfile: '/seller/profile',
+  operator: '/operator',
+  operatorStations: '/operator/stations',
+  operatorProfile: '/operator/profile',
   admin: '/admin',
 } as const;
 
@@ -32,6 +35,7 @@ export const adminRoutes = {
   payments: '/admin/payments',
   invoices: '/admin/invoices',
   financing: '/admin/financing',
+  stations: '/admin/stations',
   fleet: '/admin/fleet',
   energy: '/admin/energy',
   promotions: '/admin/promotions',
@@ -51,5 +55,6 @@ export const publicOnlyAuthPaths = [
 export const protectedWorkspacePrefixes = [
   workspaceRoutes.account,
   workspaceRoutes.seller,
+  workspaceRoutes.operator,
   workspaceRoutes.admin,
 ] as const;

@@ -4,9 +4,13 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
 import {
   activatePart,
+  approveAdminOperator,
+  approveAdminStation,
   approveListing,
   createAdminListing,
   createPart,
+  getAdminOperators,
+  getAdminStations,
   toAdminCreateListingBody,
   toAdminListingBody,
   updateAdminListing,
@@ -23,8 +27,11 @@ import {
   hotDealListing,
   publishListing,
   reactivateSeller,
+  rejectAdminOperator,
+  rejectAdminStation,
   rejectListing,
   suspendSeller,
+  suspendAdminStation,
   updateListingVerification,
   updatePart,
   verifySeller,
@@ -42,6 +49,11 @@ import {
 } from '@/lib/api/categories';
 import type { AdminCategoriesFilters } from '@/lib/api/categories';
 import { ApiClientError } from '@/lib/api';
+import type {
+  AdminOperatorFilters,
+  AdminStationFilters,
+  StationReviewActionInput,
+} from '@/types/admin/stations';
 import type {
   AdminListingsFilters,
   AdminPartsFilters,
@@ -74,6 +86,10 @@ export const adminKeys = {
   part: (id: string) => [...adminKeys.all, 'part', id] as const,
   categories: (filters: AdminCategoriesFilters = {}) =>
     [...adminKeys.all, 'categories', filters] as const,
+  operators: (filters: AdminOperatorFilters) =>
+    [...adminKeys.all, 'operators', filters] as const,
+  stations: (filters: AdminStationFilters) =>
+    [...adminKeys.all, 'stations', filters] as const,
 };
 
 function mutationError(error: unknown) {
@@ -527,6 +543,105 @@ export function useDeleteSubcategory() {
     }) => deleteSubcategory(categoryId, subId),
     onSuccess: () => {
       toast.success('Subcategory deleted');
+      void queryClient.invalidateQueries({ queryKey: adminKeys.all });
+    },
+    onError: (error) => toast.error(mutationError(error)),
+  });
+}
+
+export function useAdminOperators(
+  filters: AdminOperatorFilters,
+  enabled = true,
+) {
+  return useQuery({
+    queryKey: adminKeys.operators(filters),
+    queryFn: () => getAdminOperators(filters),
+    enabled,
+    placeholderData: (previous) => previous,
+  });
+}
+
+export function useApproveAdminOperator() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: approveAdminOperator,
+    onSuccess: () => {
+      toast.success('Operator approved');
+      void queryClient.invalidateQueries({ queryKey: adminKeys.all });
+    },
+    onError: (error) => toast.error(mutationError(error)),
+  });
+}
+
+export function useRejectAdminOperator() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: ({
+      id,
+      body,
+    }: {
+      id: string;
+      body: StationReviewActionInput;
+    }) => rejectAdminOperator(id, body),
+    onSuccess: () => {
+      toast.success('Operator rejected');
+      void queryClient.invalidateQueries({ queryKey: adminKeys.all });
+    },
+    onError: (error) => toast.error(mutationError(error)),
+  });
+}
+
+export function useAdminStations(filters: AdminStationFilters, enabled = true) {
+  return useQuery({
+    queryKey: adminKeys.stations(filters),
+    queryFn: () => getAdminStations(filters),
+    enabled,
+    placeholderData: (previous) => previous,
+  });
+}
+
+export function useApproveAdminStation() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: approveAdminStation,
+    onSuccess: () => {
+      toast.success('Station approved');
+      void queryClient.invalidateQueries({ queryKey: adminKeys.all });
+    },
+    onError: (error) => toast.error(mutationError(error)),
+  });
+}
+
+export function useRejectAdminStation() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: ({
+      id,
+      body,
+    }: {
+      id: string;
+      body: StationReviewActionInput;
+    }) => rejectAdminStation(id, body),
+    onSuccess: () => {
+      toast.success('Station rejected');
+      void queryClient.invalidateQueries({ queryKey: adminKeys.all });
+    },
+    onError: (error) => toast.error(mutationError(error)),
+  });
+}
+
+export function useSuspendAdminStation() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: ({
+      id,
+      body,
+    }: {
+      id: string;
+      body: StationReviewActionInput;
+    }) => suspendAdminStation(id, body),
+    onSuccess: () => {
+      toast.success('Station suspended');
       void queryClient.invalidateQueries({ queryKey: adminKeys.all });
     },
     onError: (error) => toast.error(mutationError(error)),

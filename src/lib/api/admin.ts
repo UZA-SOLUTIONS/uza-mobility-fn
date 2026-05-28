@@ -26,6 +26,13 @@ import type {
   UpdatePartInput,
   UpdateVerificationInput,
 } from '@/schemas/admin';
+import type {
+  AdminOperator,
+  AdminOperatorFilters,
+  AdminStation,
+  AdminStationFilters,
+  StationReviewActionInput,
+} from '@/types/admin/stations';
 
 export function getDashboard() {
   return authenticatedFetch<AdminDashboard>('/admin/dashboard');
@@ -243,4 +250,79 @@ export function deactivatePart(id: string) {
   return authenticatedFetch<AdminPart>(`/admin/parts/${id}/deactivate`, {
     method: 'PATCH',
   });
+}
+
+export function getAdminOperators(filters: AdminOperatorFilters = {}) {
+  return authenticatedPaginatedFetch<AdminOperator>(
+    '/admin/charging-stations/operators',
+    {
+      searchParams: toSearchParams(filters),
+    },
+  );
+}
+
+export function approveAdminOperator(id: string) {
+  return authenticatedFetch<AdminOperator>(
+    `/admin/charging-stations/operators/${id}/approve`,
+    {
+      method: 'PATCH',
+    },
+  );
+}
+
+export function rejectAdminOperator(
+  id: string,
+  body: StationReviewActionInput = {},
+) {
+  return authenticatedFetch<AdminOperator>(
+    `/admin/charging-stations/operators/${id}/reject`,
+    {
+      method: 'PATCH',
+      body: JSON.stringify(body),
+    },
+  );
+}
+
+export function getAdminStations(filters: AdminStationFilters = {}) {
+  return authenticatedPaginatedFetch<AdminStation>(
+    '/admin/charging-stations/stations',
+    {
+      searchParams: toSearchParams(filters),
+    },
+  );
+}
+
+export function approveAdminStation(id: string) {
+  return authenticatedFetch<AdminStation>(
+    `/admin/charging-stations/stations/${id}/approve`,
+    {
+      method: 'PATCH',
+    },
+  );
+}
+
+export function rejectAdminStation(
+  id: string,
+  body: StationReviewActionInput = {},
+) {
+  return authenticatedFetch<AdminStation>(
+    `/admin/charging-stations/stations/${id}/reject`,
+    {
+      method: 'PATCH',
+      body: JSON.stringify(body),
+    },
+  );
+}
+
+export function suspendAdminStation(
+  id: string,
+  body: StationReviewActionInput = {},
+) {
+  return authenticatedFetch<AdminStation>(
+    `/admin/charging-stations/stations/${id}/suspend`,
+    {
+      method: 'PATCH',
+      body: JSON.stringify(body),
+    },
+  );
 }

@@ -5,7 +5,8 @@ import { workspaceRoutes } from '@/config/routes';
 import { usePermissions } from '@/hooks/permissions';
 
 export function useBuyerNav() {
-  const { hasSellerWorkspace, user, isLoading } = usePermissions();
+  const { hasSellerWorkspace, hasOperatorWorkspace, user, isLoading } =
+    usePermissions();
 
   const groups: NavGroup[] = buyerNavGroups.map((group) => ({
     ...group,
@@ -16,6 +17,13 @@ export function useBuyerNav() {
     groups.push({
       label: 'Selling',
       items: [{ label: 'Seller workspace', href: workspaceRoutes.seller }],
+    });
+  }
+
+  if (hasOperatorWorkspace) {
+    groups.push({
+      label: 'Charging',
+      items: [{ label: 'Operator workspace', href: workspaceRoutes.operator }],
     });
   }
 

@@ -83,6 +83,26 @@ export const sellerNavGroups: NavGroup[] = [
     label: 'Buying',
     items: [{ label: 'Buyer workspace', href: workspaceRoutes.account }],
   },
+  {
+    label: 'Charging',
+    items: [{ label: 'Operator workspace', href: workspaceRoutes.operator }],
+  },
+];
+
+export const operatorNavGroups: NavGroup[] = [
+  {
+    items: [{ label: 'Overview', href: workspaceRoutes.operator }],
+  },
+  {
+    label: 'Stations',
+    items: [{ label: 'My stations', href: workspaceRoutes.operatorStations }],
+  },
+  {
+    label: 'Account',
+    items: [
+      { label: 'Operator profile', href: workspaceRoutes.operatorProfile },
+    ],
+  },
 ];
 
 /** Full admin sidebar; filter with `useAdminNav()`. */
@@ -164,6 +184,16 @@ export const adminNavGroups: NavGroup[] = [
         label: 'Energy',
         href: adminRoutes.energy,
         permissions: ['parts:manage', 'fleet:read', 'fleet:update-status'],
+      },
+      {
+        label: 'Stations',
+        href: adminRoutes.stations,
+        permissions: [
+          'stations:read-all',
+          'stations:approve',
+          'stations:reject',
+          'stations:suspend',
+        ],
       },
       {
         label: 'Promotions',

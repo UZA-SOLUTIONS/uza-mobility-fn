@@ -9,6 +9,7 @@ export const PLATFORM_ROLES = [
   'SALES_AGENT',
   'SELLER',
   'BUYER',
+  'CHARGING_OPERATOR',
 ] as const;
 
 export type PlatformRole = (typeof PLATFORM_ROLES)[number];
