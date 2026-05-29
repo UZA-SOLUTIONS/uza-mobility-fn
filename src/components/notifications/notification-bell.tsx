@@ -1,7 +1,8 @@
 'use client';
 
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import { Bell } from 'lucide-react';
+import { useSession } from 'next-auth/react';
 import { Button } from '@/components/ui/button';
 import {
   Popover,
@@ -20,6 +21,8 @@ import {
 } from '@/queries/notifications';
 
 export function NotificationBell() {
+  const { data: session } = useSession();
+  const currentUserId = session?.user?.id;
   const [open, setOpen] = useState(false);
   const unread = useUnreadNotificationCount();
   const list = useNotifications({ page: 1, limit: 20 }, open);
@@ -27,7 +30,11 @@ export function NotificationBell() {
   const markAllRead = useMarkAllNotificationsRead();
 
   const unreadCount = unread.data?.unreadCount ?? 0;
-  const items = list.data?.items ?? [];
+  const items = useMemo(() => {
+    const rows = list.data?.items ?? [];
+    if (!currentUserId) return rows;
+    return rows.filter((item) => item.userId === currentUserId);
+  }, [list.data?.items, currentUserId]);
 
   return (
     <Popover open={open} onOpenChange={setOpen}>

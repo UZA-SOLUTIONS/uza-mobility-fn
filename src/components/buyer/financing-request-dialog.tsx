@@ -13,6 +13,10 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
+import {
+  NumberInput,
+  numberRegisterOptions,
+} from '@/components/ui/number-input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import {
@@ -177,11 +181,10 @@ export function FinancingRequestDialog({
 
           <div className="space-y-1.5">
             <Label htmlFor="fin-deposit">Preferred deposit (USD)</Label>
-            <Input
+            <NumberInput
               id="fin-deposit"
-              type="number"
               min={0}
-              {...form.register('preferredDepositUsd', { valueAsNumber: true })}
+              {...form.register('preferredDepositUsd', numberRegisterOptions())}
             />
           </div>
           <div className="space-y-1.5">

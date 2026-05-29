@@ -8,17 +8,22 @@ import { authenticatedFetch } from '@/lib/api/authenticated';
 import { ApiClientError } from '@/lib/api';
 import { authRoutes } from '@/config/routes';
 import { signInWithSession } from '@/lib/auth/sign-in';
-import { authRedirect } from '@/lib/auth/redirect';
+import { resolvePostLoginRedirect } from '@/lib/auth/redirect';
 import { normalizeMeUser } from '@/lib/auth/seller-profiles';
+import { signOutClient } from '@/lib/auth/sign-out-client';
+import { clearUserSessionQueries } from '@/lib/query/clear-user-session';
+import type { LoginInput, RegisterInput } from '@/schemas/auth';
+import type { MeUser } from '@/types/auth/me-user';
+
 export const authKeys = {
   all: ['auth'] as const,
   me: () => [...authKeys.all, 'me'] as const,
 };
-import type { LoginInput, RegisterInput } from '@/schemas/auth';
-import type { MeUser } from '@/types/auth/me-user';
+
 export function useLogin() {
   const router = useRouter();
   const searchParams = useSearchParams();
+  const queryClient = useQueryClient();
 
   return useMutation({
     mutationFn: async (input: LoginInput) => {
@@ -40,14 +45,11 @@ export function useLogin() {
       return me;
     },
     onSuccess: async (me) => {
-      const callbackUrl = searchParams.get('callbackUrl');
-      if (callbackUrl && callbackUrl.startsWith('/')) {
-        router.replace(callbackUrl);
-        router.refresh();
-        return;
-      }
+      clearUserSessionQueries(queryClient);
 
-      router.replace(authRedirect(me));
+      router.replace(
+        resolvePostLoginRedirect(me, searchParams.get('callbackUrl')),
+      );
       router.refresh();
     },
   });
@@ -55,6 +57,7 @@ export function useLogin() {
 
 export function useRegister() {
   const router = useRouter();
+  const queryClient = useQueryClient();
 
   return useMutation({
     mutationFn: async (input: RegisterInput) => {
@@ -76,7 +79,8 @@ export function useRegister() {
       return me;
     },
     onSuccess: async (me) => {
-      router.replace(authRedirect(me));
+      clearUserSessionQueries(queryClient);
+      router.replace(resolvePostLoginRedirect(me));
       router.refresh();
     },
   });
@@ -98,8 +102,7 @@ export function useLogout() {
       }
     },
     onSettled: async () => {
-      queryClient.removeQueries({ queryKey: authKeys.all });
-      await signOut({ redirect: false });
+      await signOutClient({ queryClient, redirect: false });
       router.replace(authRoutes.login);
       router.refresh();
     },

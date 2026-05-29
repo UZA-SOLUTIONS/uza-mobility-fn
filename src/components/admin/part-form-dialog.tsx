@@ -12,6 +12,10 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
+import {
+  NumberInput,
+  numberRegisterOptions,
+} from '@/components/ui/number-input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import {
@@ -255,22 +259,20 @@ export function PartFormDialog({
             </div>
             <div className="space-y-1.5">
               <Label htmlFor="part-stock">Stock</Label>
-              <Input
+              <NumberInput
                 id="part-stock"
-                type="number"
                 min={0}
-                {...form.register('stockQuantity', { valueAsNumber: true })}
+                {...form.register('stockQuantity', numberRegisterOptions())}
               />
             </div>
           </div>
           <div className="space-y-1.5">
             <Label htmlFor="part-price">Price (USD)</Label>
-            <Input
+            <NumberInput
               id="part-price"
-              type="number"
               min={0}
               step="0.01"
-              {...form.register('priceUsd', { valueAsNumber: true })}
+              {...form.register('priceUsd', numberRegisterOptions())}
             />
           </div>
           {isEdit && part?.seller?.businessName ? (

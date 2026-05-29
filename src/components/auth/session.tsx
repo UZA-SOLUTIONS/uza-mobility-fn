@@ -1,8 +1,10 @@
 'use client';
 
 import { useEffect } from 'react';
-import { signOut, useSession } from 'next-auth/react';
+import { useQueryClient } from '@tanstack/react-query';
+import { useSession } from 'next-auth/react';
 import { authRoutes } from '@/config/routes';
+import { signOutClient } from '@/lib/auth/sign-out-client';
 import {
   clearSessionUpdate,
   setSessionUpdate,
@@ -16,6 +18,7 @@ import {
 const REFRESH_INTERVAL_MS = 4 * 60 * 1000;
 
 export function SessionRefresh() {
+  const queryClient = useQueryClient();
   const { data: session, status, update } = useSession();
 
   useEffect(() => {
@@ -29,7 +32,7 @@ export function SessionRefresh() {
     }
 
     if (session?.error === 'RefreshAccessTokenError') {
-      void signOut({ callbackUrl: authRoutes.login });
+      void signOutClient({ queryClient, callbackUrl: authRoutes.login });
       return;
     }
 
@@ -48,7 +51,7 @@ export function SessionRefresh() {
       window.clearInterval(interval);
       window.removeEventListener('focus', onFocus);
     };
-  }, [session?.error, status, update]);
+  }, [queryClient, session?.error, status, update]);
 
   return null;
 }

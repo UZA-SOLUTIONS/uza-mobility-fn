@@ -9,6 +9,10 @@ import { PageHeader } from '@/components/shared/page-header';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import {
+  NumberInput,
+  numberRegisterOptions,
+} from '@/components/ui/number-input';
 import { Label } from '@/components/ui/label';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -425,10 +429,9 @@ function EditCategoryDialog({
           </div>
           <div className="space-y-1.5">
             <Label>Display order</Label>
-            <Input
-              type="number"
+            <NumberInput
               min={0}
-              {...form.register('displayOrder', { valueAsNumber: true })}
+              {...form.register('displayOrder', numberRegisterOptions())}
             />
           </div>
           <DialogFooter>
@@ -492,10 +495,9 @@ function EditSubcategoryDialog({
           </div>
           <div className="space-y-1.5">
             <Label>Display order</Label>
-            <Input
-              type="number"
+            <NumberInput
               min={0}
-              {...form.register('displayOrder', { valueAsNumber: true })}
+              {...form.register('displayOrder', numberRegisterOptions())}
             />
           </div>
           <DialogFooter>

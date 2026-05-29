@@ -12,6 +12,10 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
+import {
+  NumberInput,
+  numberRegisterOptions,
+} from '@/components/ui/number-input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import {
@@ -173,11 +177,10 @@ export function EnergyProductFormDialog({
             </div>
             <div className="space-y-1.5">
               <Label htmlFor="ep-power">Power (kW)</Label>
-              <Input
+              <NumberInput
                 id="ep-power"
-                type="number"
                 step="0.1"
-                {...form.register('powerKw', { valueAsNumber: true })}
+                {...form.register('powerKw', numberRegisterOptions())}
               />
             </div>
           </div>
@@ -189,10 +192,9 @@ export function EnergyProductFormDialog({
             </div>
             <div className="space-y-1.5">
               <Label htmlFor="ep-price">Price (USD)</Label>
-              <Input
+              <NumberInput
                 id="ep-price"
-                type="number"
-                {...form.register('priceUsd', { valueAsNumber: true })}
+                {...form.register('priceUsd', numberRegisterOptions())}
               />
             </div>
           </div>

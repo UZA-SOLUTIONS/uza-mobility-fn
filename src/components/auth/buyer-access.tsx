@@ -3,11 +3,15 @@
 import { useEffect } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { signOut, useSession } from 'next-auth/react';
+import { useQueryClient } from '@tanstack/react-query';
+import { useSession } from 'next-auth/react';
+import { signOutClient } from '@/lib/auth/sign-out-client';
+import { useLogout } from '@/queries/auth';
 import { usePermissions } from '@/hooks/permissions';
 import { Button } from '@/components/ui/button';
 import { Spinner } from '@/components/ui/spinner';
 import { authRoutes, workspaceRoutes } from '@/config/routes';
+import { authRedirect } from '@/lib/auth/redirect';
 import { hasBuyerWorkspace } from '@/lib/permissions';
 import { isMeUser } from '@/types/auth/me-user';
 
@@ -17,9 +21,16 @@ type BuyerAccessProps = {
 
 export function BuyerAccess({ children }: BuyerAccessProps) {
   const router = useRouter();
+  const queryClient = useQueryClient();
+  const logout = useLogout();
   const { data: session, status } = useSession();
-  const { user, isLoading, hasSellerWorkspace, hasAdminAccess } =
-    usePermissions();
+  const {
+    user,
+    isLoading,
+    hasSellerWorkspace,
+    hasAdminAccess,
+    hasOperatorWorkspace,
+  } = usePermissions();
 
   const sessionUser = isMeUser(session?.user) ? session.user : null;
   const effectiveUser = user ?? sessionUser;
@@ -30,9 +41,9 @@ export function BuyerAccess({ children }: BuyerAccessProps) {
 
   useEffect(() => {
     if (session?.error === 'RefreshAccessTokenError') {
-      void signOut({ callbackUrl: authRoutes.login });
+      void signOutClient({ queryClient, callbackUrl: authRoutes.login });
     }
-  }, [session?.error]);
+  }, [queryClient, session?.error]);
 
   useEffect(() => {
     if (status === 'unauthenticated') {
@@ -40,6 +51,13 @@ export function BuyerAccess({ children }: BuyerAccessProps) {
       router.replace(login);
     }
   }, [status, router]);
+
+  useEffect(() => {
+    if (status !== 'authenticated' || canAccessBuyer || !effectiveUser) {
+      return;
+    }
+    router.replace(authRedirect(effectiveUser));
+  }, [status, canAccessBuyer, effectiveUser, router]);
 
   if (status === 'loading' || (isLoading && !effectiveUser)) {
     return (
@@ -78,10 +96,16 @@ export function BuyerAccess({ children }: BuyerAccessProps) {
                 <Link href={workspaceRoutes.admin}>Admin workspace</Link>
               </Button>
             ) : null}
+            {hasOperatorWorkspace ? (
+              <Button asChild variant="outline">
+                <Link href={workspaceRoutes.operator}>Operator workspace</Link>
+              </Button>
+            ) : null}
             <Button
               type="button"
               variant="outline"
-              onClick={() => void signOut({ callbackUrl: authRoutes.login })}
+              disabled={logout.isPending}
+              onClick={() => logout.mutate()}
             >
               Sign out
             </Button>

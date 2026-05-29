@@ -13,6 +13,10 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
+import {
+  NumberInput,
+  numberRegisterOptions,
+} from '@/components/ui/number-input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import {
@@ -223,20 +227,19 @@ export function PromotionFormDialog({
             <div className="grid gap-4 sm:grid-cols-2">
               <div className="space-y-1.5">
                 <Label htmlFor="promo-discount-usd">Discount (USD)</Label>
-                <Input
+                <NumberInput
                   id="promo-discount-usd"
-                  type="number"
-                  {...form.register('discountAmountUsd', {
-                    valueAsNumber: true,
-                  })}
+                  {...form.register(
+                    'discountAmountUsd',
+                    numberRegisterOptions(),
+                  )}
                 />
               </div>
               <div className="space-y-1.5">
                 <Label htmlFor="promo-discount-pct">Discount (%)</Label>
-                <Input
+                <NumberInput
                   id="promo-discount-pct"
-                  type="number"
-                  {...form.register('discountPercent', { valueAsNumber: true })}
+                  {...form.register('discountPercent', numberRegisterOptions())}
                 />
               </div>
             </div>

@@ -15,6 +15,10 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
+import {
+  NumberInput,
+  numberRegisterOptions,
+} from '@/components/ui/number-input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import {
@@ -287,10 +291,9 @@ export function SellerListingFormDialog({
             </div>
             <div className="space-y-1.5">
               <Label htmlFor="year">Year</Label>
-              <Input
+              <NumberInput
                 id="year"
-                type="number"
-                {...form.register('manufacturingYear', { valueAsNumber: true })}
+                {...form.register('manufacturingYear', numberRegisterOptions())}
               />
             </div>
           </div>
@@ -325,11 +328,10 @@ export function SellerListingFormDialog({
             </div>
             <div className="space-y-1.5">
               <Label htmlFor="mileage">Mileage (km)</Label>
-              <Input
+              <NumberInput
                 id="mileage"
-                type="number"
                 min={0}
-                {...form.register('mileageKm', { valueAsNumber: true })}
+                {...form.register('mileageKm', numberRegisterOptions())}
               />
             </div>
           </div>
@@ -348,14 +350,14 @@ export function SellerListingFormDialog({
           {sellerType === 'LOCAL_SELLER' ? (
             <div className="space-y-1.5">
               <Label htmlFor="payout">Desired payout (USD)</Label>
-              <Input
+              <NumberInput
                 id="payout"
-                type="number"
                 min={0}
                 step="0.01"
-                {...form.register('sellerDesiredPayoutUsd', {
-                  valueAsNumber: true,
-                })}
+                {...form.register(
+                  'sellerDesiredPayoutUsd',
+                  numberRegisterOptions(),
+                )}
               />
               {form.formState.errors.sellerDesiredPayoutUsd ? (
                 <p className="text-sm text-destructive">
@@ -366,12 +368,11 @@ export function SellerListingFormDialog({
           ) : (
             <div className="space-y-1.5">
               <Label htmlFor="fob-price">FOB price (USD)</Label>
-              <Input
+              <NumberInput
                 id="fob-price"
-                type="number"
                 min={0}
                 step="0.01"
-                {...form.register('fobPriceUsd', { valueAsNumber: true })}
+                {...form.register('fobPriceUsd', numberRegisterOptions())}
               />
               {form.formState.errors.fobPriceUsd ? (
                 <p className="text-sm text-destructive">

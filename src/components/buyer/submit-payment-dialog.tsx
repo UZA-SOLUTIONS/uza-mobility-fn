@@ -12,6 +12,10 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
+import {
+  NumberInput,
+  numberRegisterOptions,
+} from '@/components/ui/number-input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import {
@@ -89,12 +93,11 @@ export function SubmitPaymentDialog({
           <div className="grid gap-4 sm:grid-cols-2">
             <div className="space-y-1.5">
               <Label htmlFor="amount">Amount paid (USD)</Label>
-              <Input
+              <NumberInput
                 id="amount"
-                type="number"
                 min={0}
                 step="0.01"
-                {...form.register('amountPaid', { valueAsNumber: true })}
+                {...form.register('amountPaid', numberRegisterOptions())}
               />
             </div>
             <div className="space-y-1.5">

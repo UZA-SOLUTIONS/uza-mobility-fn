@@ -6,6 +6,7 @@ import { PageHeader } from '@/components/shared/page-header';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
+import { NumberInput } from '@/components/ui/number-input';
 import { Label } from '@/components/ui/label';
 import {
   Select,
@@ -378,9 +379,8 @@ export function OperatorStationsPanel() {
                   value={portNumber}
                   onChange={(event) => setPortNumber(event.target.value)}
                 />
-                <Input
+                <NumberInput
                   placeholder="Power kW"
-                  type="number"
                   value={powerKw}
                   onChange={(event) => setPowerKw(event.target.value)}
                 />
@@ -486,9 +486,8 @@ export function OperatorStationsPanel() {
                     <SelectItem value="FREE">FREE</SelectItem>
                   </SelectContent>
                 </Select>
-                <Input
+                <NumberInput
                   placeholder="Rate amount"
-                  type="number"
                   value={rateAmount}
                   onChange={(event) => setRateAmount(event.target.value)}
                 />

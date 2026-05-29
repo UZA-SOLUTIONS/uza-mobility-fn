@@ -41,7 +41,12 @@ export function NotificationSocketListener() {
 
     socketRef.current = socket;
 
-    const onNotification = (_payload: AppNotification) => {
+    const currentUserId = session?.user?.id;
+
+    const onNotification = (payload: AppNotification) => {
+      if (currentUserId && payload.userId !== currentUserId) {
+        return;
+      }
       void queryClient.invalidateQueries({ queryKey: notificationKeys.all });
     };
 
@@ -54,7 +59,13 @@ export function NotificationSocketListener() {
         socketRef.current = null;
       }
     };
-  }, [status, session?.accessToken, session?.error, queryClient]);
+  }, [
+    status,
+    session?.accessToken,
+    session?.user?.id,
+    session?.error,
+    queryClient,
+  ]);
 
   return null;
 }

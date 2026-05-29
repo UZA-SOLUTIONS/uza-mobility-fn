@@ -1,1 +1,9 @@
-export { auth, handlers, signIn, signOut, authRedirect } from './auth/index';
+export {
+  auth,
+  handlers,
+  signIn,
+  signOut,
+  authRedirect,
+  canAccessWorkspacePath,
+  resolvePostLoginRedirect,
+} from './auth/index';

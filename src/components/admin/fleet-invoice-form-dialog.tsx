@@ -15,6 +15,10 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
+import {
+  NumberInput,
+  numberRegisterOptions,
+} from '@/components/ui/number-input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { formatUsd } from '@/lib/admin/format';
@@ -263,12 +267,11 @@ export function FleetInvoiceFormDialog({
           <div className="grid gap-4 sm:grid-cols-2">
             <div className="space-y-1.5">
               <Label htmlFor="fleet-usd">Total (USD)</Label>
-              <Input
+              <NumberInput
                 id="fleet-usd"
-                type="number"
                 min={0}
                 step="0.01"
-                {...form.register('totalAmountUsd', { valueAsNumber: true })}
+                {...form.register('totalAmountUsd', numberRegisterOptions())}
               />
               {form.formState.errors.totalAmountUsd ? (
                 <p className="text-sm text-destructive">
@@ -278,12 +281,11 @@ export function FleetInvoiceFormDialog({
             </div>
             <div className="space-y-1.5">
               <Label htmlFor="fleet-rwf">Total (RWF, optional)</Label>
-              <Input
+              <NumberInput
                 id="fleet-rwf"
-                type="number"
                 min={0}
                 step="1"
-                {...form.register('totalAmountRwf', { valueAsNumber: true })}
+                {...form.register('totalAmountRwf', numberRegisterOptions())}
               />
               <p className="text-xs text-muted-foreground">
                 Leave blank to auto-convert from the listing or default rate.

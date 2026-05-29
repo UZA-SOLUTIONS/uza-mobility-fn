@@ -14,6 +14,10 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
+import {
+  NumberInput,
+  numberRegisterOptions,
+} from '@/components/ui/number-input';
 import { Label } from '@/components/ui/label';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Textarea } from '@/components/ui/textarea';
@@ -302,14 +306,14 @@ export function PaymentDetailSheet({
           >
             <div className="space-y-1.5">
               <Label htmlFor="partial-amount">Amount received (optional)</Label>
-              <Input
+              <NumberInput
                 id="partial-amount"
-                type="number"
                 min={0}
                 step="0.01"
-                {...partialForm.register('amountReceived', {
-                  valueAsNumber: true,
-                })}
+                {...partialForm.register(
+                  'amountReceived',
+                  numberRegisterOptions(),
+                )}
               />
             </div>
             <div className="space-y-1.5">

@@ -12,6 +12,10 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
+import {
+  NumberInput,
+  numberRegisterOptions,
+} from '@/components/ui/number-input';
 import { Label } from '@/components/ui/label';
 import {
   Select,
@@ -153,102 +157,93 @@ export function PricingRuleFormDialog({
           <div className="grid gap-4 sm:grid-cols-2">
             <div className="space-y-1.5">
               <Label htmlFor="pr-ship">Shipping (USD)</Label>
-              <Input
+              <NumberInput
                 id="pr-ship"
-                type="number"
                 step="0.01"
-                {...form.register('shippingCostUsd', { valueAsNumber: true })}
+                {...form.register('shippingCostUsd', numberRegisterOptions())}
               />
             </div>
             <div className="space-y-1.5">
               <Label htmlFor="pr-local">Local charges (USD)</Label>
-              <Input
+              <NumberInput
                 id="pr-local"
-                type="number"
                 step="0.01"
-                {...form.register('localChargesUsd', { valueAsNumber: true })}
+                {...form.register('localChargesUsd', numberRegisterOptions())}
               />
             </div>
             <div className="space-y-1.5">
               <Label htmlFor="pr-tax">Tax %</Label>
-              <Input
+              <NumberInput
                 id="pr-tax"
-                type="number"
                 step="0.01"
-                {...form.register('taxRatePercent', { valueAsNumber: true })}
+                {...form.register('taxRatePercent', numberRegisterOptions())}
               />
             </div>
             <div className="space-y-1.5">
               <Label htmlFor="pr-ins">Insurance %</Label>
-              <Input
+              <NumberInput
                 id="pr-ins"
-                type="number"
                 step="0.01"
-                {...form.register('insuranceRatePercent', {
-                  valueAsNumber: true,
-                })}
+                {...form.register(
+                  'insuranceRatePercent',
+                  numberRegisterOptions(),
+                )}
               />
             </div>
             <div className="space-y-1.5">
               <Label htmlFor="pr-margin">Platform margin %</Label>
-              <Input
+              <NumberInput
                 id="pr-margin"
-                type="number"
                 step="0.01"
-                {...form.register('platformMarginPercent', {
-                  valueAsNumber: true,
-                })}
+                {...form.register(
+                  'platformMarginPercent',
+                  numberRegisterOptions(),
+                )}
               />
             </div>
             <div className="space-y-1.5">
               <Label htmlFor="pr-commission">Commission rate</Label>
-              <Input
+              <NumberInput
                 id="pr-commission"
-                type="number"
                 step="0.01"
-                {...form.register('commissionRate', { valueAsNumber: true })}
+                {...form.register('commissionRate', numberRegisterOptions())}
               />
             </div>
             <div className="space-y-1.5">
               <Label htmlFor="pr-rwf">USD → RWF rate</Label>
-              <Input
+              <NumberInput
                 id="pr-rwf"
-                type="number"
-                {...form.register('exchangeRateRwf', { valueAsNumber: true })}
+                {...form.register('exchangeRateRwf', numberRegisterOptions())}
               />
             </div>
             <div className="space-y-1.5">
               <Label htmlFor="pr-clear">Clearing fee (USD)</Label>
-              <Input
+              <NumberInput
                 id="pr-clear"
-                type="number"
                 step="0.01"
-                {...form.register('clearingFeeUsd', { valueAsNumber: true })}
+                {...form.register('clearingFeeUsd', numberRegisterOptions())}
               />
             </div>
             <div className="space-y-1.5">
               <Label htmlFor="pr-storage">Storage / day (USD)</Label>
-              <Input
+              <NumberInput
                 id="pr-storage"
-                type="number"
                 step="0.01"
-                {...form.register('storagePerDayUsd', { valueAsNumber: true })}
+                {...form.register('storagePerDayUsd', numberRegisterOptions())}
               />
             </div>
             <div className="space-y-1.5">
               <Label htmlFor="pr-dmin">Delivery days min</Label>
-              <Input
+              <NumberInput
                 id="pr-dmin"
-                type="number"
-                {...form.register('deliveryDaysMin', { valueAsNumber: true })}
+                {...form.register('deliveryDaysMin', numberRegisterOptions())}
               />
             </div>
             <div className="space-y-1.5">
               <Label htmlFor="pr-dmax">Delivery days max</Label>
-              <Input
+              <NumberInput
                 id="pr-dmax"
-                type="number"
-                {...form.register('deliveryDaysMax', { valueAsNumber: true })}
+                {...form.register('deliveryDaysMax', numberRegisterOptions())}
               />
             </div>
           </div>
