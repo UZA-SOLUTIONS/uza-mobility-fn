@@ -31,6 +31,24 @@ export const listingConditions = [
   'NEEDS_REVIEW',
 ] as const;
 
+/** Stored on listing EV specs (`EvSpec.chargingType`). */
+export const listingChargingTypes = [
+  'AC_TYPE1',
+  'AC_TYPE2',
+  'DC_CCS',
+  'DC_CHADEMO',
+  'DC_GB_T',
+  'TESLA_NACS',
+  'AC',
+  'DC',
+] as const;
+
+export type ListingChargingType = (typeof listingChargingTypes)[number];
+
+export function formatListingChargingType(value: string): string {
+  return value.replaceAll('_', ' ');
+}
+
 export const adminListingSellerTypes = [
   'UZA_RWANDA_STOCK',
   'UZA_CHINA_SOURCING',
@@ -42,11 +60,7 @@ export const MAX_LISTING_PHOTOS = 20;
 /** Matches backend `FilesInterceptor('photos', 10)` on admin parts. */
 export const MAX_PART_PHOTOS = 10;
 
-export const adminListingInitialStatuses = [
-  'DRAFT',
-  'APPROVED',
-  'PUBLISHED',
-] as const;
+export const adminListingInitialStatuses = ['DRAFT', 'PENDING_REVIEW'] as const;
 
 const adminListingFormFieldsSchema = z.object({
   sellerType: z.enum(adminListingSellerTypes),
@@ -64,9 +78,44 @@ const adminListingFormFieldsSchema = z.object({
   country: z.string().length(2),
   description: z.string().max(5000).optional(),
   mileageKm: z.number().min(0).optional(),
+  rangeKm: z.number().min(1).optional(),
+  batteryHealthPercent: z.number().min(0).max(100).optional(),
+  chargingType: z.enum(listingChargingTypes).optional(),
   basePriceUsd: z.number().min(0).optional(),
   fobPriceUsd: z.number().min(0).optional(),
 });
+
+function refineListingEvSpecs(
+  data: z.infer<typeof adminListingFormFieldsSchema>,
+  ctx: z.RefinementCtx,
+) {
+  if (data.rangeKm == null || data.rangeKm <= 0) {
+    ctx.addIssue({
+      code: 'custom',
+      message: 'Electric range (km) is required',
+      path: ['rangeKm'],
+    });
+  }
+
+  if (!data.chargingType) {
+    ctx.addIssue({
+      code: 'custom',
+      message: 'Charging type is required',
+      path: ['chargingType'],
+    });
+  }
+
+  if (
+    data.condition !== 'NEW' &&
+    (data.batteryHealthPercent == null || data.batteryHealthPercent <= 0)
+  ) {
+    ctx.addIssue({
+      code: 'custom',
+      message: 'Battery health (%) is required for pre-owned vehicles',
+      path: ['batteryHealthPercent'],
+    });
+  }
+}
 
 function refineAdminListingPricing(
   data: z.infer<typeof adminListingFormFieldsSchema>,
@@ -100,7 +149,8 @@ export const adminListingFormSchema = adminListingFormFieldsSchema
     initialStatus: z.enum(adminListingInitialStatuses).optional(),
     removePhotoIds: z.array(z.string().min(1)).optional(),
   })
-  .superRefine(refineAdminListingPricing);
+  .superRefine(refineAdminListingPricing)
+  .superRefine(refineListingEvSpecs);
 
 export type AdminListingFormInput = z.infer<typeof adminListingFormSchema>;
 
@@ -108,7 +158,8 @@ export const adminUpdateListingSchema = adminListingFormFieldsSchema
   .extend({
     removePhotoIds: z.array(z.string().min(1)).optional(),
   })
-  .superRefine(refineAdminListingPricing);
+  .superRefine(refineAdminListingPricing)
+  .superRefine(refineListingEvSpecs);
 
 export type AdminUpdateListingInput = z.infer<typeof adminUpdateListingSchema>;
 
@@ -116,7 +167,8 @@ export const adminCreateListingSchema = adminListingFormFieldsSchema
   .extend({
     initialStatus: z.enum(adminListingInitialStatuses),
   })
-  .superRefine(refineAdminListingPricing);
+  .superRefine(refineAdminListingPricing)
+  .superRefine(refineListingEvSpecs);
 
 export type AdminCreateListingInput = z.infer<typeof adminCreateListingSchema>;
 

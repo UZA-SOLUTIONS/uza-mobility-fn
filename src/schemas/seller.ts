@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { listingConditions } from '@/schemas/admin';
+import { listingChargingTypes, listingConditions } from '@/schemas/admin';
 
 export const marketplaceListingSellerTypes = [
   'LOCAL_SELLER',
@@ -23,9 +23,44 @@ const sellerListingFormFieldsSchema = z.object({
   country: z.string().length(2),
   description: z.string().max(5000).optional(),
   mileageKm: z.number().min(0).optional(),
+  rangeKm: z.number().min(1).optional(),
+  batteryHealthPercent: z.number().min(0).max(100).optional(),
+  chargingType: z.enum(listingChargingTypes).optional(),
   sellerDesiredPayoutUsd: z.number().min(0).optional(),
   fobPriceUsd: z.number().min(0).optional(),
 });
+
+function refineSellerListingEvSpecs(
+  data: z.infer<typeof sellerListingFormFieldsSchema>,
+  ctx: z.RefinementCtx,
+) {
+  if (data.rangeKm == null || data.rangeKm <= 0) {
+    ctx.addIssue({
+      code: 'custom',
+      message: 'Electric range (km) is required',
+      path: ['rangeKm'],
+    });
+  }
+
+  if (!data.chargingType) {
+    ctx.addIssue({
+      code: 'custom',
+      message: 'Charging type is required',
+      path: ['chargingType'],
+    });
+  }
+
+  if (
+    data.condition !== 'NEW' &&
+    (data.batteryHealthPercent == null || data.batteryHealthPercent <= 0)
+  ) {
+    ctx.addIssue({
+      code: 'custom',
+      message: 'Battery health (%) is required for pre-owned vehicles',
+      path: ['batteryHealthPercent'],
+    });
+  }
+}
 
 function refineSellerListingPricing(
   data: z.infer<typeof sellerListingFormFieldsSchema>,
@@ -53,26 +88,29 @@ function refineSellerListingPricing(
   }
 }
 
-export const sellerListingFormSchema =
-  sellerListingFormFieldsSchema.superRefine(refineSellerListingPricing);
+const sellerListingRefinements = sellerListingFormFieldsSchema
+  .superRefine(refineSellerListingPricing)
+  .superRefine(refineSellerListingEvSpecs);
+
+export const sellerListingFormSchema = sellerListingRefinements;
 
 export type SellerListingFormInput = z.infer<typeof sellerListingFormSchema>;
 
-export const createSellerListingSchema =
-  sellerListingFormFieldsSchema.superRefine(refineSellerListingPricing);
+export const createSellerListingSchema = sellerListingRefinements;
 
 export type CreateSellerListingInput = z.infer<
   typeof createSellerListingSchema
 >;
 
-export const updateSellerListingSchema =
-  sellerListingFormFieldsSchema.superRefine(refineSellerListingPricing);
+export const updateSellerListingSchema = sellerListingRefinements;
 
 export type UpdateSellerListingInput = z.infer<
   typeof updateSellerListingSchema
 >;
 
 export {
+  formatListingChargingType,
+  listingChargingTypes,
   listingConditions,
   MAX_PART_PHOTOS,
   partConditions,

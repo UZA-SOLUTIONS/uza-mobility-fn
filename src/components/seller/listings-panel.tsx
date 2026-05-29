@@ -66,7 +66,7 @@ export function SellerListingsPanel() {
       <div className="flex flex-wrap items-start justify-between gap-4">
         <PageHeader
           title="My listings"
-          description="Create drafts, upload photos, and submit vehicles for UZA review."
+          description="Create drafts, upload photos, and submit for administrator review before publishing."
         />
         <Button onClick={openCreate} disabled={!canTrade}>
           New listing

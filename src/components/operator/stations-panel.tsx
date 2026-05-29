@@ -1,6 +1,11 @@
 'use client';
 
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
+import { toast } from 'sonner';
+import {
+  parseStationCoordinates,
+  StationLocationFields,
+} from '@/components/operator/station-location-fields';
 import { StatusBadge } from '@/components/admin/shared/status-badge';
 import { PageHeader } from '@/components/shared/page-header';
 import { Button } from '@/components/ui/button';
@@ -67,6 +72,8 @@ export function OperatorStationsPanel() {
   const [hasRestroom, setHasRestroom] = useState(false);
   const [hasCCTV, setHasCCTV] = useState(false);
   const [hasRoofCover, setHasRoofCover] = useState(false);
+  const [latitude, setLatitude] = useState('');
+  const [longitude, setLongitude] = useState('');
 
   const [portNumber, setPortNumber] = useState('');
   const [chargerType, setChargerType] = useState<
@@ -117,6 +124,69 @@ export function OperatorStationsPanel() {
     (item) => item.id === selectedStationId,
   );
 
+  useEffect(() => {
+    if (!selectedStation) return;
+    if (selectedStation.latitude != null) {
+      setLatitude(String(selectedStation.latitude));
+    }
+    if (selectedStation.longitude != null) {
+      setLongitude(String(selectedStation.longitude));
+    }
+  }, [selectedStation]);
+
+  const createDraft = () => {
+    const coords = parseStationCoordinates(latitude, longitude);
+    if (!coords) {
+      toast.error(
+        'Enter valid map coordinates (latitude and longitude) for this station.',
+      );
+      return;
+    }
+    createStation.mutate({
+      name,
+      address,
+      city,
+      country,
+      latitude: coords.latitude,
+      longitude: coords.longitude,
+      description: description || undefined,
+      locationType,
+      isOpen24h,
+      hasCCTV,
+      hasParking,
+      hasRestroom,
+      hasRoofCover,
+      hasWifi,
+      operationalStatus,
+    });
+  };
+
+  const saveStationLocation = () => {
+    const coords = parseStationCoordinates(latitude, longitude);
+    if (!coords || !selectedStationId) {
+      toast.error('Enter valid map coordinates before saving.');
+      return;
+    }
+    updateStation.mutate({
+      id: selectedStationId,
+      body: {
+        latitude: coords.latitude,
+        longitude: coords.longitude,
+      },
+    });
+  };
+
+  const submitSelectedStation = (stationId: string) => {
+    const station = stationItems.find((item) => item.id === stationId);
+    if (station?.latitude == null || station?.longitude == null) {
+      toast.error(
+        'Set GPS coordinates on this station before submitting for review.',
+      );
+      return;
+    }
+    submitStation.mutate(stationId);
+  };
+
   return (
     <div className="space-y-6">
       <PageHeader
@@ -155,6 +225,12 @@ export function OperatorStationsPanel() {
             placeholder="Description (optional)"
             value={description}
             onChange={(e) => setDescription(e.target.value)}
+          />
+          <StationLocationFields
+            latitude={latitude}
+            longitude={longitude}
+            onLatitudeChange={setLatitude}
+            onLongitudeChange={setLongitude}
           />
           <div className="grid gap-3 md:grid-cols-2">
             <div className="space-y-1.5">
@@ -223,26 +299,7 @@ export function OperatorStationsPanel() {
               Roof cover
             </label>
           </div>
-          <Button
-            disabled={createStation.isPending}
-            onClick={() =>
-              createStation.mutate({
-                name,
-                address,
-                city,
-                country,
-                description: description || undefined,
-                locationType,
-                isOpen24h,
-                hasCCTV,
-                hasParking,
-                hasRestroom,
-                hasRoofCover,
-                hasWifi,
-                operationalStatus,
-              })
-            }
-          >
+          <Button disabled={createStation.isPending} onClick={createDraft}>
             Create draft
           </Button>
         </CardContent>
@@ -297,7 +354,7 @@ export function OperatorStationsPanel() {
                         size="sm"
                         variant="outline"
                         disabled={submitStation.isPending}
-                        onClick={() => submitStation.mutate(station.id)}
+                        onClick={() => submitSelectedStation(station.id)}
                       >
                         Submit
                       </Button>
@@ -347,6 +404,34 @@ export function OperatorStationsPanel() {
               <span className="font-medium text-foreground">
                 {selectedStation.status}
               </span>
+              {selectedStation.latitude != null &&
+              selectedStation.longitude != null ? (
+                <>
+                  {' '}
+                  · {selectedStation.latitude.toFixed(5)},{' '}
+                  {selectedStation.longitude.toFixed(5)}
+                </>
+              ) : (
+                <span className="text-destructive"> · GPS not set</span>
+              )}
+            </div>
+          ) : null}
+
+          {selectedStationId ? (
+            <div className="space-y-2">
+              <StationLocationFields
+                latitude={latitude}
+                longitude={longitude}
+                onLatitudeChange={setLatitude}
+                onLongitudeChange={setLongitude}
+              />
+              <Button
+                variant="outline"
+                disabled={!selectedStationId || updateStation.isPending}
+                onClick={saveStationLocation}
+              >
+                Save map location
+              </Button>
             </div>
           ) : null}
 

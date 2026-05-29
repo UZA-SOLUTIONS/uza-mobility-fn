@@ -15,7 +15,8 @@ import {
 } from '@/queries/operator';
 
 export function OperatorProfilePanel() {
-  const { hasOperatorWorkspace } = usePermissions();
+  const { hasOperatorWorkspace, hasOperatorApplication, user } =
+    usePermissions();
   const { data, isLoading } = useMyOperatorProfile();
   const applyMutation = useApplyOperatorProfile();
   const updateMutation = useUpdateMyOperatorProfile();
@@ -31,7 +32,13 @@ export function OperatorProfilePanel() {
   const [description, setDescription] = useState('');
 
   const profile = data ?? null;
-  const canUpdate = hasOperatorWorkspace && Boolean(profile);
+  const applicationStatus = profile?.status ?? user?.operator?.status ?? null;
+  const hasSubmittedApplication = Boolean(profile) || hasOperatorApplication;
+  const isPendingReview = applicationStatus === 'PENDING';
+  const isRejected = applicationStatus === 'REJECTED';
+  const canSaveUpdates = hasOperatorWorkspace || isRejected;
+  const formDisabled =
+    hasSubmittedApplication && isPendingReview && !hasOperatorWorkspace;
   const isBusy = applyMutation.isPending || updateMutation.isPending;
 
   useEffect(() => {
@@ -79,15 +86,15 @@ export function OperatorProfilePanel() {
     <div className="space-y-6">
       <PageHeader
         title="Operator profile"
-        description="Submit or update your charging operator company details."
+        description="Submit your charging operator company details. Business address is for contact and review; station GPS coordinates are set when you add each charging site."
       />
 
       <Card>
         <CardHeader>
           <CardTitle>
-            {profile
-              ? `Status: ${profile.status}`
-              : 'Operator application / profile'}
+            {applicationStatus
+              ? `Status: ${applicationStatus}`
+              : 'Operator application'}
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
@@ -95,10 +102,26 @@ export function OperatorProfilePanel() {
             <p className="text-sm text-muted-foreground">Loading...</p>
           ) : null}
 
-          {!hasOperatorWorkspace ? (
+          {isPendingReview && !hasOperatorWorkspace ? (
+            <p className="rounded-md border border-amber-200 bg-amber-50 px-3 py-2 text-sm text-amber-950 dark:border-amber-900 dark:bg-amber-950/40 dark:text-amber-100">
+              Your application is under review. You cannot submit again until an
+              administrator decides. After approval, sign out and sign back in
+              (or wait a few minutes and refresh) to unlock station management.
+            </p>
+          ) : null}
+
+          {isRejected ? (
+            <p className="rounded-md border border-destructive/30 bg-destructive/5 px-3 py-2 text-sm text-destructive">
+              Your application was rejected. Update your details below and save
+              to resubmit for review.
+              {profile?.adminNotes ? ` Note: ${profile.adminNotes}` : null}
+            </p>
+          ) : null}
+
+          {!hasOperatorWorkspace && !hasSubmittedApplication ? (
             <p className="text-sm text-muted-foreground">
-              You do not have operator permissions yet. Submit an application
-              below. If you already applied, your review may still be pending.
+              Submit your company profile to apply. An administrator will review
+              it before you can add charging stations on the map.
             </p>
           ) : null}
 
@@ -109,6 +132,7 @@ export function OperatorProfilePanel() {
                 value={businessName}
                 onChange={(e) => setBusinessName(e.target.value)}
                 placeholder={profile?.businessName ?? 'UZA Charging Ltd'}
+                disabled={formDisabled}
               />
             </div>
             <div className="space-y-1">
@@ -117,6 +141,7 @@ export function OperatorProfilePanel() {
                 value={businessRegNumber}
                 onChange={(e) => setBusinessRegNumber(e.target.value)}
                 placeholder={profile?.businessRegNumber ?? 'Optional'}
+                disabled={formDisabled}
               />
             </div>
             <div className="space-y-1">
@@ -125,6 +150,7 @@ export function OperatorProfilePanel() {
                 value={contactPerson}
                 onChange={(e) => setContactPerson(e.target.value)}
                 placeholder={profile?.contactPerson ?? 'Jane Doe'}
+                disabled={formDisabled}
               />
             </div>
             <div className="space-y-1">
@@ -133,6 +159,7 @@ export function OperatorProfilePanel() {
                 value={phone}
                 onChange={(e) => setPhone(e.target.value)}
                 placeholder={profile?.phone ?? '+250...'}
+                disabled={formDisabled}
               />
             </div>
             <div className="space-y-1">
@@ -141,6 +168,7 @@ export function OperatorProfilePanel() {
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 placeholder={profile?.email ?? 'ops@example.com'}
+                disabled={formDisabled}
               />
             </div>
             <div className="space-y-1">
@@ -149,6 +177,7 @@ export function OperatorProfilePanel() {
                 value={country}
                 onChange={(e) => setCountry(e.target.value.toUpperCase())}
                 placeholder={profile?.country ?? 'RW'}
+                disabled={formDisabled}
               />
             </div>
             <div className="space-y-1">
@@ -157,14 +186,18 @@ export function OperatorProfilePanel() {
                 value={city}
                 onChange={(e) => setCity(e.target.value)}
                 placeholder={profile?.city ?? 'Kigali'}
+                disabled={formDisabled}
               />
             </div>
             <div className="space-y-1">
-              <Label>Address</Label>
+              <Label>Business address</Label>
               <Input
                 value={address}
                 onChange={(e) => setAddress(e.target.value)}
-                placeholder={profile?.address ?? 'Optional'}
+                placeholder={
+                  profile?.address ?? 'Office / HQ address (optional)'
+                }
+                disabled={formDisabled}
               />
             </div>
           </div>
@@ -175,19 +208,21 @@ export function OperatorProfilePanel() {
               value={description}
               onChange={(e) => setDescription(e.target.value)}
               placeholder={profile?.description ?? 'Optional'}
+              disabled={formDisabled}
             />
           </div>
 
           <div className="flex gap-2">
-            {!canUpdate ? (
+            {!hasSubmittedApplication ? (
               <Button onClick={submitApply} disabled={isBusy}>
                 Submit application
               </Button>
-            ) : (
+            ) : null}
+            {hasSubmittedApplication && canSaveUpdates ? (
               <Button onClick={submitUpdate} disabled={isBusy}>
                 Save profile updates
               </Button>
-            )}
+            ) : null}
           </div>
         </CardContent>
       </Card>

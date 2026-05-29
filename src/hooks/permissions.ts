@@ -5,6 +5,7 @@ import {
   canAny,
   hasAdminAccess,
   hasBuyerWorkspace,
+  hasOperatorApplication,
   hasOperatorWorkspace,
   hasSellerWorkspace,
   isSuperAdmin,
@@ -29,6 +30,7 @@ export function usePermissions() {
       user?.sellers,
     ),
     hasOperatorWorkspace: hasOperatorWorkspace(permissions, user?.roles),
+    hasOperatorApplication: hasOperatorApplication(user?.operator),
     hasBuyerWorkspace: hasBuyerWorkspace(permissions, user?.roles),
   };
 }

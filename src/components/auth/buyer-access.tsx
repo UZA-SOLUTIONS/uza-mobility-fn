@@ -30,6 +30,7 @@ export function BuyerAccess({ children }: BuyerAccessProps) {
     hasSellerWorkspace,
     hasAdminAccess,
     hasOperatorWorkspace,
+    hasOperatorApplication,
   } = usePermissions();
 
   const sessionUser = isMeUser(session?.user) ? session.user : null;
@@ -96,11 +97,21 @@ export function BuyerAccess({ children }: BuyerAccessProps) {
                 <Link href={workspaceRoutes.admin}>Admin workspace</Link>
               </Button>
             ) : null}
-            {hasOperatorWorkspace ? (
+            {hasOperatorWorkspace || hasOperatorApplication ? (
               <Button asChild variant="outline">
-                <Link href={workspaceRoutes.operator}>Operator workspace</Link>
+                <Link href={workspaceRoutes.operator}>
+                  {hasOperatorWorkspace
+                    ? 'Operator workspace'
+                    : 'Charging operator application'}
+                </Link>
               </Button>
-            ) : null}
+            ) : (
+              <Button asChild variant="outline">
+                <Link href={workspaceRoutes.operator}>
+                  Become a charging operator
+                </Link>
+              </Button>
+            )}
             <Button
               type="button"
               variant="outline"

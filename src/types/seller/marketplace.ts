@@ -15,12 +15,28 @@ export type SellerListingCategory = {
   type: string;
 };
 
+export type SellerListingEvSpecs = {
+  rangeKm: number | null;
+  batteryHealthPercent: number | null;
+  chargingType?: string | null;
+  batteryHealthReport?: boolean;
+};
+
 export type SellerListingPricing = {
   finalPriceUsd: number;
   finalPriceRwf: number | null;
   currency: string;
   basePriceUsd?: number | null;
   fobPriceUsd?: number | null;
+  sellerDesiredPayoutUsd?: number | null;
+  commissionUsd?: number | null;
+  shippingCostUsd?: number | null;
+  localChargesUsd?: number | null;
+  taxesEstimateUsd?: number | null;
+  insuranceUsd?: number | null;
+  marginUsd?: number | null;
+  landingCostUsd?: number | null;
+  discountUsd?: number | null;
 };
 
 export type SellerListing = {
@@ -46,6 +62,7 @@ export type SellerListing = {
   category: SellerListingCategory;
   subcategory: { id: string; name: string; slug: string } | null;
   listingPricing: SellerListingPricing | null;
+  evSpecs: SellerListingEvSpecs | null;
   photos: SellerListingPhoto[];
   rejectionReason?: string;
 };
@@ -55,6 +72,8 @@ export type SellerPartPhoto = {
   url: string;
   isPrimary: boolean;
 };
+
+export type PartStatus = 'PENDING_REVIEW' | 'APPROVED' | 'REJECTED';
 
 export type SellerPart = {
   id: string;
@@ -67,8 +86,10 @@ export type SellerPart = {
   stockLabel: string;
   deliveryEstimate: string | null;
   description: string | null;
+  status: PartStatus;
   isActive: boolean;
   createdAt: string;
   updatedAt: string;
   photos: SellerPartPhoto[];
+  rejectionReason?: string;
 };

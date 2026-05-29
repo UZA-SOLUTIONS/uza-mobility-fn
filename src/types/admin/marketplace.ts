@@ -119,6 +119,11 @@ export type AdminListing = {
   category: AdminListingCategory;
   subcategory: { id: string; name: string; slug: string } | null;
   listingPricing: AdminListingPricing | null;
+  evSpecs: {
+    rangeKm: number | null;
+    batteryHealthPercent: number | null;
+    chargingType?: string | null;
+  } | null;
   photos: AdminListingPhoto[];
   verificationReport: AdminVerificationReport | null;
   createdBy: AdminListingCreatedBy | null;
@@ -178,6 +183,8 @@ export type AdminSellersFilters = {
 
 export type PartCondition = 'NEW' | 'USED' | 'REFURBISHED';
 
+export type PartStatus = 'PENDING_REVIEW' | 'APPROVED' | 'REJECTED';
+
 export type AdminPart = {
   id: string;
   sellerId: string | null;
@@ -194,6 +201,7 @@ export type AdminPart = {
   hasWarranty: boolean;
   warrantyDetails: string | null;
   description: string | null;
+  status: PartStatus;
   isActive: boolean;
   createdAt: string;
   updatedAt: string;
@@ -204,6 +212,7 @@ export type AdminPart = {
 export type AdminPartsFilters = {
   q?: string;
   category?: string;
+  status?: PartStatus;
   page?: number;
   limit?: number;
 };

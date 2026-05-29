@@ -13,10 +13,16 @@ export function useOperatorNav() {
     isLoading,
   } = usePermissions();
 
-  const groups: NavGroup[] = operatorNavGroups.map((group) => ({
-    ...group,
-    items: [...group.items],
-  }));
+  const groups: NavGroup[] = operatorNavGroups
+    .map((group) => ({
+      ...group,
+      items: group.items.filter(
+        (item) =>
+          hasOperatorWorkspace ||
+          item.href !== workspaceRoutes.operatorStations,
+      ),
+    }))
+    .filter((group) => group.items.length > 0);
 
   if (hasBuyerWorkspace) {
     groups.push({

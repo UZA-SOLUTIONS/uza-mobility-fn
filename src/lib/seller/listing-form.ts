@@ -4,7 +4,7 @@ import type {
   UpdateSellerListingInput,
 } from '@/schemas/seller';
 import type { SellerListing } from '@/types/seller/marketplace';
-import { listingConditions } from '@/schemas/admin';
+import { listingChargingTypes, listingConditions } from '@/schemas/admin';
 
 export function sellerListingToFormValues(
   listing: SellerListing,
@@ -31,8 +31,19 @@ export function sellerListingToFormValues(
     country: listing.country,
     description: listing.description ?? '',
     mileageKm: listing.mileageKm ?? undefined,
+    rangeKm: listing.evSpecs?.rangeKm ?? undefined,
+    batteryHealthPercent: listing.evSpecs?.batteryHealthPercent ?? undefined,
+    chargingType:
+      listing.evSpecs?.chargingType &&
+      (listingChargingTypes as readonly string[]).includes(
+        listing.evSpecs.chargingType,
+      )
+        ? (listing.evSpecs
+            .chargingType as SellerListingFormInput['chargingType'])
+        : undefined,
     fobPriceUsd: listing.listingPricing?.fobPriceUsd ?? undefined,
-    sellerDesiredPayoutUsd: undefined,
+    sellerDesiredPayoutUsd:
+      listing.listingPricing?.sellerDesiredPayoutUsd ?? undefined,
   };
 }
 
@@ -56,6 +67,12 @@ export function toSellerListingBody(
     description: description?.trim() || undefined,
     trim: trim?.trim() || undefined,
     mileageKm,
+    evSpecs: {
+      rangeKm: input.rangeKm!,
+      chargingType: input.chargingType!,
+      batteryHealthPercent:
+        input.condition === 'NEW' ? undefined : input.batteryHealthPercent,
+    },
     pricing: {
       sellerDesiredPayoutUsd:
         input.sellerType === 'LOCAL_SELLER'

@@ -38,23 +38,40 @@ export function getDashboard() {
   return authenticatedFetch<AdminDashboard>('/admin/dashboard');
 }
 
-export type AdminCreateListingBody = AdminCreateListingInput & {
+type AdminListingFormFlattenKeys =
+  | 'rangeKm'
+  | 'batteryHealthPercent'
+  | 'chargingType'
+  | 'basePriceUsd'
+  | 'fobPriceUsd';
+
+type AdminListingApiExtras = {
   pricing: {
     basePriceUsd?: number;
     fobPriceUsd?: number;
   };
-};
-
-export type AdminUpdateListingBody = AdminUpdateListingInput & {
-  pricing: {
-    basePriceUsd?: number;
-    fobPriceUsd?: number;
+  evSpecs: {
+    rangeKm: number;
+    chargingType: string;
+    batteryHealthPercent?: number;
   };
 };
 
-export function toAdminListingBody(
+export type AdminCreateListingBody = Omit<
+  AdminCreateListingInput,
+  AdminListingFormFlattenKeys
+> &
+  AdminListingApiExtras;
+
+export type AdminUpdateListingBody = Omit<
+  AdminUpdateListingInput,
+  AdminListingFormFlattenKeys
+> &
+  AdminListingApiExtras;
+
+function buildAdminListingApiBody(
   input: AdminCreateListingInput | AdminUpdateListingInput,
-): AdminCreateListingBody {
+) {
   const {
     basePriceUsd,
     fobPriceUsd,
@@ -62,6 +79,9 @@ export function toAdminListingBody(
     description,
     trim,
     mileageKm,
+    rangeKm,
+    batteryHealthPercent,
+    chargingType,
     ...rest
   } = input;
 
@@ -71,19 +91,31 @@ export function toAdminListingBody(
     description: description?.trim() || undefined,
     trim: trim?.trim() || undefined,
     mileageKm,
+    evSpecs: {
+      rangeKm: rangeKm!,
+      chargingType: chargingType!,
+      batteryHealthPercent:
+        input.condition === 'NEW' ? undefined : input.batteryHealthPercent,
+    },
     pricing: {
       basePriceUsd:
         input.sellerType === 'UZA_RWANDA_STOCK' ? basePriceUsd : undefined,
       fobPriceUsd:
         input.sellerType === 'UZA_CHINA_SOURCING' ? fobPriceUsd : undefined,
     },
-  } as AdminCreateListingBody;
+  };
 }
 
 export function toAdminCreateListingBody(
   input: AdminCreateListingInput,
 ): AdminCreateListingBody {
-  return toAdminListingBody(input);
+  return buildAdminListingApiBody(input) as AdminCreateListingBody;
+}
+
+export function toAdminUpdateListingBody(
+  input: AdminUpdateListingInput,
+): AdminUpdateListingBody {
+  return buildAdminListingApiBody(input) as AdminUpdateListingBody;
 }
 
 export function createAdminListing(
@@ -101,7 +133,7 @@ export function updateAdminListing(
   body: AdminUpdateListingBody,
   photos: File[] = [],
 ) {
-  const form = buildMultipartFormData(toAdminListingBody(body), [
+  const form = buildMultipartFormData(body, [
     { field: 'photos', files: photos },
   ]);
   return authenticatedMultipartFetch<AdminListing>(
@@ -249,6 +281,19 @@ export function activatePart(id: string) {
 export function deactivatePart(id: string) {
   return authenticatedFetch<AdminPart>(`/admin/parts/${id}/deactivate`, {
     method: 'PATCH',
+  });
+}
+
+export function approvePart(id: string) {
+  return authenticatedFetch<AdminPart>(`/admin/parts/${id}/approve`, {
+    method: 'PATCH',
+  });
+}
+
+export function rejectPart(id: string, body: { reason: string }) {
+  return authenticatedFetch<AdminPart>(`/admin/parts/${id}/reject`, {
+    method: 'PATCH',
+    body: JSON.stringify(body),
   });
 }
 

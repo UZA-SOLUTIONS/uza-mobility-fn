@@ -262,7 +262,7 @@ export function OrderDetailSheet({
         title="Cancel order?"
         description={
           order
-            ? `${order.orderNumber} will be cancelled. This is restricted to super admins.`
+            ? `${order.orderNumber} will be cancelled. This is restricted to administrators.`
             : ''
         }
         confirmLabel="Cancel order"

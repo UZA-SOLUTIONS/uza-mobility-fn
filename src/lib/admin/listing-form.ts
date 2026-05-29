@@ -1,5 +1,5 @@
 import type { AdminListingFormInput } from '@/schemas/admin';
-import { listingConditions } from '@/schemas/admin';
+import { listingChargingTypes, listingConditions } from '@/schemas/admin';
 import type { AdminListing } from '@/types/admin/marketplace';
 
 function parseListingCondition(
@@ -53,6 +53,16 @@ export function adminListingToFormValues(
     country: listing.country,
     description: listing.description ?? '',
     mileageKm: listing.mileageKm ?? undefined,
+    rangeKm: listing.evSpecs?.rangeKm ?? undefined,
+    batteryHealthPercent: listing.evSpecs?.batteryHealthPercent ?? undefined,
+    chargingType:
+      listing.evSpecs?.chargingType &&
+      (listingChargingTypes as readonly string[]).includes(
+        listing.evSpecs.chargingType,
+      )
+        ? (listing.evSpecs
+            .chargingType as AdminListingFormInput['chargingType'])
+        : undefined,
     basePriceUsd: listing.listingPricing?.basePriceUsd ?? undefined,
     fobPriceUsd: listing.listingPricing?.fobPriceUsd ?? undefined,
   };

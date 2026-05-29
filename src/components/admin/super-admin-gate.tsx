@@ -23,7 +23,7 @@ export function SuperAdminGate({ children }: SuperAdminGateProps) {
   if (!isSuperAdmin) {
     return (
       <p className="text-sm text-muted-foreground">
-        This section is restricted to super administrators.
+        This section is restricted to administrators.
       </p>
     );
   }

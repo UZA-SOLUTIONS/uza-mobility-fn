@@ -1,0 +1,21 @@
+export type PriceBreakdown = {
+  sellerType: string;
+  basePriceUsd?: number;
+  fobPriceUsd?: number;
+  sellerDesiredPayoutUsd?: number;
+  shippingCostUsd?: number;
+  localChargesUsd?: number;
+  taxesEstimateUsd?: number;
+  insuranceUsd?: number;
+  storageUsd?: number;
+  clearingFeeUsd?: number;
+  landingCostUsd?: number;
+  marginUsd?: number;
+  commissionUsd?: number;
+  discountUsd?: number;
+  finalPriceUsd: number;
+  finalPriceRwf?: number;
+  deliveryDaysMin: number;
+  deliveryDaysMax: number;
+  currency: string;
+};

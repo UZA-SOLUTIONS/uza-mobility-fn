@@ -4,6 +4,7 @@ import Image from 'next/image';
 import { useState } from 'react';
 import { useDebounce } from '@/hooks/use-debounce';
 import { usePermissions } from '@/hooks/permissions';
+import { StatusBadge } from '@/components/admin/shared/status-badge';
 import { ConfirmDialog } from '@/components/admin/shared/confirm-dialog';
 import { PartDetailSheet } from '@/components/admin/part-detail-sheet';
 import { PartFormDialog } from '@/components/admin/part-form-dialog';
@@ -13,7 +14,6 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Skeleton } from '@/components/ui/skeleton';
-import { Badge } from '@/components/ui/badge';
 import {
   Table,
   TableBody,
@@ -25,9 +25,20 @@ import {
 import {
   useActivatePart,
   useAdminParts,
+  useApprovePart,
   useDeactivatePart,
   useDeletePart,
+  useRejectPart,
 } from '@/queries/admin';
+import { rejectListingSchema } from '@/schemas/admin';
+import { Textarea } from '@/components/ui/textarea';
+import {
+  Dialog,
+  DialogContent,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog';
 import type { AdminPart, AdminPartsFilters } from '@/types/admin/marketplace';
 
 function formatUsd(value: number) {
@@ -51,29 +62,113 @@ function PartActions({
   onDelete: () => void;
   busy: boolean;
 }) {
-  const { can } = usePermissions();
+  const { can, isSuperAdmin } = usePermissions();
+  const approve = useApprovePart();
+  const reject = useRejectPart();
+  const [rejectOpen, setRejectOpen] = useState(false);
+  const [reason, setReason] = useState('');
+  const [reasonError, setReasonError] = useState<string | null>(null);
 
   if (!can('parts:manage')) {
     return null;
   }
 
+  const actionBusy = busy || approve.isPending || reject.isPending;
+
+  const handleReject = () => {
+    const parsed = rejectListingSchema.safeParse({ reason });
+    if (!parsed.success) {
+      setReasonError(parsed.error.issues[0]?.message ?? 'Invalid reason');
+      return;
+    }
+    setReasonError(null);
+    reject.mutate(
+      { id: part.id, body: parsed.data },
+      { onSuccess: () => setRejectOpen(false) },
+    );
+  };
+
   return (
-    <div className="flex flex-wrap justify-end gap-1">
-      <Button size="sm" variant="outline" disabled={busy} onClick={onView}>
-        View
-      </Button>
-      <Button size="sm" variant="ghost" disabled={busy} onClick={onEdit}>
-        Edit
-      </Button>
-      <Button
-        size="sm"
-        variant="destructive"
-        disabled={busy}
-        onClick={onDelete}
-      >
-        Delete
-      </Button>
-    </div>
+    <>
+      <div className="flex flex-wrap justify-end gap-1">
+        {part.status === 'PENDING_REVIEW' && isSuperAdmin ? (
+          <Button
+            size="sm"
+            variant="outline"
+            disabled={actionBusy}
+            onClick={() => approve.mutate(part.id)}
+          >
+            Approve
+          </Button>
+        ) : null}
+        {part.status === 'PENDING_REVIEW' && isSuperAdmin ? (
+          <Button
+            size="sm"
+            variant="outline"
+            disabled={actionBusy}
+            onClick={() => setRejectOpen(true)}
+          >
+            Reject
+          </Button>
+        ) : null}
+        <Button
+          size="sm"
+          variant="outline"
+          disabled={actionBusy}
+          onClick={onView}
+        >
+          View
+        </Button>
+        <Button
+          size="sm"
+          variant="ghost"
+          disabled={actionBusy}
+          onClick={onEdit}
+        >
+          Edit
+        </Button>
+        <Button
+          size="sm"
+          variant="destructive"
+          disabled={actionBusy}
+          onClick={onDelete}
+        >
+          Delete
+        </Button>
+      </div>
+
+      <Dialog open={rejectOpen} onOpenChange={setRejectOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Reject part</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-2">
+            <Label htmlFor="part-reject-reason">Reason for seller</Label>
+            <Textarea
+              id="part-reject-reason"
+              value={reason}
+              onChange={(event) => setReason(event.target.value)}
+              rows={4}
+            />
+            {reasonError ? (
+              <p className="text-sm text-destructive">{reasonError}</p>
+            ) : null}
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setRejectOpen(false)}>
+              Cancel
+            </Button>
+            <Button
+              variant="destructive"
+              disabled={actionBusy}
+              onClick={handleReject}
+            >
+              Reject part
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+    </>
   );
 }
 
@@ -229,9 +324,7 @@ export function AdminPartsPanel() {
                     <TableCell>{formatUsd(part.priceUsd)}</TableCell>
                     <TableCell>{part.stockQuantity}</TableCell>
                     <TableCell>
-                      <Badge variant={part.isActive ? 'default' : 'secondary'}>
-                        {part.isActive ? 'Active' : 'Inactive'}
-                      </Badge>
+                      <StatusBadge status={part.status} />
                     </TableCell>
                     <TableCell className="text-right">
                       <PartActions

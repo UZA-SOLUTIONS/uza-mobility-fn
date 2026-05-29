@@ -33,7 +33,7 @@ export function ListingActions({
   listing,
   onActionComplete,
 }: ListingActionsProps) {
-  const { can } = usePermissions();
+  const { can, isSuperAdmin } = usePermissions();
   const approve = useApproveListing();
   const publish = usePublishListing();
   const reject = useRejectListing();
@@ -76,7 +76,7 @@ export function ListingActions({
   return (
     <>
       <div className="flex flex-wrap gap-1">
-        {listing.status === 'PENDING_REVIEW' && can('listings:approve') ? (
+        {listing.status === 'PENDING_REVIEW' && isSuperAdmin ? (
           <Button
             size="sm"
             variant="outline"
@@ -86,7 +86,7 @@ export function ListingActions({
             Approve
           </Button>
         ) : null}
-        {listing.status === 'APPROVED' && can('listings:approve') ? (
+        {listing.status === 'APPROVED' && isSuperAdmin ? (
           <Button
             size="sm"
             disabled={busy}
@@ -97,7 +97,7 @@ export function ListingActions({
         ) : null}
         {(listing.status === 'PENDING_REVIEW' ||
           listing.status === 'APPROVED') &&
-        can('listings:reject') ? (
+        isSuperAdmin ? (
           <Button
             size="sm"
             variant="outline"

@@ -1,5 +1,6 @@
 import { workspaceRoutes } from '@/config/routes';
 import {
+  canAccessOperatorPath,
   hasAdminAccess,
   hasBuyerWorkspace,
   hasOperatorWorkspace,
@@ -23,7 +24,7 @@ export function canAccessWorkspacePath(me: MeUser, path: string): boolean {
     return hasSellerWorkspace(me.permissions, me.seller, me.sellers);
   }
   if (pathStartsWith(path, workspaceRoutes.operator)) {
-    return hasOperatorWorkspace(me.permissions, me.roles);
+    return canAccessOperatorPath(me, path);
   }
   return true;
 }

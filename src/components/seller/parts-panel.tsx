@@ -8,7 +8,7 @@ import {
   useSellerCanTrade,
 } from '@/components/seller/seller-status-banner';
 import { PageHeader } from '@/components/shared/page-header';
-import { Badge } from '@/components/ui/badge';
+import { StatusBadge } from '@/components/admin/shared/status-badge';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
 import {
@@ -55,7 +55,7 @@ export function SellerPartsPanel() {
       <div className="flex flex-wrap items-start justify-between gap-4">
         <PageHeader
           title="My parts"
-          description="List EV parts and accessories for buyers on the marketplace."
+          description="Parts are reviewed by an administrator before they appear in the marketplace."
         />
         <Button onClick={openCreate} disabled={!canTrade}>
           New part
@@ -110,38 +110,38 @@ export function SellerPartsPanel() {
                   </p>
                 </TableCell>
                 <TableCell>
-                  <Badge variant={part.isActive ? 'secondary' : 'outline'}>
-                    {part.isActive ? 'Active' : 'Inactive'}
-                  </Badge>
+                  <StatusBadge status={part.status} />
                 </TableCell>
                 <TableCell>{formatUsd(part.priceUsd)}</TableCell>
                 <TableCell>{part.stockQuantity}</TableCell>
                 <TableCell>
                   <div className="flex flex-wrap justify-end gap-1">
-                    {part.isActive ? (
-                      <>
-                        <Button
-                          size="sm"
-                          variant="ghost"
-                          disabled={!canTrade || deactivate.isPending}
-                          onClick={() => openEdit(part)}
-                        >
-                          Edit
-                        </Button>
-                        <Button
-                          size="sm"
-                          variant="destructive"
-                          disabled={!canTrade || deactivate.isPending}
-                          onClick={() => setDeactivateTarget(part)}
-                        >
-                          Deactivate
-                        </Button>
-                      </>
-                    ) : (
-                      <span className="text-xs text-muted-foreground">
-                        Deactivated
-                      </span>
-                    )}
+                    {part.status === 'PENDING_REVIEW' ||
+                    part.status === 'REJECTED' ? (
+                      <Button
+                        size="sm"
+                        variant="ghost"
+                        disabled={!canTrade || deactivate.isPending}
+                        onClick={() => openEdit(part)}
+                      >
+                        Edit
+                      </Button>
+                    ) : null}
+                    {part.status === 'APPROVED' && part.isActive ? (
+                      <Button
+                        size="sm"
+                        variant="destructive"
+                        disabled={!canTrade || deactivate.isPending}
+                        onClick={() => setDeactivateTarget(part)}
+                      >
+                        Deactivate
+                      </Button>
+                    ) : null}
+                    {part.rejectionReason ? (
+                      <p className="text-xs text-destructive">
+                        {part.rejectionReason}
+                      </p>
+                    ) : null}
                   </div>
                 </TableCell>
               </TableRow>

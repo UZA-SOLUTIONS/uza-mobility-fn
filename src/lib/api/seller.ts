@@ -12,7 +12,19 @@ import type {
   UpdateSellerListingInput,
 } from '@/schemas/seller';
 import type { MeSellerProfile } from '@/types/auth/seller-profile';
+import type { PriceBreakdown } from '@/types/pricing';
 import type { SellerListing, SellerPart } from '@/types/seller/marketplace';
+
+export type ListingPricingPreviewInput = {
+  country?: string;
+  sellerDesiredPayoutUsd?: number;
+  fobPriceUsd?: number;
+  discountUsd?: number;
+};
+
+export type PartPricingPreviewInput = {
+  desiredPayoutUsd: number;
+};
 
 export function getMyListings() {
   return authenticatedFetch<SellerListing[]>('/listings/my');
@@ -35,6 +47,20 @@ export function updateListing(id: string, body: UpdateSellerListingInput) {
 export function deleteListing(id: string) {
   return authenticatedFetch<{ message: string }>(`/listings/${id}`, {
     method: 'DELETE',
+  });
+}
+
+export function previewListingPricing(body: ListingPricingPreviewInput) {
+  return authenticatedFetch<PriceBreakdown>('/listings/pricing-preview', {
+    method: 'POST',
+    body: JSON.stringify(body),
+  });
+}
+
+export function previewPartPricing(body: PartPricingPreviewInput) {
+  return authenticatedFetch<PriceBreakdown>('/parts/pricing-preview', {
+    method: 'POST',
+    body: JSON.stringify(body),
   });
 }
 

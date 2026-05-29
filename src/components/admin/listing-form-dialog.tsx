@@ -44,6 +44,8 @@ import {
   adminListingFormSchema,
   adminListingInitialStatuses,
   adminUpdateListingSchema,
+  formatListingChargingType,
+  listingChargingTypes,
   listingConditions,
   MAX_LISTING_PHOTOS,
   type AdminListingFormInput,
@@ -82,7 +84,7 @@ export function ListingFormDialog({
     resolver: zodResolver(adminListingFormSchema),
     defaultValues: {
       sellerType: 'UZA_RWANDA_STOCK',
-      initialStatus: 'PUBLISHED',
+      initialStatus: 'PENDING_REVIEW',
       listingTitle: '',
       categoryId: '',
       subcategoryId: '',
@@ -118,7 +120,7 @@ export function ListingFormDialog({
     } else {
       form.reset({
         sellerType: 'UZA_RWANDA_STOCK',
-        initialStatus: 'PUBLISHED',
+        initialStatus: 'PENDING_REVIEW',
         listingTitle: '',
         categoryId: '',
         subcategoryId: '',
@@ -349,7 +351,59 @@ export function ListingFormDialog({
                 {...form.register('mileageKm', numberRegisterOptions())}
               />
             </div>
+            <div className="space-y-1.5">
+              <Label htmlFor="range">Electric range (km)</Label>
+              <NumberInput
+                id="range"
+                min={1}
+                {...form.register('rangeKm', numberRegisterOptions())}
+              />
+            </div>
+            <div className="space-y-1.5">
+              <Label>Charging type</Label>
+              <Select
+                value={form.watch('chargingType') ?? ''}
+                onValueChange={(value) =>
+                  form.setValue(
+                    'chargingType',
+                    value as AdminListingFormInput['chargingType'],
+                    { shouldValidate: true },
+                  )
+                }
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Select charging type" />
+                </SelectTrigger>
+                <SelectContent>
+                  {listingChargingTypes.map((type) => (
+                    <SelectItem key={type} value={type}>
+                      {formatListingChargingType(type)}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              {form.formState.errors.chargingType ? (
+                <p className="text-sm text-destructive">
+                  {form.formState.errors.chargingType.message}
+                </p>
+              ) : null}
+            </div>
           </div>
+
+          {form.watch('condition') !== 'NEW' ? (
+            <div className="space-y-1.5">
+              <Label htmlFor="battery-health">Battery health (%)</Label>
+              <NumberInput
+                id="battery-health"
+                min={0}
+                max={100}
+                {...form.register(
+                  'batteryHealthPercent',
+                  numberRegisterOptions(),
+                )}
+              />
+            </div>
+          ) : null}
 
           <div className="grid gap-4 sm:grid-cols-2">
             <div className="space-y-1.5">

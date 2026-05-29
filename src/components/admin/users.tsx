@@ -52,7 +52,7 @@ export function AdminUsersPanel() {
       <div className="space-y-6">
         <PageHeader
           title="Users"
-          description="View accounts, assign roles, and deactivate users. Super admin only."
+          description="View accounts, assign roles, and deactivate users. Administrator access only."
         />
 
         <div className="max-w-md space-y-1.5">

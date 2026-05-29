@@ -4,6 +4,7 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useSession } from 'next-auth/react';
 import { toast } from 'sonner';
 import { ApiClientError } from '@/lib/api';
+import { fetchMeUser } from '@/lib/auth/sync-me';
 import {
   addMyStationCompatibility,
   applyOperatorProfile,
@@ -53,28 +54,45 @@ export function useMyOperatorProfile() {
   const { token, ready } = useOperatorAuth();
   return useQuery({
     queryKey: operatorKeys.profile(),
-    queryFn: () => getMyOperatorProfile(token),
+    queryFn: async () => {
+      try {
+        return await getMyOperatorProfile(token);
+      } catch (error) {
+        if (error instanceof ApiClientError && error.statusCode === 404) {
+          return null;
+        }
+        throw error;
+      }
+    },
     enabled: ready,
     retry: false,
   });
 }
 
-export function useMyChargingStations(filters: ChargingStationFilters = {}) {
+export function useMyChargingStations(
+  filters: ChargingStationFilters = {},
+  options?: { enabled?: boolean },
+) {
   const { token, ready } = useOperatorAuth();
   return useQuery({
     queryKey: operatorKeys.stations(filters),
     queryFn: () => getMyChargingStations(filters, token),
-    enabled: ready,
+    enabled: ready && (options?.enabled ?? true),
   });
 }
 
 export function useApplyOperatorProfile() {
   const queryClient = useQueryClient();
   const { token } = useOperatorAuth();
+  const { update } = useSession();
   return useMutation({
     mutationFn: (body: OperatorApplyInput) => applyOperatorProfile(body, token),
-    onSuccess: () => {
+    onSuccess: async () => {
       toast.success('Operator application submitted');
+      if (token) {
+        const me = await fetchMeUser(token);
+        await update({ user: me });
+      }
       void queryClient.invalidateQueries({ queryKey: operatorKeys.profile() });
     },
     onError: (error) => toast.error(mutationError(error)),
@@ -84,11 +102,16 @@ export function useApplyOperatorProfile() {
 export function useUpdateMyOperatorProfile() {
   const queryClient = useQueryClient();
   const { token } = useOperatorAuth();
+  const { update } = useSession();
   return useMutation({
     mutationFn: (body: OperatorUpdateProfileInput) =>
       updateMyOperatorProfile(body, token),
-    onSuccess: () => {
+    onSuccess: async () => {
       toast.success('Operator profile updated');
+      if (token) {
+        const me = await fetchMeUser(token);
+        await update({ user: me });
+      }
       void queryClient.invalidateQueries({ queryKey: operatorKeys.profile() });
     },
     onError: (error) => toast.error(mutationError(error)),

@@ -18,9 +18,14 @@ import {
 } from '@/queries/operator';
 
 export function OperatorOverviewPanel() {
-  const { hasOperatorWorkspace } = usePermissions();
+  const { hasOperatorWorkspace, user } = usePermissions();
   const profile = useMyOperatorProfile();
-  const stations = useMyChargingStations({ page: 1, limit: 1 });
+  const stations = useMyChargingStations(
+    { page: 1, limit: 1 },
+    { enabled: hasOperatorWorkspace },
+  );
+  const operatorStatus =
+    profile.data?.status ?? user?.operator?.status ?? undefined;
 
   return (
     <div className="space-y-6">
@@ -51,7 +56,7 @@ export function OperatorOverviewPanel() {
           <CardHeader>
             <CardDescription>Operator status</CardDescription>
             <CardTitle>
-              {profile.data?.status ?? (profile.isError ? 'Unavailable' : '—')}
+              {operatorStatus ?? (profile.isError ? 'Unavailable' : '—')}
             </CardTitle>
           </CardHeader>
         </Card>

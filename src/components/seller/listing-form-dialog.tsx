@@ -1,8 +1,12 @@
 'use client';
 
 import { useEffect, useMemo, useState } from 'react';
+import { useQuery } from '@tanstack/react-query';
 import { toast } from 'sonner';
 import { useForm } from 'react-hook-form';
+import { PricingBreakdown } from '@/components/shared/pricing-breakdown';
+import { useDebounce } from '@/hooks/use-debounce';
+import { previewListingPricing } from '@/lib/api/seller';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { ExistingPhotosGrid } from '@/components/shared/existing-photos-grid';
 import { PendingPhotoPicker } from '@/components/shared/pending-photo-picker';
@@ -43,6 +47,8 @@ import {
 } from '@/queries/seller';
 import {
   createSellerListingSchema,
+  formatListingChargingType,
+  listingChargingTypes,
   listingConditions,
   MAX_SELLER_LISTING_PHOTOS,
   sellerListingFormSchema,
@@ -115,7 +121,40 @@ export function SellerListingFormDialog({
   });
 
   const sellerType = form.watch('sellerType');
+  const condition = form.watch('condition');
+  const payout = form.watch('sellerDesiredPayoutUsd');
+  const fob = form.watch('fobPriceUsd');
+  const country = form.watch('country');
+  const debouncedPayout = useDebounce(payout, 400);
+  const debouncedFob = useDebounce(fob, 400);
   const categoryId = form.watch('categoryId');
+
+  const pricingPreview = useQuery({
+    queryKey: [
+      'seller',
+      'listing-pricing-preview',
+      sellerType,
+      debouncedPayout,
+      debouncedFob,
+      country,
+    ],
+    queryFn: () =>
+      previewListingPricing({
+        country,
+        sellerDesiredPayoutUsd:
+          sellerType === 'LOCAL_SELLER' ? debouncedPayout : undefined,
+        fobPriceUsd:
+          sellerType === 'INTERNATIONAL_SELLER' ? debouncedFob : undefined,
+      }),
+    enabled:
+      open &&
+      ((sellerType === 'LOCAL_SELLER' &&
+        debouncedPayout != null &&
+        debouncedPayout > 0) ||
+        (sellerType === 'INTERNATIONAL_SELLER' &&
+          debouncedFob != null &&
+          debouncedFob > 0)),
+  });
   const selectedCategory = vehicleCats.find((c) => c.id === categoryId);
   const subcategories = selectedCategory?.subcategories ?? [];
 
@@ -201,8 +240,8 @@ export function SellerListingFormDialog({
           </DialogTitle>
         </DialogHeader>
         <p className="text-sm text-muted-foreground">
-          Listings are saved as drafts. Submit for review when ready — UZA will
-          publish after approval.
+          Listings are saved as drafts. Submit for administrator review when
+          ready — UZA will publish after approval.
         </p>
         <form onSubmit={onSubmit} className="space-y-4">
           <div className="space-y-1.5">
@@ -334,7 +373,59 @@ export function SellerListingFormDialog({
                 {...form.register('mileageKm', numberRegisterOptions())}
               />
             </div>
+            <div className="space-y-1.5">
+              <Label htmlFor="range">Electric range (km)</Label>
+              <NumberInput
+                id="range"
+                min={1}
+                {...form.register('rangeKm', numberRegisterOptions())}
+              />
+            </div>
+            <div className="space-y-1.5">
+              <Label>Charging type</Label>
+              <Select
+                value={form.watch('chargingType') ?? ''}
+                onValueChange={(value) =>
+                  form.setValue(
+                    'chargingType',
+                    value as SellerListingFormInput['chargingType'],
+                    { shouldValidate: true },
+                  )
+                }
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Select charging type" />
+                </SelectTrigger>
+                <SelectContent>
+                  {listingChargingTypes.map((type) => (
+                    <SelectItem key={type} value={type}>
+                      {formatListingChargingType(type)}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              {form.formState.errors.chargingType ? (
+                <p className="text-sm text-destructive">
+                  {form.formState.errors.chargingType.message}
+                </p>
+              ) : null}
+            </div>
           </div>
+
+          {condition !== 'NEW' ? (
+            <div className="space-y-1.5">
+              <Label htmlFor="battery-health">Battery health (%)</Label>
+              <NumberInput
+                id="battery-health"
+                min={0}
+                max={100}
+                {...form.register(
+                  'batteryHealthPercent',
+                  numberRegisterOptions(),
+                )}
+              />
+            </div>
+          ) : null}
 
           <div className="grid gap-4 sm:grid-cols-2">
             <div className="space-y-1.5">
@@ -348,37 +439,59 @@ export function SellerListingFormDialog({
           </div>
 
           {sellerType === 'LOCAL_SELLER' ? (
-            <div className="space-y-1.5">
-              <Label htmlFor="payout">Desired payout (USD)</Label>
-              <NumberInput
-                id="payout"
-                min={0}
-                step="0.01"
-                {...form.register(
-                  'sellerDesiredPayoutUsd',
-                  numberRegisterOptions(),
-                )}
-              />
-              {form.formState.errors.sellerDesiredPayoutUsd ? (
-                <p className="text-sm text-destructive">
-                  {form.formState.errors.sellerDesiredPayoutUsd.message}
+            <div className="space-y-2">
+              <div className="space-y-1.5">
+                <Label htmlFor="payout">Desired payout after sale (USD)</Label>
+                <p className="text-xs text-muted-foreground">
+                  Amount you want to receive; platform fees are added for the
+                  buyer price shown on the marketplace.
                 </p>
-              ) : null}
+                <NumberInput
+                  id="payout"
+                  min={0}
+                  step="0.01"
+                  {...form.register(
+                    'sellerDesiredPayoutUsd',
+                    numberRegisterOptions(),
+                  )}
+                />
+                {form.formState.errors.sellerDesiredPayoutUsd ? (
+                  <p className="text-sm text-destructive">
+                    {form.formState.errors.sellerDesiredPayoutUsd.message}
+                  </p>
+                ) : null}
+              </div>
+              <PricingBreakdown
+                breakdown={pricingPreview.data}
+                loading={pricingPreview.isFetching}
+                sellerType="LOCAL_SELLER"
+              />
             </div>
           ) : (
-            <div className="space-y-1.5">
-              <Label htmlFor="fob-price">FOB price (USD)</Label>
-              <NumberInput
-                id="fob-price"
-                min={0}
-                step="0.01"
-                {...form.register('fobPriceUsd', numberRegisterOptions())}
-              />
-              {form.formState.errors.fobPriceUsd ? (
-                <p className="text-sm text-destructive">
-                  {form.formState.errors.fobPriceUsd.message}
+            <div className="space-y-2">
+              <div className="space-y-1.5">
+                <Label htmlFor="fob-price">FOB price (USD)</Label>
+                <p className="text-xs text-muted-foreground">
+                  Free-on-board cost; shipping, taxes, and platform margin are
+                  added for the buyer price.
                 </p>
-              ) : null}
+                <NumberInput
+                  id="fob-price"
+                  min={0}
+                  step="0.01"
+                  {...form.register('fobPriceUsd', numberRegisterOptions())}
+                />
+                {form.formState.errors.fobPriceUsd ? (
+                  <p className="text-sm text-destructive">
+                    {form.formState.errors.fobPriceUsd.message}
+                  </p>
+                ) : null}
+              </div>
+              <PricingBreakdown
+                breakdown={pricingPreview.data}
+                loading={pricingPreview.isFetching}
+                sellerType="INTERNATIONAL_SELLER"
+              />
             </div>
           )}
 

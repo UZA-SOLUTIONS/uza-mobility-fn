@@ -1,3 +1,5 @@
+import { workspaceRoutes } from '@/config/routes';
+import type { MeUser } from '@/types/auth/me-user';
 import type { PlatformRole } from '@/types/auth/role';
 
 /** Staff roles that use the /admin workspace (not marketplace sellers or buyers). */
@@ -109,6 +111,28 @@ export function hasOperatorWorkspace(
     return true;
   }
   return canAny(permissions, [...OPERATOR_WORKSPACE_PERMISSIONS]);
+}
+
+export function hasOperatorApplication(
+  operator: MeUser['operator'] | null | undefined,
+): boolean {
+  return operator != null;
+}
+
+function pathStartsWith(path: string, prefix: string) {
+  return path === prefix || path.startsWith(`${prefix}/`);
+}
+
+/** Applicants may open overview + profile; approved operators get the full workspace. */
+export function canAccessOperatorPath(me: MeUser, path: string): boolean {
+  if (hasOperatorWorkspace(me.permissions, me.roles)) {
+    return true;
+  }
+  return (
+    pathStartsWith(path, workspaceRoutes.operator) &&
+    (path === workspaceRoutes.operator ||
+      path === workspaceRoutes.operatorProfile)
+  );
 }
 
 const BUYER_WORKSPACE_PERMISSIONS = [

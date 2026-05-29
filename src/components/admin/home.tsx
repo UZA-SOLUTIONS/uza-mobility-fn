@@ -22,8 +22,8 @@ export function AdminHome() {
 
       {modules.length === 0 ? (
         <p className="text-sm text-muted-foreground">
-          No modules are available for your role. Contact a super administrator
-          if you need access.
+          No modules are available for your role. Contact an administrator if
+          you need access.
         </p>
       ) : (
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">

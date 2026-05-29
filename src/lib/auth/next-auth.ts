@@ -12,6 +12,7 @@ import NextAuth from 'next-auth';
 import type { Session } from 'next-auth';
 import Credentials from 'next-auth/providers/credentials';
 import { authRoutes } from '@/config/routes';
+import { isMeUser, type MeUser } from '@/types/auth/me-user';
 import { isAuthUser, type AppJwt, type AuthUser } from '@/types/auth/session';
 import { authorizeCredentials } from './authorize';
 import { refreshAccessToken, shouldRefreshAccessToken } from './refresh-token';
@@ -60,9 +61,23 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
     strategy: 'jwt',
   },
   callbacks: {
-    async jwt({ token, user }) {
+    async jwt({ token, user, trigger, session }) {
       if (user && isAuthUser(user)) {
         return { ...token, ...userToJwt(user) };
+      }
+
+      if (
+        trigger === 'update' &&
+        session &&
+        typeof session === 'object' &&
+        'user' in session &&
+        isMeUser((session as { user: unknown }).user) &&
+        isAppJwt(token)
+      ) {
+        return {
+          ...token,
+          user: (session as { user: MeUser }).user,
+        };
       }
 
       if (!isAppJwt(token)) {

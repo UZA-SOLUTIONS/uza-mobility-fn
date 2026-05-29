@@ -50,6 +50,7 @@ export type OperatorProfile = {
   description: string | null;
   status: OperatorStatus;
   isVerified: boolean;
+  adminNotes?: string | null;
   verifiedAt: string | null;
   createdAt: string;
   updatedAt: string;

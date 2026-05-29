@@ -1,4 +1,5 @@
 import type { MeBuyerProfile } from './buyer-profile';
+import type { MeOperatorSummary } from './operator-profile';
 import type { MeSellerProfile } from './seller-profile';
 import type { PlatformRole } from './role';
 
@@ -20,6 +21,8 @@ export type MeUser = {
   seller: MeSellerProfile | null;
   /** One row per inventory channel (e.g. Rwanda stock + China sourcing). */
   sellers?: MeSellerProfile[];
+  /** Charging operator application or approved profile. */
+  operator?: MeOperatorSummary | null;
   createdAt: string;
   updatedAt: string;
 };

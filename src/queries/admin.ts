@@ -7,12 +7,13 @@ import {
   approveAdminOperator,
   approveAdminStation,
   approveListing,
+  approvePart,
   createAdminListing,
   createPart,
   getAdminOperators,
   getAdminStations,
   toAdminCreateListingBody,
-  toAdminListingBody,
+  toAdminUpdateListingBody,
   updateAdminListing,
   deactivatePart,
   deleteListing,
@@ -30,6 +31,7 @@ import {
   rejectAdminOperator,
   rejectAdminStation,
   rejectListing,
+  rejectPart,
   suspendSeller,
   suspendAdminStation,
   updateListingVerification,
@@ -150,7 +152,7 @@ export function useUpdateAdminListing() {
       id: string;
       body: AdminUpdateListingInput;
       photos?: File[];
-    }) => updateAdminListing(id, toAdminListingBody(body), photos),
+    }) => updateAdminListing(id, toAdminUpdateListingBody(body), photos),
     onSuccess: () => {
       toast.success('Listing updated');
       void queryClient.invalidateQueries({ queryKey: adminKeys.all });
@@ -345,6 +347,33 @@ export function useDeactivatePart() {
     mutationFn: deactivatePart,
     onSuccess: () => {
       toast.success('Part deactivated');
+      void queryClient.invalidateQueries({ queryKey: adminKeys.all });
+    },
+    onError: (error) => toast.error(mutationError(error)),
+  });
+}
+
+export function useApprovePart() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: approvePart,
+    onSuccess: () => {
+      toast.success('Part approved');
+      void queryClient.invalidateQueries({ queryKey: adminKeys.all });
+    },
+    onError: (error) => toast.error(mutationError(error)),
+  });
+}
+
+export function useRejectPart() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: ({ id, body }: { id: string; body: { reason: string } }) =>
+      rejectPart(id, body),
+    onSuccess: () => {
+      toast.success('Part rejected');
       void queryClient.invalidateQueries({ queryKey: adminKeys.all });
     },
     onError: (error) => toast.error(mutationError(error)),

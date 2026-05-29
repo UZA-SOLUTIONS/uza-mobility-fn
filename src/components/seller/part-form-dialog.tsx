@@ -1,7 +1,11 @@
 'use client';
 
 import { useEffect, useMemo, useState } from 'react';
+import { useQuery } from '@tanstack/react-query';
 import { useForm } from 'react-hook-form';
+import { PricingBreakdown } from '@/components/shared/pricing-breakdown';
+import { useDebounce } from '@/hooks/use-debounce';
+import { previewPartPricing } from '@/lib/api/seller';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { ExistingPhotosGrid } from '@/components/shared/existing-photos-grid';
 import { PendingPhotoPicker } from '@/components/shared/pending-photo-picker';
@@ -257,14 +261,23 @@ export function SellerPartFormDialog({
               />
             </div>
           </div>
-          <div className="space-y-1.5">
-            <Label htmlFor="part-price">Price (USD)</Label>
-            <NumberInput
-              id="part-price"
-              min={0}
-              step="0.01"
-              {...form.register('priceUsd', numberRegisterOptions())}
-            />
+          <div className="space-y-2">
+            <div className="space-y-1.5">
+              <Label htmlFor="part-price">
+                Desired payout after sale (USD)
+              </Label>
+              <p className="text-xs text-muted-foreground">
+                Buyer list price includes platform commission (same estimate as
+                local vehicle listings).
+              </p>
+              <NumberInput
+                id="part-price"
+                min={0}
+                step="0.01"
+                {...form.register('priceUsd', numberRegisterOptions())}
+              />
+            </div>
+            <PartPricingPreview priceUsd={form.watch('priceUsd')} open={open} />
           </div>
           <div className="space-y-1.5">
             <Label htmlFor="part-delivery">Delivery estimate</Label>
@@ -305,5 +318,28 @@ export function SellerPartFormDialog({
         </form>
       </DialogContent>
     </Dialog>
+  );
+}
+
+function PartPricingPreview({
+  priceUsd,
+  open,
+}: {
+  priceUsd: number | undefined;
+  open: boolean;
+}) {
+  const debounced = useDebounce(priceUsd, 400);
+  const preview = useQuery({
+    queryKey: ['seller', 'part-pricing-preview', debounced],
+    queryFn: () => previewPartPricing({ desiredPayoutUsd: debounced! }),
+    enabled: open && debounced != null && debounced > 0,
+  });
+
+  return (
+    <PricingBreakdown
+      breakdown={preview.data}
+      loading={preview.isFetching}
+      sellerType="LOCAL_SELLER"
+    />
   );
 }
