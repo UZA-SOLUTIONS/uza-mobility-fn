@@ -20,6 +20,7 @@ import {
   useHotDealListing,
   usePublishListing,
   useRejectListing,
+  useUnpublishListing,
 } from '@/queries/admin';
 import type { AdminListing } from '@/types/admin/marketplace';
 import { rejectListingSchema } from '@/schemas/admin';
@@ -33,9 +34,12 @@ export function ListingActions({
   listing,
   onActionComplete,
 }: ListingActionsProps) {
-  const { can, isSuperAdmin } = usePermissions();
+  const { can, isSuperAdmin, user } = usePermissions();
+  const canApprove =
+    isSuperAdmin || user?.roles?.includes('SUPER_ADMIN') === true;
   const approve = useApproveListing();
   const publish = usePublishListing();
+  const unpublish = useUnpublishListing();
   const reject = useRejectListing();
   const feature = useFeatureListing();
   const hotDeal = useHotDealListing();
@@ -48,6 +52,7 @@ export function ListingActions({
   const busy =
     approve.isPending ||
     publish.isPending ||
+    unpublish.isPending ||
     reject.isPending ||
     feature.isPending ||
     hotDeal.isPending ||
@@ -76,7 +81,7 @@ export function ListingActions({
   return (
     <>
       <div className="flex flex-wrap gap-1">
-        {listing.status === 'PENDING_REVIEW' && isSuperAdmin ? (
+        {listing.status === 'PENDING_REVIEW' && canApprove ? (
           <Button
             size="sm"
             variant="outline"
@@ -86,7 +91,7 @@ export function ListingActions({
             Approve
           </Button>
         ) : null}
-        {listing.status === 'APPROVED' && isSuperAdmin ? (
+        {listing.status === 'APPROVED' && canApprove ? (
           <Button
             size="sm"
             disabled={busy}
@@ -95,9 +100,28 @@ export function ListingActions({
             Publish
           </Button>
         ) : null}
+        {listing.status === 'SUSPENDED' && canApprove ? (
+          <Button
+            size="sm"
+            disabled={busy}
+            onClick={() => publish.mutate(listing.id, { onSuccess })}
+          >
+            Republish
+          </Button>
+        ) : null}
+        {listing.status === 'PUBLISHED' && canApprove ? (
+          <Button
+            size="sm"
+            variant="outline"
+            disabled={busy}
+            onClick={() => unpublish.mutate(listing.id, { onSuccess })}
+          >
+            Unpublish
+          </Button>
+        ) : null}
         {(listing.status === 'PENDING_REVIEW' ||
           listing.status === 'APPROVED') &&
-        isSuperAdmin ? (
+        canApprove ? (
           <Button
             size="sm"
             variant="outline"

@@ -28,6 +28,7 @@ const statusStyles: Record<string, string> = {
   REJECTED: 'bg-red-500/15 text-red-700 dark:text-red-400',
   BANK_REJECTED: 'bg-red-500/15 text-red-700 dark:text-red-400',
   SUSPENDED: 'bg-red-500/15 text-red-700 dark:text-red-400',
+  UNPUBLISHED: 'bg-muted text-muted-foreground',
   CANCELLED: 'bg-red-500/15 text-red-700 dark:text-red-400',
   EXPIRED: 'bg-muted text-muted-foreground',
   REFUNDED: 'bg-muted text-muted-foreground',

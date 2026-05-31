@@ -65,5 +65,6 @@ export function adminListingToFormValues(
         : undefined,
     basePriceUsd: listing.listingPricing?.basePriceUsd ?? undefined,
     fobPriceUsd: listing.listingPricing?.fobPriceUsd ?? undefined,
+    status: listing.status,
   };
 }

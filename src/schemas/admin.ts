@@ -1,4 +1,5 @@
 import { z } from 'zod';
+import type { ListingStatus } from '@/types/admin/marketplace';
 
 export const rejectListingSchema = z.object({
   reason: z.string().min(1, 'Reason is required').max(2000),
@@ -61,6 +62,19 @@ export const MAX_LISTING_PHOTOS = 20;
 export const MAX_PART_PHOTOS = 10;
 
 export const adminListingInitialStatuses = ['DRAFT', 'PENDING_REVIEW'] as const;
+
+/** Status options when editing an admin-owned listing in the form. */
+export function adminListingStatusEditOptions(
+  current: ListingStatus,
+): ListingStatus[] {
+  if (current === 'DRAFT') {
+    return ['DRAFT', 'PENDING_REVIEW'];
+  }
+  if (current === 'REJECTED') {
+    return ['REJECTED', 'DRAFT', 'PENDING_REVIEW'];
+  }
+  return [current];
+}
 
 const adminListingFormFieldsSchema = z.object({
   sellerType: z.enum(adminListingSellerTypes),
@@ -147,6 +161,20 @@ function refineAdminListingPricing(
 export const adminListingFormSchema = adminListingFormFieldsSchema
   .extend({
     initialStatus: z.enum(adminListingInitialStatuses).optional(),
+    status: z
+      .enum([
+        'DRAFT',
+        'PENDING_REVIEW',
+        'REJECTED',
+        'APPROVED',
+        'PUBLISHED',
+        'SOLD',
+        'RESERVED',
+        'SUSPENDED',
+        'EXPIRED',
+        'ARCHIVED',
+      ])
+      .optional(),
     removePhotoIds: z.array(z.string().min(1)).optional(),
   })
   .superRefine(refineAdminListingPricing)
@@ -156,6 +184,20 @@ export type AdminListingFormInput = z.infer<typeof adminListingFormSchema>;
 
 export const adminUpdateListingSchema = adminListingFormFieldsSchema
   .extend({
+    status: z
+      .enum([
+        'DRAFT',
+        'PENDING_REVIEW',
+        'REJECTED',
+        'APPROVED',
+        'PUBLISHED',
+        'SOLD',
+        'RESERVED',
+        'SUSPENDED',
+        'EXPIRED',
+        'ARCHIVED',
+      ])
+      .optional(),
     removePhotoIds: z.array(z.string().min(1)).optional(),
   })
   .superRefine(refineAdminListingPricing)

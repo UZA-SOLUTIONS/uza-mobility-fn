@@ -3,8 +3,8 @@
 import Image from 'next/image';
 import { useState } from 'react';
 import { useDebounce } from '@/hooks/use-debounce';
-import { usePermissions } from '@/hooks/permissions';
 import { StatusBadge } from '@/components/admin/shared/status-badge';
+import { partDisplayStatus } from '@/lib/admin/part-status';
 import { ConfirmDialog } from '@/components/admin/shared/confirm-dialog';
 import { PartDetailSheet } from '@/components/admin/part-detail-sheet';
 import { PartFormDialog } from '@/components/admin/part-form-dialog';
@@ -22,23 +22,7 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
-import {
-  useActivatePart,
-  useAdminParts,
-  useApprovePart,
-  useDeactivatePart,
-  useDeletePart,
-  useRejectPart,
-} from '@/queries/admin';
-import { rejectListingSchema } from '@/schemas/admin';
-import { Textarea } from '@/components/ui/textarea';
-import {
-  Dialog,
-  DialogContent,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from '@/components/ui/dialog';
+import { useAdminParts, useDeletePart } from '@/queries/admin';
 import type { AdminPart, AdminPartsFilters } from '@/types/admin/marketplace';
 
 function formatUsd(value: number) {
@@ -47,129 +31,6 @@ function formatUsd(value: number) {
     currency: 'USD',
     maximumFractionDigits: 0,
   }).format(value);
-}
-
-function PartActions({
-  part,
-  onView,
-  onEdit,
-  onDelete,
-  busy,
-}: {
-  part: AdminPart;
-  onView: () => void;
-  onEdit: () => void;
-  onDelete: () => void;
-  busy: boolean;
-}) {
-  const { can, isSuperAdmin } = usePermissions();
-  const approve = useApprovePart();
-  const reject = useRejectPart();
-  const [rejectOpen, setRejectOpen] = useState(false);
-  const [reason, setReason] = useState('');
-  const [reasonError, setReasonError] = useState<string | null>(null);
-
-  if (!can('parts:manage')) {
-    return null;
-  }
-
-  const actionBusy = busy || approve.isPending || reject.isPending;
-
-  const handleReject = () => {
-    const parsed = rejectListingSchema.safeParse({ reason });
-    if (!parsed.success) {
-      setReasonError(parsed.error.issues[0]?.message ?? 'Invalid reason');
-      return;
-    }
-    setReasonError(null);
-    reject.mutate(
-      { id: part.id, body: parsed.data },
-      { onSuccess: () => setRejectOpen(false) },
-    );
-  };
-
-  return (
-    <>
-      <div className="flex flex-wrap justify-end gap-1">
-        {part.status === 'PENDING_REVIEW' && isSuperAdmin ? (
-          <Button
-            size="sm"
-            variant="outline"
-            disabled={actionBusy}
-            onClick={() => approve.mutate(part.id)}
-          >
-            Approve
-          </Button>
-        ) : null}
-        {part.status === 'PENDING_REVIEW' && isSuperAdmin ? (
-          <Button
-            size="sm"
-            variant="outline"
-            disabled={actionBusy}
-            onClick={() => setRejectOpen(true)}
-          >
-            Reject
-          </Button>
-        ) : null}
-        <Button
-          size="sm"
-          variant="outline"
-          disabled={actionBusy}
-          onClick={onView}
-        >
-          View
-        </Button>
-        <Button
-          size="sm"
-          variant="ghost"
-          disabled={actionBusy}
-          onClick={onEdit}
-        >
-          Edit
-        </Button>
-        <Button
-          size="sm"
-          variant="destructive"
-          disabled={actionBusy}
-          onClick={onDelete}
-        >
-          Delete
-        </Button>
-      </div>
-
-      <Dialog open={rejectOpen} onOpenChange={setRejectOpen}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Reject part</DialogTitle>
-          </DialogHeader>
-          <div className="space-y-2">
-            <Label htmlFor="part-reject-reason">Reason for seller</Label>
-            <Textarea
-              id="part-reject-reason"
-              value={reason}
-              onChange={(event) => setReason(event.target.value)}
-              rows={4}
-            />
-            {reasonError ? (
-              <p className="text-sm text-destructive">{reasonError}</p>
-            ) : null}
-          </div>
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setRejectOpen(false)}>
-              Cancel
-            </Button>
-            <Button
-              variant="destructive"
-              disabled={actionBusy}
-              onClick={handleReject}
-            >
-              Reject part
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
-    </>
-  );
 }
 
 export function AdminPartsPanel() {
@@ -185,10 +46,6 @@ export function AdminPartsPanel() {
   const [detailOpen, setDetailOpen] = useState(false);
   const [deleteTarget, setDeleteTarget] = useState<AdminPart | null>(null);
   const deletePart = useDeletePart();
-  const activate = useActivatePart();
-  const deactivate = useDeactivatePart();
-  const actionsBusy =
-    deletePart.isPending || activate.isPending || deactivate.isPending;
 
   const queryFilters: AdminPartsFilters = {
     ...filters,
@@ -324,16 +181,16 @@ export function AdminPartsPanel() {
                     <TableCell>{formatUsd(part.priceUsd)}</TableCell>
                     <TableCell>{part.stockQuantity}</TableCell>
                     <TableCell>
-                      <StatusBadge status={part.status} />
+                      <StatusBadge status={partDisplayStatus(part)} />
                     </TableCell>
                     <TableCell className="text-right">
-                      <PartActions
-                        part={part}
-                        busy={actionsBusy}
-                        onView={() => openDetail(part)}
-                        onEdit={() => openEdit(part)}
-                        onDelete={() => setDeleteTarget(part)}
-                      />
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        onClick={() => openDetail(part)}
+                      >
+                        Manage
+                      </Button>
                     </TableCell>
                   </TableRow>
                 ))
@@ -358,7 +215,6 @@ export function AdminPartsPanel() {
           setDetailOpen(open);
           if (!open) setViewingPartId(null);
         }}
-        actionsBusy={actionsBusy}
         onEdit={(part) => {
           setDetailOpen(false);
           openEdit(part);
@@ -367,8 +223,6 @@ export function AdminPartsPanel() {
           setDetailOpen(false);
           setDeleteTarget(part);
         }}
-        onActivate={(part) => activate.mutate(part.id)}
-        onDeactivate={(part) => deactivate.mutate(part.id)}
       />
 
       <PartFormDialog

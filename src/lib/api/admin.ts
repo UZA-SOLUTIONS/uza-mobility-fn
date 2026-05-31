@@ -163,6 +163,12 @@ export function publishListing(id: string) {
   });
 }
 
+export function unpublishListing(id: string) {
+  return authenticatedFetch<AdminListing>(`/admin/listings/${id}/unpublish`, {
+    method: 'PATCH',
+  });
+}
+
 export function rejectListing(id: string, body: RejectListingInput) {
   return authenticatedFetch<AdminListing>(`/admin/listings/${id}/reject`, {
     method: 'PATCH',

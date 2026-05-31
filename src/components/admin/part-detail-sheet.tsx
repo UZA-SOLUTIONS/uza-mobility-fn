@@ -1,8 +1,9 @@
 'use client';
 
 import Image from 'next/image';
-import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
+import { PartActions } from '@/components/admin/part-actions';
+import { StatusBadge } from '@/components/admin/shared/status-badge';
+import { partDisplayStatus } from '@/lib/admin/part-status';
 import { Skeleton } from '@/components/ui/skeleton';
 import {
   Sheet,
@@ -36,9 +37,6 @@ type PartDetailSheetProps = {
   onOpenChange: (open: boolean) => void;
   onEdit: (part: AdminPart) => void;
   onDelete: (part: AdminPart) => void;
-  onActivate: (part: AdminPart) => void;
-  onDeactivate: (part: AdminPart) => void;
-  actionsBusy?: boolean;
 };
 
 export function PartDetailSheet({
@@ -47,9 +45,6 @@ export function PartDetailSheet({
   onOpenChange,
   onEdit,
   onDelete,
-  onActivate,
-  onDeactivate,
-  actionsBusy = false,
 }: PartDetailSheetProps) {
   const {
     data: part,
@@ -98,9 +93,9 @@ export function PartDetailSheet({
             </SheetHeader>
 
             <div className="space-y-6 px-6 py-6">
-              <Badge variant={part.isActive ? 'default' : 'secondary'}>
-                {part.isActive ? 'Active' : 'Inactive'}
-              </Badge>
+              <div className="flex flex-wrap items-center gap-2">
+                <StatusBadge status={partDisplayStatus(part)} />
+              </div>
 
               {photos.length > 0 ? (
                 <div className="grid grid-cols-2 gap-3 lg:grid-cols-3">
@@ -191,42 +186,14 @@ export function PartDetailSheet({
                 </div>
               ) : null}
 
-              <div className="flex flex-wrap gap-2 rounded-lg border bg-muted/30 p-4">
-                <Button
-                  size="sm"
-                  variant="outline"
-                  disabled={actionsBusy}
-                  onClick={() => onEdit(part)}
-                >
-                  Edit
-                </Button>
-                {part.isActive ? (
-                  <Button
-                    size="sm"
-                    variant="outline"
-                    disabled={actionsBusy}
-                    onClick={() => onDeactivate(part)}
-                  >
-                    Deactivate
-                  </Button>
-                ) : (
-                  <Button
-                    size="sm"
-                    variant="outline"
-                    disabled={actionsBusy}
-                    onClick={() => onActivate(part)}
-                  >
-                    Activate
-                  </Button>
-                )}
-                <Button
-                  size="sm"
-                  variant="destructive"
-                  disabled={actionsBusy}
-                  onClick={() => onDelete(part)}
-                >
-                  Delete
-                </Button>
+              <div className="space-y-3 rounded-lg border bg-muted/30 p-4">
+                <p className="text-sm font-medium">Actions</p>
+                <PartActions
+                  part={part}
+                  onEdit={() => onEdit(part)}
+                  onDelete={() => onDelete(part)}
+                  onActionComplete={() => onOpenChange(false)}
+                />
               </div>
             </div>
           </>

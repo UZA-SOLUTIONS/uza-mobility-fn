@@ -27,6 +27,7 @@ import {
   getDashboard,
   hotDealListing,
   publishListing,
+  unpublishListing,
   reactivateSeller,
   rejectAdminOperator,
   rejectAdminStation,
@@ -187,6 +188,19 @@ export function usePublishListing() {
   });
 }
 
+export function useUnpublishListing() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: unpublishListing,
+    onSuccess: () => {
+      toast.success('Listing unpublished');
+      void queryClient.invalidateQueries({ queryKey: adminKeys.all });
+    },
+    onError: (error) => toast.error(mutationError(error)),
+  });
+}
+
 export function useRejectListing() {
   const queryClient = useQueryClient();
 
@@ -333,7 +347,7 @@ export function useActivatePart() {
   return useMutation({
     mutationFn: activatePart,
     onSuccess: () => {
-      toast.success('Part activated');
+      toast.success('Part published');
       void queryClient.invalidateQueries({ queryKey: adminKeys.all });
     },
     onError: (error) => toast.error(mutationError(error)),
@@ -346,7 +360,7 @@ export function useDeactivatePart() {
   return useMutation({
     mutationFn: deactivatePart,
     onSuccess: () => {
-      toast.success('Part deactivated');
+      toast.success('Part unpublished');
       void queryClient.invalidateQueries({ queryKey: adminKeys.all });
     },
     onError: (error) => toast.error(mutationError(error)),

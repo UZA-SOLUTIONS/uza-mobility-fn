@@ -43,6 +43,7 @@ import {
   adminCreateListingSchema,
   adminListingFormSchema,
   adminListingInitialStatuses,
+  adminListingStatusEditOptions,
   adminUpdateListingSchema,
   formatListingChargingType,
   listingChargingTypes,
@@ -103,6 +104,10 @@ export function ListingFormDialog({
 
   const sellerType = form.watch('sellerType');
   const categoryId = form.watch('categoryId');
+  const statusOptions = listing
+    ? adminListingStatusEditOptions(listing.status)
+    : [];
+  const canEditStatus = isEdit && statusOptions.length > 1;
   const selectedCategory = categories?.find(
     (category) => category.id === categoryId,
   );
@@ -246,6 +251,35 @@ export function ListingFormDialog({
                     ))}
                   </SelectContent>
                 </Select>
+              </div>
+            ) : canEditStatus ? (
+              <div className="space-y-1.5">
+                <Label>Status</Label>
+                <Select
+                  value={form.watch('status') ?? listing?.status}
+                  onValueChange={(value) =>
+                    form.setValue(
+                      'status',
+                      value as AdminListingFormInput['status'],
+                    )
+                  }
+                >
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {statusOptions.map((status) => (
+                      <SelectItem key={status} value={status}>
+                        {status.replaceAll('_', ' ')}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            ) : isEdit && listing ? (
+              <div className="space-y-1.5">
+                <Label>Status</Label>
+                <p className="text-sm">{listing.status.replaceAll('_', ' ')}</p>
               </div>
             ) : null}
           </div>
