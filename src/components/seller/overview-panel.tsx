@@ -8,6 +8,15 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { SellerStatusBanner } from '@/components/seller/seller-status-banner';
 import { workspaceRoutes } from '@/config/routes';
 import { useMyListings, useMyParts } from '@/queries/seller';
+import {
+  FileText,
+  Clock,
+  CheckCircle,
+  XCircle,
+  List,
+  Wrench,
+  User,
+} from 'lucide-react';
 
 function countByStatus(listings: { status: string }[], statuses: string[]) {
   return listings.filter((l) => statuses.includes(l.status)).length;
@@ -37,21 +46,25 @@ export function SellerOverviewPanel() {
           title="Draft listings"
           value={draftCount}
           loading={listingsLoading}
+          icon={FileText}
         />
         <StatCard
           title="Pending review"
           value={pendingCount}
           loading={listingsLoading}
+          icon={Clock}
         />
         <StatCard
           title="Live listings"
           value={liveCount}
           loading={listingsLoading}
+          icon={CheckCircle}
         />
         <StatCard
           title="Rejected"
           value={rejectedCount}
           loading={listingsLoading}
+          icon={XCircle}
         />
       </div>
 
@@ -61,15 +74,31 @@ export function SellerOverviewPanel() {
         </CardHeader>
         <CardContent className="flex flex-wrap gap-2">
           <Button asChild>
-            <Link href={workspaceRoutes.sellerListings}>Manage listings</Link>
+            <Link
+              href={workspaceRoutes.sellerListings}
+              className="flex items-center"
+            >
+              <List className="size-4" />
+              Manage listings
+            </Link>
           </Button>
           <Button variant="outline" asChild>
-            <Link href={workspaceRoutes.sellerParts}>
+            <Link
+              href={workspaceRoutes.sellerParts}
+              className="flex items-center"
+            >
+              <Wrench className="size-4" />
               Manage parts ({partsLoading ? '…' : activeParts} active)
             </Link>
           </Button>
           <Button variant="outline" asChild>
-            <Link href={workspaceRoutes.sellerProfile}>Seller profile</Link>
+            <Link
+              href={workspaceRoutes.sellerProfile}
+              className="flex items-center"
+            >
+              <User className="size-4" />
+              Seller profile
+            </Link>
           </Button>
         </CardContent>
       </Card>
@@ -81,14 +110,24 @@ function StatCard({
   title,
   value,
   loading,
+  icon,
 }: {
   title: string;
   value: number;
   loading: boolean;
+  icon?: React.ElementType;
 }) {
   return (
     <Card>
-      <CardHeader className="pb-2">
+      <CardHeader className="flex items-center gap-2 pb-2">
+        {icon ? (
+          <span className="text-muted-foreground">
+            {(() => {
+              const Icon = icon as any;
+              return <Icon className="size-5" />;
+            })()}
+          </span>
+        ) : null}
         <CardTitle className="text-sm font-medium text-muted-foreground">
           {title}
         </CardTitle>

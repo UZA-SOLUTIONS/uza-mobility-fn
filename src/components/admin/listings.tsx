@@ -147,18 +147,6 @@ export function AdminListingsPanel() {
             </SelectContent>
           </Select>
         </div>
-        <div className="space-y-1.5 sm:min-w-[200px]">
-          <Label htmlFor="seller-id">Seller ID (optional)</Label>
-          <Input
-            id="seller-id"
-            placeholder="Filter by seller row…"
-            value={sellerIdInput}
-            onChange={(event) => {
-              setSellerIdInput(event.target.value);
-              setFilters((current) => ({ ...current, page: 1 }));
-            }}
-          />
-        </div>
       </div>
 
       {isError ? (

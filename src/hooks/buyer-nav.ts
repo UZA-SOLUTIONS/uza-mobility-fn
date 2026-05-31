@@ -3,6 +3,7 @@
 import { buyerNavGroups, type NavGroup } from '@/config/navigation';
 import { workspaceRoutes } from '@/config/routes';
 import { usePermissions } from '@/hooks/permissions';
+import { Store, Zap } from 'lucide-react';
 
 export function useBuyerNav() {
   const {
@@ -21,7 +22,13 @@ export function useBuyerNav() {
   if (hasSellerWorkspace) {
     groups.push({
       label: 'Selling',
-      items: [{ label: 'Seller workspace', href: workspaceRoutes.seller }],
+      items: [
+        {
+          label: 'Seller workspace',
+          href: workspaceRoutes.seller,
+          icon: Store,
+        },
+      ],
     });
   }
 
@@ -35,6 +42,7 @@ export function useBuyerNav() {
             ? 'Charging operator application'
             : 'Become a charging operator',
         href: workspaceRoutes.operator,
+        icon: Zap,
       },
     ],
   });

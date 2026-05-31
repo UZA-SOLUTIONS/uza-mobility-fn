@@ -40,12 +40,20 @@ export function Workspace({ title, navItems, children }: WorkspaceProps) {
               key={item.href}
               href={item.href}
               className={cn(
-                'rounded-md px-3 py-2 transition-colors',
+                'flex items-center rounded-md px-3 py-2 transition-colors',
                 pathname === item.href || pathname.startsWith(`${item.href}/`)
                   ? 'bg-background font-medium shadow-sm'
                   : 'text-muted-foreground hover:bg-background/60 hover:text-foreground',
               )}
             >
+              {item.icon ? (
+                <span className="mr-2 flex items-center text-muted-foreground">
+                  {(() => {
+                    const Icon = item.icon as any;
+                    return <Icon className="size-4" />;
+                  })()}
+                </span>
+              ) : null}
               {item.label}
             </Link>
           ))}

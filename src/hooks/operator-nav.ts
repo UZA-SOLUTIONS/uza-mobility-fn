@@ -3,6 +3,7 @@
 import { operatorNavGroups, type NavGroup } from '@/config/navigation';
 import { workspaceRoutes } from '@/config/routes';
 import { usePermissions } from '@/hooks/permissions';
+import { ShoppingCart, Store } from 'lucide-react';
 
 export function useOperatorNav() {
   const {
@@ -27,14 +28,26 @@ export function useOperatorNav() {
   if (hasBuyerWorkspace) {
     groups.push({
       label: 'Buying',
-      items: [{ label: 'Buyer workspace', href: workspaceRoutes.account }],
+      items: [
+        {
+          label: 'Buyer workspace',
+          href: workspaceRoutes.account,
+          icon: ShoppingCart,
+        },
+      ],
     });
   }
 
   if (hasSellerWorkspace) {
     groups.push({
       label: 'Selling',
-      items: [{ label: 'Seller workspace', href: workspaceRoutes.seller }],
+      items: [
+        {
+          label: 'Seller workspace',
+          href: workspaceRoutes.seller,
+          icon: Store,
+        },
+      ],
     });
   }
 

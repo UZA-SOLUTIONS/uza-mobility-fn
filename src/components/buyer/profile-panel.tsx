@@ -11,7 +11,7 @@ export function BuyerProfilePanel() {
   const { hasSellerWorkspace } = usePermissions();
 
   return (
-    <div className="mx-auto max-w-2xl space-y-10">
+    <div className="mx-auto max-w-4xl space-y-10">
       <PageHeader
         title="Profile"
         description="Your personal account and buyer details for purchases on UZA Mobility."

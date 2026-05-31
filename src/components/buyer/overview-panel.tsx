@@ -12,6 +12,13 @@ import {
   useMyOrders,
   useMyPayments,
 } from '@/queries/buyer';
+import {
+  ShoppingCart,
+  FileText,
+  CreditCard,
+  DollarSign,
+  List,
+} from 'lucide-react';
 
 export function BuyerOverviewPanel() {
   const { data: orders, isLoading: ordersLoading } = useMyOrders({
@@ -37,21 +44,25 @@ export function BuyerOverviewPanel() {
           title="Orders"
           value={orders?.meta.total}
           loading={ordersLoading}
+          icon={ShoppingCart}
         />
         <StatCard
           title="Invoices"
           value={invoices?.meta.total}
           loading={invoicesLoading}
+          icon={FileText}
         />
         <StatCard
           title="Payments"
           value={payments?.meta.total}
           loading={paymentsLoading}
+          icon={CreditCard}
         />
         <StatCard
           title="Financing requests"
           value={financing?.length}
           loading={financingLoading}
+          icon={DollarSign}
         />
       </div>
 
@@ -61,16 +72,38 @@ export function BuyerOverviewPanel() {
         </CardHeader>
         <CardContent className="flex flex-wrap gap-2">
           <Button asChild>
-            <Link href={workspaceRoutes.accountInvoices}>Request invoice</Link>
+            <Link
+              href={workspaceRoutes.accountInvoices}
+              className="flex items-center"
+            >
+              <FileText className="size-4" />
+              Request invoice
+            </Link>
           </Button>
           <Button variant="outline" asChild>
-            <Link href={workspaceRoutes.accountOrders}>View orders</Link>
+            <Link
+              href={workspaceRoutes.accountOrders}
+              className="flex items-center"
+            >
+              <List className="size-4" />
+              View orders
+            </Link>
           </Button>
           <Button variant="outline" asChild>
-            <Link href={workspaceRoutes.accountPayments}>Submit payment</Link>
+            <Link
+              href={workspaceRoutes.accountPayments}
+              className="flex items-center"
+            >
+              <CreditCard className="size-4" />
+              Submit payment
+            </Link>
           </Button>
           <Button variant="outline" asChild>
-            <Link href={workspaceRoutes.accountFinancing}>
+            <Link
+              href={workspaceRoutes.accountFinancing}
+              className="flex items-center"
+            >
+              <DollarSign className="size-4" />
               Financing support
             </Link>
           </Button>
@@ -84,14 +117,24 @@ function StatCard({
   title,
   value,
   loading,
+  icon,
 }: {
   title: string;
   value: number | undefined;
   loading: boolean;
+  icon?: React.ElementType;
 }) {
   return (
     <Card>
-      <CardHeader className="pb-2">
+      <CardHeader className="flex items-center gap-2 pb-2">
+        {icon ? (
+          <span className="text-muted-foreground">
+            {(() => {
+              const Icon = icon as any;
+              return <Icon className="size-5" />;
+            })()}
+          </span>
+        ) : null}
         <CardTitle className="text-sm font-medium text-muted-foreground">
           {title}
         </CardTitle>

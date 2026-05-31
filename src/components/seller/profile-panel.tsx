@@ -94,7 +94,7 @@ export function SellerProfilePanel() {
   );
 
   return (
-    <div className="mx-auto max-w-2xl space-y-8">
+    <div className="mx-auto max-w-4xl space-y-8">
       <PageHeader
         title="Profile"
         description="Manage your personal account and marketplace seller details."

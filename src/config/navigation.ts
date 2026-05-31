@@ -1,4 +1,24 @@
 import { adminRoutes, workspaceRoutes } from '@/config/routes';
+import { ElementType } from 'react';
+import {
+  Home,
+  List,
+  Users,
+  Tag,
+  Wrench,
+  ShoppingCart,
+  CreditCard,
+  FileText,
+  DollarSign,
+  Truck,
+  Zap,
+  MapPin,
+  Megaphone,
+  Leaf,
+  User,
+  Activity,
+  Percent,
+} from 'lucide-react';
 
 export type NavItem = {
   label: string;
@@ -9,6 +29,8 @@ export type NavItem = {
   permissions?: string[];
   /** Only visible to super admin (`*` permission). */
   superAdminOnly?: boolean;
+  /** Optional icon component to display in sidebars. */
+  icon?: ElementType;
 };
 
 export type NavGroup = {
@@ -29,78 +51,128 @@ export const marketingFooterNav: NavItem[] = [
 ];
 
 export const accountNav: NavItem[] = [
-  { label: 'Overview', href: workspaceRoutes.account },
-  { label: 'Orders', href: workspaceRoutes.accountOrders },
-  { label: 'Invoices', href: workspaceRoutes.accountInvoices },
-  { label: 'Payments', href: workspaceRoutes.accountPayments },
-  { label: 'Financing', href: workspaceRoutes.accountFinancing },
-  { label: 'Profile', href: workspaceRoutes.accountProfile },
+  { label: 'Overview', href: workspaceRoutes.account, icon: Home },
+  { label: 'Orders', href: workspaceRoutes.accountOrders, icon: ShoppingCart },
+  { label: 'Invoices', href: workspaceRoutes.accountInvoices, icon: FileText },
+  {
+    label: 'Payments',
+    href: workspaceRoutes.accountPayments,
+    icon: CreditCard,
+  },
+  {
+    label: 'Financing',
+    href: workspaceRoutes.accountFinancing,
+    icon: DollarSign,
+  },
+  { label: 'Profile', href: workspaceRoutes.accountProfile, icon: User },
 ];
 
 export const buyerNavGroups: NavGroup[] = [
   {
-    items: [{ label: 'Overview', href: workspaceRoutes.account }],
+    items: [{ label: 'Overview', href: workspaceRoutes.account, icon: Home }],
   },
   {
     label: 'Purchases',
     items: [
-      { label: 'Orders', href: workspaceRoutes.accountOrders },
-      { label: 'Invoices', href: workspaceRoutes.accountInvoices },
-      { label: 'Payments', href: workspaceRoutes.accountPayments },
-      { label: 'Financing', href: workspaceRoutes.accountFinancing },
+      {
+        label: 'Orders',
+        href: workspaceRoutes.accountOrders,
+        icon: ShoppingCart,
+      },
+      {
+        label: 'Invoices',
+        href: workspaceRoutes.accountInvoices,
+        icon: FileText,
+      },
+      {
+        label: 'Payments',
+        href: workspaceRoutes.accountPayments,
+        icon: CreditCard,
+      },
+      {
+        label: 'Financing',
+        href: workspaceRoutes.accountFinancing,
+        icon: DollarSign,
+      },
     ],
   },
   {
     label: 'Account',
-    items: [{ label: 'Profile', href: workspaceRoutes.accountProfile }],
+    items: [
+      { label: 'Profile', href: workspaceRoutes.accountProfile, icon: User },
+    ],
   },
 ];
 
 export const sellerNav: NavItem[] = [
-  { label: 'Overview', href: workspaceRoutes.seller },
-  { label: 'Listings', href: workspaceRoutes.sellerListings },
-  { label: 'Parts', href: workspaceRoutes.sellerParts },
-  { label: 'Profile', href: workspaceRoutes.sellerProfile },
+  { label: 'Overview', href: workspaceRoutes.seller, icon: Home },
+  { label: 'Listings', href: workspaceRoutes.sellerListings, icon: List },
+  { label: 'Parts', href: workspaceRoutes.sellerParts, icon: Wrench },
+  { label: 'Profile', href: workspaceRoutes.sellerProfile, icon: User },
 ];
 
 /** Seller sidebar — same structure as admin nav groups. */
 export const sellerNavGroups: NavGroup[] = [
   {
-    items: [{ label: 'Overview', href: workspaceRoutes.seller }],
+    items: [{ label: 'Overview', href: workspaceRoutes.seller, icon: Home }],
   },
   {
     label: 'Marketplace',
     items: [
-      { label: 'Listings', href: workspaceRoutes.sellerListings },
-      { label: 'Parts', href: workspaceRoutes.sellerParts },
+      { label: 'Listings', href: workspaceRoutes.sellerListings, icon: List },
+      { label: 'Parts', href: workspaceRoutes.sellerParts, icon: Wrench },
     ],
   },
   {
     label: 'Account',
-    items: [{ label: 'Profile', href: workspaceRoutes.sellerProfile }],
+    items: [
+      { label: 'Profile', href: workspaceRoutes.sellerProfile, icon: User },
+    ],
   },
   {
     label: 'Buying',
-    items: [{ label: 'Buyer workspace', href: workspaceRoutes.account }],
+    items: [
+      {
+        label: 'Buyer workspace',
+        href: workspaceRoutes.account,
+        icon: ShoppingCart,
+      },
+    ],
   },
   {
     label: 'Charging',
-    items: [{ label: 'Operator workspace', href: workspaceRoutes.operator }],
+    items: [
+      {
+        label: 'Operator workspace',
+        href: workspaceRoutes.operator,
+        icon: Zap,
+      },
+    ],
   },
 ];
 
 export const operatorNavGroups: NavGroup[] = [
   {
-    items: [{ label: 'Overview', href: workspaceRoutes.operator }],
+    items: [{ label: 'Overview', href: workspaceRoutes.operator, icon: Home }],
   },
   {
     label: 'Stations',
-    items: [{ label: 'My stations', href: workspaceRoutes.operatorStations }],
+    items: [
+      {
+        label: 'My stations',
+        href: workspaceRoutes.operatorStations,
+        icon: MapPin,
+      },
+    ],
   },
   {
     label: 'Account',
     items: [
-      { label: 'Operator profile', href: workspaceRoutes.operatorProfile },
+      {
+        label: 'Operator profile',
+        href: workspaceRoutes.operatorProfile,
+        icon: User,
+      },
     ],
   },
 ];
@@ -112,6 +184,7 @@ export const adminNavGroups: NavGroup[] = [
       {
         label: 'Overview',
         href: adminRoutes.root,
+        icon: Home,
         superAdminOnly: true,
       },
     ],
@@ -122,6 +195,7 @@ export const adminNavGroups: NavGroup[] = [
       {
         label: 'Listings',
         href: adminRoutes.listings,
+        icon: List,
         permissions: [
           'listings:approve',
           'listings:reject',
@@ -133,16 +207,19 @@ export const adminNavGroups: NavGroup[] = [
       {
         label: 'Sellers',
         href: adminRoutes.sellers,
+        icon: Users,
         permissions: ['sellers:verify', 'sellers:suspend'],
       },
       {
         label: 'Categories',
         href: adminRoutes.categories,
+        icon: Tag,
         permissions: ['listings:approve', 'listings:create', 'parts:manage'],
       },
       {
         label: 'Parts',
         href: adminRoutes.parts,
+        icon: Wrench,
         permissions: ['parts:manage'],
       },
     ],
@@ -153,21 +230,25 @@ export const adminNavGroups: NavGroup[] = [
       {
         label: 'Orders',
         href: adminRoutes.orders,
+        icon: ShoppingCart,
         permissions: ['orders:read', 'orders:update-status'],
       },
       {
         label: 'Payments',
         href: adminRoutes.payments,
+        icon: CreditCard,
         permissions: ['payments:verify', 'payments:reject', 'payments:refund'],
       },
       {
         label: 'Invoices',
         href: adminRoutes.invoices,
+        icon: FileText,
         permissions: ['invoices:read', 'invoices:send', 'invoices:cancel'],
       },
       {
         label: 'Financing',
         href: adminRoutes.financing,
+        icon: DollarSign,
         permissions: ['financing:read', 'financing:send-to-bank'],
       },
     ],
@@ -178,16 +259,19 @@ export const adminNavGroups: NavGroup[] = [
       {
         label: 'Fleet',
         href: adminRoutes.fleet,
+        icon: Truck,
         permissions: ['fleet:read', 'fleet:update-status'],
       },
       {
         label: 'Energy',
         href: adminRoutes.energy,
+        icon: Zap,
         permissions: ['parts:manage', 'fleet:read', 'fleet:update-status'],
       },
       {
         label: 'Stations',
         href: adminRoutes.stations,
+        icon: MapPin,
         permissions: [
           'stations:read-all',
           'stations:approve',
@@ -198,11 +282,13 @@ export const adminNavGroups: NavGroup[] = [
       {
         label: 'Promotions',
         href: adminRoutes.promotions,
+        icon: Megaphone,
         permissions: ['promotions:create', 'promotions:manage'],
       },
       {
         label: 'Sustainability',
         href: adminRoutes.sustainability,
+        icon: Leaf,
         permissions: ['sustainability:read', 'sustainability:manage'],
       },
     ],
@@ -213,21 +299,25 @@ export const adminNavGroups: NavGroup[] = [
       {
         label: 'Users',
         href: adminRoutes.users,
+        icon: Users,
         superAdminOnly: true,
       },
       {
         label: 'Activity logs',
         href: adminRoutes.activityLogs,
+        icon: Activity,
         superAdminOnly: true,
       },
       {
         label: 'Pricing rules',
         href: adminRoutes.pricingRules,
+        icon: Percent,
         superAdminOnly: true,
       },
       {
         label: 'Profile',
         href: adminRoutes.settings,
+        icon: User,
       },
     ],
   },

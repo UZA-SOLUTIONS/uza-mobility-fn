@@ -23,6 +23,13 @@ import {
   CardHeader,
   CardTitle,
 } from '@/components/ui/card';
+import { Tag, ShoppingCart, List, Plus, Edit, Trash2 } from 'lucide-react';
+import {
+  Accordion,
+  AccordionItem,
+  AccordionTrigger,
+  AccordionContent,
+} from '@/components/ui/accordion';
 import {
   Dialog,
   DialogContent,
@@ -180,18 +187,26 @@ function CategoryCard({ category }: CategoryCardProps) {
   return (
     <>
       <Card className={!category.isActive ? 'opacity-80' : undefined}>
-        <CardHeader className="pb-2">
+        <CardHeader>
           <div className="flex items-start justify-between gap-2">
             <div className="space-y-1">
               <div className="flex flex-wrap items-center gap-2">
+                <Tag className="size-4 text-muted-foreground" />
                 <CardTitle className="text-base">{category.name}</CardTitle>
                 {!category.isActive ? (
                   <Badge variant="secondary">Inactive</Badge>
                 ) : null}
               </div>
-              <CardDescription>
-                {category.slug} · {category.type.replaceAll('_', ' ')}
-                {listingCount > 0 ? ` · ${listingCount} listing(s)` : null}
+              <CardDescription className="flex items-center gap-2">
+                <span className="truncate text-muted-foreground">
+                  {category.slug} · {category.type.replaceAll('_', ' ')}
+                </span>
+                {listingCount > 0 ? (
+                  <span className="flex items-center gap-1 text-xs text-muted-foreground">
+                    <ShoppingCart className="size-4" />
+                    {listingCount}
+                  </span>
+                ) : null}
               </CardDescription>
             </div>
             {hasAdminAccess ? (
@@ -236,42 +251,70 @@ function CategoryCard({ category }: CategoryCardProps) {
             ) : null}
           </div>
         </CardHeader>
-        <CardContent className="space-y-3">
+        <CardContent className="space-y-1">
           {category.subcategories?.length ? (
-            <ul className="space-y-2 text-sm">
-              {category.subcategories.map((sub) => (
-                <li
-                  key={sub.id}
-                  className="flex flex-wrap items-center justify-between gap-2 rounded-md border px-2 py-1.5"
-                >
-                  <span className="text-muted-foreground">
-                    {sub.name} <span className="text-xs">({sub.slug})</span>
-                  </span>
-                  {hasAdminAccess ? (
-                    <div className="flex gap-1">
-                      <Button
-                        size="sm"
-                        variant="ghost"
-                        className="h-7 text-xs"
-                        disabled={busy}
-                        onClick={() => setEditSub(sub)}
-                      >
-                        Edit
-                      </Button>
-                      <Button
-                        size="sm"
-                        variant="ghost"
-                        className="h-7 text-xs text-destructive"
-                        disabled={busy}
-                        onClick={() => setConfirm({ type: 'delete-sub', sub })}
-                      >
-                        Delete
-                      </Button>
+            <Accordion type="single" collapsible>
+              <AccordionItem value={String(category.id)}>
+                <AccordionTrigger>
+                  <div className="flex w-full cursor-pointer items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      <List className="size-4 text-muted-foreground" />
+                      <span className="text-sm">Subcategories</span>
                     </div>
-                  ) : null}
-                </li>
-              ))}
-            </ul>
+                    <span className="text-xs text-muted-foreground">
+                      {category.subcategories.length}
+                    </span>
+                  </div>
+                </AccordionTrigger>
+                <AccordionContent>
+                  <ul className="space-y-2 text-sm">
+                    {category.subcategories.map((sub) => (
+                      <li
+                        key={sub.id}
+                        className="flex items-center justify-between gap-2 rounded-md border px-2 py-1.5"
+                      >
+                        <div className="min-w-0">
+                          <div className="flex items-center gap-2">
+                            <span className="truncate font-medium">
+                              {sub.name}
+                            </span>
+                            <span className="truncate text-xs text-muted-foreground">
+                              ({sub.slug})
+                            </span>
+                          </div>
+                        </div>
+                        {hasAdminAccess ? (
+                          <div className="flex gap-1">
+                            <Button
+                              size="sm"
+                              variant="ghost"
+                              className="h-7 text-xs"
+                              disabled={busy}
+                              onClick={() => setEditSub(sub)}
+                            >
+                              <Edit className="size-4" />
+                              Edit
+                            </Button>
+                            <Button
+                              size="sm"
+                              variant="ghost"
+                              className="h-7 text-xs text-destructive"
+                              disabled={busy}
+                              onClick={() =>
+                                setConfirm({ type: 'delete-sub', sub })
+                              }
+                            >
+                              <Trash2 className="size-4" />
+                              Delete
+                            </Button>
+                          </div>
+                        ) : null}
+                      </li>
+                    ))}
+                  </ul>
+                </AccordionContent>
+              </AccordionItem>
+            </Accordion>
           ) : (
             <p className="text-sm text-muted-foreground">
               No subcategories yet.
@@ -279,6 +322,7 @@ function CategoryCard({ category }: CategoryCardProps) {
           )}
           {category.isActive ? (
             <Button size="sm" variant="ghost" onClick={() => setSubOpen(true)}>
+              <Plus className="size-4" />
               Add subcategory
             </Button>
           ) : null}
@@ -556,9 +600,9 @@ export function AdminCategoriesPanel() {
 
       <Tabs value={view} onValueChange={(v) => setView(v as ViewFilter)}>
         <TabsList>
+          <TabsTrigger value="all">All</TabsTrigger>
           <TabsTrigger value="active">Active</TabsTrigger>
           <TabsTrigger value="inactive">Inactive</TabsTrigger>
-          <TabsTrigger value="all">All</TabsTrigger>
         </TabsList>
       </Tabs>
 
@@ -571,7 +615,7 @@ export function AdminCategoriesPanel() {
       ) : null}
 
       {isLoading ? (
-        <div className="grid gap-4 md:grid-cols-2">
+        <div className="flex flex-col gap-4">
           {Array.from({ length: 4 }).map((_, index) => (
             <Skeleton key={index} className="h-40 rounded-xl" />
           ))}
@@ -581,7 +625,7 @@ export function AdminCategoriesPanel() {
           No categories in this view.
         </p>
       ) : (
-        <div className="grid gap-4 md:grid-cols-2">
+        <div className="flex flex-col gap-4">
           {data?.map((category) => (
             <CategoryCard key={category.id} category={category} />
           ))}

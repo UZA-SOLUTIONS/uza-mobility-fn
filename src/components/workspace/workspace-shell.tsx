@@ -68,12 +68,20 @@ export function WorkspaceShell({
                           <Link
                             href={item.href}
                             className={cn(
-                              'block rounded-md px-2.5 py-2 text-sm transition-colors',
+                              'flex items-center rounded-md px-2.5 py-2 text-sm transition-colors',
                               isActive
                                 ? 'bg-background font-medium text-foreground shadow-sm ring-1 ring-foreground/10'
                                 : 'text-muted-foreground hover:bg-background/70 hover:text-foreground',
                             )}
                           >
+                            {item.icon ? (
+                              <span className="mr-2 flex items-center text-muted-foreground">
+                                {(() => {
+                                  const Icon = item.icon as any;
+                                  return <Icon className="size-4" />;
+                                })()}
+                              </span>
+                            ) : null}
                             {item.label}
                           </Link>
                         </li>
@@ -87,7 +95,16 @@ export function WorkspaceShell({
         </ScrollArea>
 
         {sidebarFooter ? (
-          <div className="shrink-0 border-t px-4 py-3">{sidebarFooter}</div>
+          <div className="shrink-0 border-t px-4 py-3">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => logout.mutate()}
+              disabled={logout.isPending}
+            >
+              Log out
+            </Button>
+          </div>
         ) : null}
       </aside>
 
@@ -95,14 +112,11 @@ export function WorkspaceShell({
         <header className="flex h-14 shrink-0 items-center justify-end gap-2 border-b px-4 lg:px-6">
           <NotificationBell />
           <ThemeToggle />
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => logout.mutate()}
-            disabled={logout.isPending}
-          >
-            Log out
-          </Button>
+          {sidebarFooter ? (
+            <div className="ml-3 flex items-center gap-2 text-sm">
+              {sidebarFooter}
+            </div>
+          ) : null}
         </header>
         <main className="min-h-0 flex-1 overflow-x-hidden overflow-y-auto overscroll-y-contain">
           <div className="mx-auto w-full max-w-6xl p-4 lg:p-6">{children}</div>

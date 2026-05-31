@@ -4,6 +4,7 @@ import { WorkspaceShell } from '@/components/workspace/workspace-shell';
 import { adminRoutes } from '@/config/routes';
 import { useAdminNav } from '@/hooks/admin-nav';
 import { usePermissions } from '@/hooks/permissions';
+import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
 
 type AdminShellProps = {
   children: React.ReactNode;
@@ -15,10 +16,24 @@ export function AdminShell({ children }: AdminShellProps) {
 
   const sidebarFooter = user ? (
     <>
-      <p className="truncate text-xs font-medium">{user.email}</p>
-      <p className="truncate text-xs text-muted-foreground">
-        {user.roles.join(', ')}
-      </p>
+      <Avatar size="default">
+        {user.profilePhoto ? (
+          <AvatarImage src={user.profilePhoto} alt={user.email} />
+        ) : (
+          <AvatarFallback>
+            {user.firstName?.charAt(0) ?? '?'}
+            {user.lastName?.charAt(0) ?? ''}
+          </AvatarFallback>
+        )}
+      </Avatar>
+      <div className="min-w-0">
+        <p className="truncate text-sm font-medium">
+          {user.firstName || user.lastName
+            ? `${user.firstName ?? ''} ${user.lastName ?? ''}`.trim()
+            : user.email}
+        </p>
+        <p className="truncate text-xs text-muted-foreground">{user.email}</p>
+      </div>
     </>
   ) : null;
 

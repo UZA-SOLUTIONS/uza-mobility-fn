@@ -13,6 +13,7 @@ export type SellerStatus =
   | string;
 
 export type MeSellerProfile = {
+  logoUrl: any;
   id: string;
   sellerType: SellerType;
   status: SellerStatus;
