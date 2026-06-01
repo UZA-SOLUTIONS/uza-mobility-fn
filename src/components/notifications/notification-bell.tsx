@@ -1,18 +1,20 @@
 'use client';
 
+import Link from 'next/link';
+import { usePathname } from 'next/navigation';
 import { useMemo, useState } from 'react';
 import { Bell } from 'lucide-react';
 import { useSession } from 'next-auth/react';
+import { NotificationList } from '@/components/notifications/notification-list';
 import { Button } from '@/components/ui/button';
 import {
   Popover,
   PopoverContent,
   PopoverTrigger,
 } from '@/components/ui/popover';
-import { ScrollArea } from '@/components/ui/scroll-area';
 import { Skeleton } from '@/components/ui/skeleton';
-import { cn } from '@/lib/utils';
-import { formatDateTime } from '@/lib/admin/format';
+import { NOTIFICATION_PREVIEW_LIMIT } from '@/lib/notifications/constants';
+import { notificationsHrefFromPathname } from '@/lib/notifications/paths';
 import {
   useMarkAllNotificationsRead,
   useMarkNotificationRead,
@@ -20,12 +22,23 @@ import {
   useUnreadNotificationCount,
 } from '@/queries/notifications';
 
-export function NotificationBell() {
+type NotificationBellProps = {
+  /** Override when not inside a workspace (e.g. marketing navbar). */
+  viewAllHref?: string;
+};
+
+export function NotificationBell({ viewAllHref }: NotificationBellProps) {
+  const pathname = usePathname();
   const { data: session } = useSession();
   const currentUserId = session?.user?.id;
   const [open, setOpen] = useState(false);
+  const allNotificationsHref =
+    viewAllHref ?? notificationsHrefFromPathname(pathname);
   const unread = useUnreadNotificationCount();
-  const list = useNotifications({ page: 1, limit: 20 }, open);
+  const list = useNotifications(
+    { page: 1, limit: NOTIFICATION_PREVIEW_LIMIT },
+    open,
+  );
   const markRead = useMarkNotificationRead();
   const markAllRead = useMarkAllNotificationsRead();
 
@@ -35,6 +48,10 @@ export function NotificationBell() {
     if (!currentUserId) return rows;
     return rows.filter((item) => item.userId === currentUserId);
   }, [list.data?.items, currentUserId]);
+
+  const hasMore =
+    (list.data?.meta.total ?? 0) > NOTIFICATION_PREVIEW_LIMIT ||
+    unreadCount > items.length;
 
   return (
     <Popover open={open} onOpenChange={setOpen}>
@@ -58,8 +75,12 @@ export function NotificationBell() {
           ) : null}
         </Button>
       </PopoverTrigger>
-      <PopoverContent align="end" className="w-80 p-0 sm:w-96">
-        <div className="flex items-center justify-between border-b px-4 py-3">
+      <PopoverContent
+        align="end"
+        sideOffset={8}
+        className="flex w-[min(calc(100vw-1.5rem),22rem)] flex-col gap-0 overflow-hidden p-0 sm:w-96"
+      >
+        <div className="flex shrink-0 items-center justify-between border-b px-3 py-2.5">
           <p className="text-sm font-medium">Notifications</p>
           {unreadCount > 0 ? (
             <Button
@@ -75,55 +96,47 @@ export function NotificationBell() {
           ) : null}
         </div>
 
-        <ScrollArea className="max-h-[min(24rem,70vh)]">
+        <div className="max-h-[min(14rem,40vh)] min-h-0 overflow-y-auto overscroll-y-contain">
           {list.isLoading ? (
             <div className="space-y-2 p-3">
-              <Skeleton className="h-14 w-full" />
-              <Skeleton className="h-14 w-full" />
+              <Skeleton className="h-12 w-full" />
+              <Skeleton className="h-12 w-full" />
+              <Skeleton className="h-12 w-full" />
             </div>
           ) : null}
 
           {list.isError ? (
-            <p className="p-4 text-sm text-destructive">
+            <p className="px-3 py-4 text-sm text-destructive">
               Could not load notifications.
             </p>
           ) : null}
 
-          {!list.isLoading && items.length === 0 ? (
-            <p className="p-6 text-center text-sm text-muted-foreground">
-              No notifications yet.
-            </p>
+          {!list.isLoading && !list.isError ? (
+            <NotificationList
+              compact
+              items={items}
+              onItemClick={(item) => {
+                if (!item.isRead) {
+                  markRead.mutate(item.id);
+                }
+              }}
+            />
           ) : null}
+        </div>
 
-          <ul className="divide-y">
-            {items.map((item) => (
-              <li key={item.id}>
-                <button
-                  type="button"
-                  className={cn(
-                    'w-full px-4 py-3 text-left transition-colors hover:bg-muted/50',
-                    !item.isRead && 'bg-primary/5',
-                  )}
-                  onClick={() => {
-                    if (!item.isRead) {
-                      markRead.mutate(item.id);
-                    }
-                  }}
-                >
-                  <p className="text-sm leading-snug font-medium">
-                    {item.title}
-                  </p>
-                  <p className="mt-0.5 line-clamp-2 text-xs text-muted-foreground">
-                    {item.body}
-                  </p>
-                  <p className="mt-1 text-[10px] text-muted-foreground">
-                    {formatDateTime(item.createdAt)}
-                  </p>
-                </button>
-              </li>
-            ))}
-          </ul>
-        </ScrollArea>
+        <div className="shrink-0 border-t bg-popover p-2">
+          <Button
+            variant="outline"
+            size="sm"
+            className="w-full"
+            asChild
+            onClick={() => setOpen(false)}
+          >
+            <Link href={allNotificationsHref}>
+              {hasMore ? 'View all notifications' : 'Open notifications'}
+            </Link>
+          </Button>
+        </div>
       </PopoverContent>
     </Popover>
   );

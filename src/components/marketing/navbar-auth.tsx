@@ -6,6 +6,7 @@ import { NotificationBell } from '@/components/notifications/notification-bell';
 import { Button } from '@/components/ui/button';
 import { authRoutes } from '@/config/routes';
 import { authRedirect } from '@/lib/auth/redirect';
+import { notificationsHrefForWorkspaceRoot } from '@/lib/notifications/paths';
 import { isMeUser } from '@/types/auth/me-user';
 
 export function NavbarAuth() {
@@ -17,9 +18,10 @@ export function NavbarAuth() {
 
   if (isMeUser(session?.user)) {
     const workspaceHref = authRedirect(session.user);
+    const notificationsHref = notificationsHrefForWorkspaceRoot(workspaceHref);
     return (
       <div className="flex items-center gap-2">
-        <NotificationBell />
+        <NotificationBell viewAllHref={notificationsHref} />
         <Button size="sm" asChild>
           <Link href={workspaceHref}>Go to workspace</Link>
         </Button>

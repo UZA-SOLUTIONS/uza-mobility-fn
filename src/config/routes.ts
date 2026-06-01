@@ -11,6 +11,7 @@ export const workspaceRoutes = {
   accountPayments: '/account/payments',
   accountFinancing: '/account/financing',
   accountProfile: '/account/profile',
+  accountNotifications: '/account/notifications',
   /** @deprecated Use accountProfile */
   accountSettings: '/account/profile',
   /** @deprecated Use accountInvoices */
@@ -19,9 +20,11 @@ export const workspaceRoutes = {
   sellerListings: '/seller/listings',
   sellerParts: '/seller/parts',
   sellerProfile: '/seller/profile',
+  sellerNotifications: '/seller/notifications',
   operator: '/operator',
   operatorStations: '/operator/stations',
   operatorProfile: '/operator/profile',
+  operatorNotifications: '/operator/notifications',
   admin: '/admin',
 } as const;
 
@@ -44,6 +47,7 @@ export const adminRoutes = {
   activityLogs: '/admin/activity-logs',
   pricingRules: '/admin/pricing-rules',
   settings: '/admin/settings',
+  notifications: '/admin/notifications',
 } as const;
 
 export const publicOnlyAuthPaths = [

@@ -18,6 +18,7 @@ import {
   User,
   Activity,
   Percent,
+  Bell,
 } from 'lucide-react';
 
 export type NavItem = {
@@ -65,6 +66,11 @@ export const accountNav: NavItem[] = [
     icon: DollarSign,
   },
   { label: 'Profile', href: workspaceRoutes.accountProfile, icon: User },
+  {
+    label: 'Notifications',
+    href: workspaceRoutes.accountNotifications,
+    icon: Bell,
+  },
 ];
 
 export const buyerNavGroups: NavGroup[] = [
@@ -100,6 +106,11 @@ export const buyerNavGroups: NavGroup[] = [
     label: 'Account',
     items: [
       { label: 'Profile', href: workspaceRoutes.accountProfile, icon: User },
+      {
+        label: 'Notifications',
+        href: workspaceRoutes.accountNotifications,
+        icon: Bell,
+      },
     ],
   },
 ];
@@ -127,6 +138,11 @@ export const sellerNavGroups: NavGroup[] = [
     label: 'Account',
     items: [
       { label: 'Profile', href: workspaceRoutes.sellerProfile, icon: User },
+      {
+        label: 'Notifications',
+        href: workspaceRoutes.sellerNotifications,
+        icon: Bell,
+      },
     ],
   },
   {
@@ -172,6 +188,11 @@ export const operatorNavGroups: NavGroup[] = [
         label: 'Operator profile',
         href: workspaceRoutes.operatorProfile,
         icon: User,
+      },
+      {
+        label: 'Notifications',
+        href: workspaceRoutes.operatorNotifications,
+        icon: Bell,
       },
     ],
   },
@@ -318,6 +339,11 @@ export const adminNavGroups: NavGroup[] = [
         label: 'Profile',
         href: adminRoutes.settings,
         icon: User,
+      },
+      {
+        label: 'Notifications',
+        href: adminRoutes.notifications,
+        icon: Bell,
       },
     ],
   },
