@@ -18,6 +18,12 @@ function buildImageRemotePatterns(): NonNullable<
       port: '7000',
       pathname: '/**',
     },
+    // Legacy listing photos still stored on Cloudinary
+    {
+      protocol: 'https',
+      hostname: 'res.cloudinary.com',
+      pathname: '/**',
+    },
   ];
 
   const extraHosts = process.env.NEXT_PUBLIC_IMAGE_REMOTE_HOSTS?.split(',')

@@ -1,16 +1,20 @@
-import { PageHeader } from '@/components/shared/page-header';
+import { MarketingPageHero } from '@/components/marketing/marketing-page-hero';
 
 export default function PricingPage() {
   return (
-    <div className="mx-auto max-w-4xl space-y-10 px-4 py-16">
-      <PageHeader
-        title="Pricing"
-        description="Programs for buyers, sellers, and fleet partners — details coming soon."
+    <>
+      <MarketingPageHero
+        title="For Business"
+        description="Programs for buyers, sellers, and fleet partners."
       />
-      <p className="text-sm text-muted-foreground">
-        Contact us for fleet quotes, seller onboarding, and financing
-        facilitation.
-      </p>
-    </div>
+      <div className="bg-white">
+        <div className="mx-auto max-w-3xl px-[60px] py-16 text-[#356769]">
+          <p className="text-base leading-relaxed">
+            Contact us for fleet quotes, seller onboarding, and financing
+            facilitation. Detailed pricing will be published here soon.
+          </p>
+        </div>
+      </div>
+    </>
   );
 }

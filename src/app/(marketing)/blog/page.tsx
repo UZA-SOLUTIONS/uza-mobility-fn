@@ -1,12 +1,17 @@
-import { PageHeader } from '@/components/shared/page-header';
+import { MarketingPageHero } from '@/components/marketing/marketing-page-hero';
 
 export default function BlogPage() {
   return (
-    <div className="mx-auto max-w-3xl px-4 py-16">
-      <PageHeader
+    <>
+      <MarketingPageHero
         title="Blog"
-        description="News and updates — content coming soon."
+        description="News and updates from UZA Mobility."
       />
-    </div>
+      <div className="bg-white">
+        <div className="mx-auto max-w-3xl px-[60px] py-16 text-[#356769]">
+          <p className="text-base leading-relaxed">Content coming soon.</p>
+        </div>
+      </div>
+    </>
   );
 }

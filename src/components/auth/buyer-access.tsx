@@ -2,7 +2,7 @@
 
 import { useEffect } from 'react';
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
+import { useAppRouter } from '@/lib/navigation/use-app-router';
 import { useQueryClient } from '@tanstack/react-query';
 import { useSession } from 'next-auth/react';
 import { signOutClient } from '@/lib/auth/sign-out-client';
@@ -20,7 +20,7 @@ type BuyerAccessProps = {
 };
 
 export function BuyerAccess({ children }: BuyerAccessProps) {
-  const router = useRouter();
+  const router = useAppRouter();
   const queryClient = useQueryClient();
   const logout = useLogout();
   const { data: session, status } = useSession();

@@ -39,12 +39,20 @@ export type NavGroup = {
   items: NavItem[];
 };
 
+export type MarketingFooterColumn = {
+  title: string;
+  links: NavItem[];
+};
+
+/** @deprecated Use buildMarketingNav() with categories from GET /categories */
 export const marketingNav: NavItem[] = [
-  { label: 'Pricing', href: '/pricing' },
-  { label: 'About', href: '/about' },
-  { label: 'Blog', href: '/blog' },
+  { label: 'Vehicles', href: '/vehicles' },
+  { label: 'Spare Parts', href: '/vehicles' },
+  { label: 'For Business', href: '/pricing' },
+  { label: 'About UZA Mobility', href: '/about' },
 ];
 
+/** @deprecated Use buildMarketingFooterColumns() with categories from GET /categories */
 export const marketingFooterNav: NavItem[] = [
   { label: 'About', href: '/about' },
   { label: 'Blog', href: '/blog' },

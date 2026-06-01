@@ -2,7 +2,8 @@
 
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { signOut, useSession } from 'next-auth/react';
-import { useRouter, useSearchParams } from 'next/navigation';
+import { useSearchParams } from 'next/navigation';
+import { useAppRouter } from '@/lib/navigation/use-app-router';
 import { getMe, login, logout, register } from '@/lib/api/auth';
 import { authenticatedFetch } from '@/lib/api/authenticated';
 import { ApiClientError } from '@/lib/api';
@@ -21,7 +22,7 @@ export const authKeys = {
 };
 
 export function useLogin() {
-  const router = useRouter();
+  const router = useAppRouter();
   const searchParams = useSearchParams();
   const queryClient = useQueryClient();
 
@@ -56,7 +57,7 @@ export function useLogin() {
 }
 
 export function useRegister() {
-  const router = useRouter();
+  const router = useAppRouter();
   const queryClient = useQueryClient();
 
   return useMutation({
@@ -87,7 +88,7 @@ export function useRegister() {
 }
 
 export function useLogout() {
-  const router = useRouter();
+  const router = useAppRouter();
   const queryClient = useQueryClient();
   const { data: session } = useSession();
 

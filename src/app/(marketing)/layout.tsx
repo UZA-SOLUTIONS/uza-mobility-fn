@@ -1,16 +1,18 @@
-import { MarketingFooter } from '@/components/marketing/footer';
-import { MarketingNavbar } from '@/components/marketing/navbar';
+import { MarketingChrome } from '@/components/marketing/marketing-chrome';
+import { getPublicCategories } from '@/lib/api/catalog';
+import type { Category } from '@/types/admin/marketplace';
 
-export default function MarketingLayout({
+export default async function MarketingLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
-  return (
-    <div className="flex min-h-full flex-col">
-      <MarketingNavbar />
-      <main className="flex-1">{children}</main>
-      <MarketingFooter />
-    </div>
-  );
+  let categories: Category[] = [];
+  try {
+    categories = await getPublicCategories();
+  } catch {
+    categories = [];
+  }
+
+  return <MarketingChrome categories={categories}>{children}</MarketingChrome>;
 }
