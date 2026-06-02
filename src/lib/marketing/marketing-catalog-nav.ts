@@ -22,19 +22,10 @@ function subcategoryLinks(categories: Category[]) {
 
 /** Top nav from live category tree (`GET /categories`). */
 export function buildMarketingNav(categories: Category[]): NavItem[] {
-  const partsCategory = sortPublicCategories(categories).find(
-    (c) => c.type === 'EV_PARTS_ACCESSORIES',
-  );
-
   return [
     { label: 'Vehicles', href: vehiclesHref() },
-    {
-      label: 'Spare Parts',
-      href: partsCategory
-        ? vehiclesHref({ category: partsCategory.slug })
-        : vehiclesHref(),
-    },
-    { label: 'For Business', href: '/pricing' },
+    { label: 'Spare Parts', href: '/spare-parts' },
+    { label: 'For Business', href: '/for-business' },
     { label: 'About UZA Mobility', href: '/about' },
   ];
 }
@@ -63,7 +54,7 @@ export function buildMarketingFooterColumns(
     });
     businessLinks.push(...subcategoryLinks([commercial]));
   }
-  businessLinks.push({ label: 'Fleet solutions', href: '/pricing' });
+  businessLinks.push({ label: 'Fleet solutions', href: '/for-business' });
   if (businessLinks.length > 0) {
     columns.push({ title: 'For Business', links: businessLinks });
   }

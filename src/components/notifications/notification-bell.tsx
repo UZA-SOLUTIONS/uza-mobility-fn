@@ -21,13 +21,18 @@ import {
   useNotifications,
   useUnreadNotificationCount,
 } from '@/queries/notifications';
+import { cn } from '@/lib/utils';
 
 type NotificationBellProps = {
   /** Override when not inside a workspace (e.g. marketing navbar). */
   viewAllHref?: string;
+  triggerClassName?: string;
 };
 
-export function NotificationBell({ viewAllHref }: NotificationBellProps) {
+export function NotificationBell({
+  viewAllHref,
+  triggerClassName,
+}: NotificationBellProps) {
   const pathname = usePathname();
   const { data: session } = useSession();
   const currentUserId = session?.user?.id;
@@ -60,7 +65,7 @@ export function NotificationBell({ viewAllHref }: NotificationBellProps) {
           type="button"
           variant="ghost"
           size="icon"
-          className="relative"
+          className={cn('relative', triggerClassName)}
           aria-label={
             unreadCount > 0
               ? `${unreadCount} unread notifications`

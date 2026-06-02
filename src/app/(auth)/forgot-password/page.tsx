@@ -6,7 +6,7 @@ import { Label } from '@/components/ui/label';
 
 export default function ForgotPasswordPage() {
   return (
-    <div className="space-y-6 rounded-xl border bg-card p-6 shadow-sm">
+    <div className="space-y-6 rounded-xl border border-white/40 bg-white/95 p-6 shadow-xl backdrop-blur-sm">
       <PageHeader
         title="Forgot password"
         description="We will send reset instructions when this flow is connected to the API."

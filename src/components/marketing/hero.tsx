@@ -18,7 +18,7 @@ export function Hero({ title, description }: HeroProps) {
           <Link href="/register">Browse EVs</Link>
         </Button>
         <Button size="lg" variant="outline" asChild>
-          <Link href="/pricing">View pricing</Link>
+          <Link href="/for-business">View pricing</Link>
         </Button>
       </div>
     </section>

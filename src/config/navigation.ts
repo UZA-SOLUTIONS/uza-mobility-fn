@@ -47,8 +47,8 @@ export type MarketingFooterColumn = {
 /** @deprecated Use buildMarketingNav() with categories from GET /categories */
 export const marketingNav: NavItem[] = [
   { label: 'Vehicles', href: '/vehicles' },
-  { label: 'Spare Parts', href: '/vehicles' },
-  { label: 'For Business', href: '/pricing' },
+  { label: 'Spare Parts', href: '/spare-parts' },
+  { label: 'For Business', href: '/for-business' },
   { label: 'About UZA Mobility', href: '/about' },
 ];
 
@@ -56,7 +56,7 @@ export const marketingNav: NavItem[] = [
 export const marketingFooterNav: NavItem[] = [
   { label: 'About', href: '/about' },
   { label: 'Blog', href: '/blog' },
-  { label: 'Pricing', href: '/pricing' },
+  { label: 'Pricing', href: '/for-business' },
 ];
 
 export const accountNav: NavItem[] = [

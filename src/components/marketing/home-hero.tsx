@@ -19,12 +19,7 @@ export function HomeHero() {
       <div
         className="absolute inset-0"
         style={{
-          background: `linear-gradient(
-            180deg,
-            rgba(${brand.forestRgb}, 0.15) 0%,
-            rgba(${brand.forestRgb}, 0.25) 45%,
-            rgba(${brand.forestRgb}, 0.55) 100%
-          )`,
+          backgroundColor: '#17443866',
         }}
         aria-hidden
       />

@@ -1,5 +1,6 @@
 'use client';
 
+import Image from 'next/image';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { NotificationBell } from '@/components/notifications/notification-bell';
@@ -7,7 +8,6 @@ import { ThemeToggle } from '@/components/shared/theme-toggle';
 import { Button } from '@/components/ui/button';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Skeleton } from '@/components/ui/skeleton';
-import { siteConfig } from '@/config/site';
 import type { NavGroup } from '@/config/navigation';
 import { useLogout } from '@/queries/auth';
 import { cn } from '@/lib/utils';
@@ -33,10 +33,17 @@ export function WorkspaceShell({
 
   return (
     <div className="flex h-dvh max-h-dvh min-h-0 w-full overflow-hidden bg-background">
-      <aside className="flex h-full w-60 shrink-0 flex-col border-r bg-muted/30 lg:w-64">
-        <div className="shrink-0 border-b px-4 py-4">
-          <Link href="/" className="block font-semibold tracking-tight">
-            {siteConfig.name}
+      <aside className="flex h-full w-60 shrink-0 flex-col border-r border-sidebar-border bg-sidebar text-sidebar-foreground lg:w-64">
+        <div className="shrink-0 border-b border-sidebar-border px-4 py-2">
+          <Link href="/" className="relative block h-[40px] w-[118px]">
+            <Image
+              src="/images/FInal-logo-dashboard.png"
+              alt="UZA Mobility"
+              fill
+              className="object-contain object-center"
+              sizes="118px"
+              priority
+            />
           </Link>
         </div>
 
@@ -52,7 +59,7 @@ export function WorkspaceShell({
               navGroups.map((group) => (
                 <div key={group.label ?? 'main'}>
                   {group.label ? (
-                    <p className="mb-1.5 px-2 text-xs font-medium tracking-wide text-muted-foreground uppercase">
+                    <p className="mb-1.5 px-2 text-xs font-medium tracking-wide text-sidebar-foreground/70 uppercase">
                       {group.label}
                     </p>
                   ) : null}
@@ -70,12 +77,19 @@ export function WorkspaceShell({
                             className={cn(
                               'flex items-center rounded-md px-2.5 py-2 text-sm transition-colors',
                               isActive
-                                ? 'bg-background font-medium text-foreground shadow-sm ring-1 ring-foreground/10'
-                                : 'text-muted-foreground hover:bg-background/70 hover:text-foreground',
+                                ? 'bg-primary font-medium text-primary-foreground shadow-sm'
+                                : 'text-sidebar-foreground/80 hover:bg-primary/10 hover:text-primary',
                             )}
                           >
                             {item.icon ? (
-                              <span className="mr-2 flex items-center text-muted-foreground">
+                              <span
+                                className={cn(
+                                  'mr-2 flex items-center',
+                                  isActive
+                                    ? 'text-primary-foreground'
+                                    : 'text-primary/80',
+                                )}
+                              >
                                 {(() => {
                                   const Icon = item.icon as any;
                                   return <Icon className="size-4" />;
@@ -95,9 +109,9 @@ export function WorkspaceShell({
         </ScrollArea>
 
         {sidebarFooter ? (
-          <div className="shrink-0 border-t px-4 py-3">
+          <div className="shrink-0 border-t border-sidebar-border px-4 py-3">
             <Button
-              variant="outline"
+              variant="default"
               size="sm"
               onClick={() => logout.mutate()}
               disabled={logout.isPending}
@@ -109,9 +123,13 @@ export function WorkspaceShell({
       </aside>
 
       <div className="flex min-h-0 min-w-0 flex-1 flex-col">
-        <header className="flex h-14 shrink-0 items-center justify-end gap-2 border-b px-4 lg:px-6">
-          <NotificationBell />
-          <ThemeToggle />
+        <header className="flex h-14 shrink-0 items-center justify-end gap-2 border-b border-sidebar-border px-4 lg:px-6">
+          <div className="text-primary">
+            <NotificationBell />
+          </div>
+          <div className="text-primary">
+            <ThemeToggle />
+          </div>
           {sidebarFooter ? (
             <div className="ml-3 flex items-center gap-2 text-sm">
               {sidebarFooter}

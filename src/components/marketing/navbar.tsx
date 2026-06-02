@@ -2,9 +2,10 @@
 
 import Image from 'next/image';
 import Link from 'next/link';
-import { Search, ShoppingCart } from 'lucide-react';
+import { Search } from 'lucide-react';
 import type { NavItem } from '@/config/navigation';
 import { authRoutes } from '@/config/routes';
+import { NavbarCart } from '@/components/marketing/navbar-cart';
 import { NavbarAuth } from '@/components/marketing/navbar-auth';
 import { brand } from '@/lib/marketing/colors';
 
@@ -57,9 +58,7 @@ export function MarketingNavbar({
               key={item.label}
               href={item.href}
               className={`px-5 py-2 text-sm ${
-                overlay
-                  ? 'text-white'
-                  : 'text-muted-foreground hover:text-foreground'
+                overlay ? 'text-white' : 'text-primary/80 hover:text-primary'
               }`}
             >
               {item.label}
@@ -68,27 +67,11 @@ export function MarketingNavbar({
         </nav>
 
         <div className="flex items-center">
+          <NavbarCart overlay={overlay} />
           <Link
             href="/vehicles"
             className={`flex items-center justify-center px-5 py-3 ${
-              overlay ? 'text-white' : 'text-foreground'
-            }`}
-            aria-label="Cart"
-          >
-            <span className="relative">
-              <ShoppingCart className="size-6" />
-              <span
-                className="absolute -top-2 -right-2 flex size-[18px] items-center justify-center rounded-full text-[10px] font-medium"
-                style={{ backgroundColor: brand.lime, color: brand.forest }}
-              >
-                0
-              </span>
-            </span>
-          </Link>
-          <Link
-            href="/vehicles"
-            className={`flex items-center justify-center px-5 py-3 ${
-              overlay ? 'text-white' : 'text-foreground'
+              overlay ? 'text-white' : 'text-primary'
             }`}
             aria-label="Search vehicles"
           >

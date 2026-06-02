@@ -27,7 +27,14 @@ export function NavbarAuth({ overlay = false }: NavbarAuthProps) {
     const notificationsHref = notificationsHrefForWorkspaceRoot(workspaceHref);
     return (
       <div className="flex items-center gap-2 px-3">
-        <NotificationBell viewAllHref={notificationsHref} />
+        <NotificationBell
+          viewAllHref={notificationsHref}
+          triggerClassName={
+            overlay
+              ? 'text-white hover:text-white hover:bg-white/10'
+              : 'text-primary hover:text-primary'
+          }
+        />
         <Button size="sm" asChild>
           <Link href={workspaceHref}>Workspace</Link>
         </Button>

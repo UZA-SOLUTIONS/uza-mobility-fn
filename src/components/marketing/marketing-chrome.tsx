@@ -12,11 +12,13 @@ import type { Category } from '@/types/admin/marketplace';
 type MarketingChromeProps = {
   children: React.ReactNode;
   categories: Category[];
+  overlayNav?: boolean;
 };
 
 export function MarketingChrome({
   children,
   categories,
+  overlayNav = true,
 }: MarketingChromeProps) {
   const navItems = buildMarketingNav(categories);
   const footerColumns = buildMarketingFooterColumns(categories);
@@ -25,7 +27,7 @@ export function MarketingChrome({
     <MarketingCatalogProvider categories={categories}>
       <div className="flex min-h-full flex-col">
         <div className="relative">
-          <MarketingNavbar overlay navItems={navItems} />
+          <MarketingNavbar overlay={overlayNav} navItems={navItems} />
           <main className="flex-1">{children}</main>
         </div>
         <MarketingFooter columns={footerColumns} />

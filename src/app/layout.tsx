@@ -16,6 +16,11 @@ export const metadata: Metadata = {
     template: `%s | ${siteConfig.name}`,
   },
   description: siteConfig.description,
+  icons: {
+    icon: [{ url: '/images/FInal-logo.png', type: 'image/png' }],
+    shortcut: ['/images/FInal-logo.png'],
+    apple: [{ url: '/images/FInal-logo.png', type: 'image/png' }],
+  },
 };
 
 export default function RootLayout({

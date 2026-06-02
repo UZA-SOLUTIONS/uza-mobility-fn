@@ -32,7 +32,7 @@ export function AdminShell({ children }: AdminShellProps) {
             ? `${user.firstName ?? ''} ${user.lastName ?? ''}`.trim()
             : user.email}
         </p>
-        <p className="truncate text-xs text-muted-foreground">{user.email}</p>
+        <p className="truncate text-xs text-primary/70">{user.email}</p>
       </div>
     </>
   ) : null;

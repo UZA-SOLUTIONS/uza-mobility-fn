@@ -40,7 +40,7 @@ export function Register() {
   });
 
   return (
-    <div className="space-y-6 rounded-xl border bg-card p-6 shadow-sm">
+    <div className="space-y-6 rounded-xl border border-white/40 bg-white/95 p-6 shadow-xl backdrop-blur-sm">
       <PageHeader
         title="Create account"
         description="Register as a buyer. Seller onboarding is available after sign-up."

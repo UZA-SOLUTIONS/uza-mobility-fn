@@ -1,3 +1,4 @@
+import Image from 'next/image';
 import Link from 'next/link';
 import { Battery, Car, Gauge, MapPin, Settings2 } from 'lucide-react';
 import { VehicleDetailGallery } from '@/components/marketing/vehicle-detail-gallery';
@@ -137,25 +138,33 @@ export function VehicleDetailView({ listing }: VehicleDetailViewProps) {
                 </ul>
               </div>
 
-              <div
-                className="relative overflow-hidden rounded-2xl px-6 py-16"
-                style={{
-                  background: `linear-gradient(135deg, rgba(${brand.forestRgb}, 0.9), rgba(${brand.forestRgb}, 0.95))`,
-                }}
-              >
-                <div className="relative z-10 space-y-6">
-                  <h2 className="text-2xl font-semibold text-white">
-                    Keep It Moving
-                  </h2>
-                  <Link
-                    href={vehiclesHref({
-                      category: listing.category?.slug,
-                    })}
-                    className="inline-flex h-10 items-center justify-center rounded-full px-6 text-sm font-semibold"
-                    style={{ backgroundColor: brand.lime, color: brand.forest }}
-                  >
-                    Find Accessories
-                  </Link>
+              <div className="relative min-h-[260px] overflow-hidden rounded-2xl px-6 py-8">
+                <div className="absolute inset-0" aria-hidden>
+                  <Image
+                    src="/images/find-accessories.jpg"
+                    alt=""
+                    fill
+                    className="object-cover"
+                    sizes="(max-width: 1024px) 100vw, 380px"
+                  />
+                </div>
+                <div className="absolute inset-0 bg-[#17443866]" aria-hidden />
+                <div className="relative z-10 flex min-h-[196px] items-end">
+                  <div className="space-y-6">
+                    <h2 className="text-2xl font-semibold text-white">
+                      Keep It Moving
+                    </h2>
+                    <Link
+                      href="/spare-parts"
+                      className="inline-flex h-10 items-center justify-center rounded-full px-6 text-sm font-semibold"
+                      style={{
+                        backgroundColor: brand.lime,
+                        color: brand.forest,
+                      }}
+                    >
+                      Find Accessories
+                    </Link>
+                  </div>
                 </div>
               </div>
             </div>

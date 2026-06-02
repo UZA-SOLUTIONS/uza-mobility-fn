@@ -1,17 +1,34 @@
-import Link from 'next/link';
-import { siteConfig } from '@/config/site';
+import { MarketingChrome } from '@/components/marketing/marketing-chrome';
+import { getPublicCategories } from '@/lib/api/catalog';
+import type { Category } from '@/types/admin/marketplace';
 
-export default function AuthLayout({
+export default async function AuthLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
+  let categories: Category[] = [];
+  try {
+    categories = await getPublicCategories();
+  } catch {
+    categories = [];
+  }
+
   return (
-    <div className="flex min-h-full flex-col items-center justify-center px-4 py-12">
-      <Link href="/" className="mb-8 text-lg font-semibold">
-        {siteConfig.name}
-      </Link>
-      <div className="w-full max-w-md">{children}</div>
-    </div>
+    <MarketingChrome categories={categories}>
+      <section className="relative overflow-hidden pt-32 pb-16">
+        <div
+          className="absolute inset-0"
+          style={{
+            backgroundImage: "url('/images/sourcing-img.jpg')",
+            backgroundSize: 'cover',
+            backgroundPosition: 'center',
+          }}
+          aria-hidden
+        />
+        <div className="absolute inset-0 bg-[#17443866]" aria-hidden />
+        <div className="relative mx-auto w-full max-w-md px-4">{children}</div>
+      </section>
+    </MarketingChrome>
   );
 }
