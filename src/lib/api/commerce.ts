@@ -4,6 +4,12 @@ import {
   authenticatedFetch,
   authenticatedPaginatedFetch,
 } from '@/lib/api/authenticated';
+import {
+  downloadInvoiceDocumentHtml,
+  fetchAuthenticatedInvoiceDocument,
+  invoiceDocumentFilename,
+  openInvoiceDocumentInNewTab,
+} from '@/lib/api/invoice-document';
 import { toSearchParams } from '@/lib/api/query-params';
 import type { AdminListing } from '@/types/admin/marketplace';
 import type {
@@ -65,29 +71,30 @@ export function getAdminInvoice(id: string) {
   return authenticatedFetch<AdminInvoice>(`/admin/invoices/${id}`);
 }
 
-export async function openAdminInvoiceDocument(id: string) {
+async function fetchAdminInvoiceDocumentHtml(id: string) {
   const session = await getSession();
   const token = session?.accessToken;
   if (!token) {
     throw new Error('Not authenticated');
   }
 
-  const response = await fetch(
+  return fetchAuthenticatedInvoiceDocument(
     `${siteConfig.apiUrl}/admin/invoices/${id}/document`,
-    {
-      headers: { Authorization: `Bearer ${token}` },
-    },
+    token,
   );
+}
 
-  if (!response.ok) {
-    throw new Error('Failed to load invoice document');
-  }
+export async function openAdminInvoiceDocument(id: string) {
+  const html = await fetchAdminInvoiceDocumentHtml(id);
+  openInvoiceDocumentInNewTab(html);
+}
 
-  const html = await response.text();
-  const blob = new Blob([html], { type: 'text/html;charset=utf-8' });
-  const url = URL.createObjectURL(blob);
-  window.open(url, '_blank', 'noopener,noreferrer');
-  window.setTimeout(() => URL.revokeObjectURL(url), 60_000);
+export async function downloadAdminInvoiceDocument(
+  id: string,
+  invoiceNumber: string,
+) {
+  const html = await fetchAdminInvoiceDocumentHtml(id);
+  downloadInvoiceDocumentHtml(html, invoiceDocumentFilename(invoiceNumber));
 }
 
 export function cancelInvoice(id: string) {

@@ -1,14 +1,19 @@
 'use client';
 
+import Link from 'next/link';
+import { useSearchParams } from 'next/navigation';
 import { AccountProfileForm } from '@/components/account/account-profile-form';
 import { BuyerProfileForm } from '@/components/buyer/buyer-profile-form';
 import { PageHeader } from '@/components/shared/page-header';
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
+import { Button } from '@/components/ui/button';
 import { usePermissions } from '@/hooks/permissions';
 import { workspaceRoutes } from '@/config/routes';
-import Link from 'next/link';
 
 export function BuyerProfilePanel() {
   const { hasSellerWorkspace } = usePermissions();
+  const searchParams = useSearchParams();
+  const returnTo = searchParams.get('returnTo');
 
   return (
     <div className="mx-auto max-w-4xl space-y-10">
@@ -16,6 +21,21 @@ export function BuyerProfilePanel() {
         title="Profile"
         description="Your personal account and buyer details for purchases on UZA Mobility."
       />
+
+      {returnTo?.startsWith('/') ? (
+        <Alert>
+          <AlertTitle>Complete your buyer profile</AlertTitle>
+          <AlertDescription className="flex flex-wrap items-center gap-3">
+            <span>
+              Finish your buyer details to continue with your vehicle
+              reservation.
+            </span>
+            <Button size="sm" variant="outline" asChild>
+              <Link href={returnTo}>Continue purchase</Link>
+            </Button>
+          </AlertDescription>
+        </Alert>
+      ) : null}
 
       {hasSellerWorkspace ? (
         <p className="text-sm text-muted-foreground">

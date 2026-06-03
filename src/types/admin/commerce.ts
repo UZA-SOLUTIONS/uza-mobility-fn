@@ -106,6 +106,10 @@ export type AdminInvoice = {
   paymentDeadline: string | null;
   validUntil: string | null;
   issuedAt: string | null;
+  beneficiaryName?: string | null;
+  bankName?: string | null;
+  accountNumber?: string | null;
+  notes?: string | null;
   createdAt: string;
   updatedAt: string;
   listing?: { slug: string; listingTitle: string } | null;

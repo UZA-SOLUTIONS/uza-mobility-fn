@@ -34,8 +34,14 @@ export function NavbarAuth({ overlay = false }: NavbarAuthProps) {
               ? 'text-white hover:text-white hover:bg-white/10'
               : 'text-primary hover:text-primary'
           }
+          badgeClassName="bg-[#AAFF47] text-[#174438]"
         />
-        <Button size="sm" asChild>
+        <Button
+          size="sm"
+          asChild
+          className="border-0 hover:opacity-90"
+          style={{ backgroundColor: brand.lime, color: brand.forest }}
+        >
           <Link href={workspaceHref}>Workspace</Link>
         </Button>
       </div>

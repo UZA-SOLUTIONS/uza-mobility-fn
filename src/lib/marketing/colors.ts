@@ -1,4 +1,3 @@
-/** Brand tokens from marketing design (Figma). */
 export const brand = {
   forest: '#174438',
   forestRgb: '23 68 56',

@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Button } from '@/components/ui/button';
@@ -25,6 +25,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
+import { formatUsd } from '@/lib/admin/format';
 import { useMyInvoices, useSubmitPayment } from '@/queries/buyer';
 import { submitPaymentSchema, type SubmitPaymentInput } from '@/schemas/buyer';
 
@@ -40,7 +41,10 @@ export function SubmitPaymentDialog({
   defaultInvoiceId,
 }: SubmitPaymentDialogProps) {
   const submit = useSubmitPayment();
-  const { data: invoices } = useMyInvoices({ limit: 50 });
+  const { data: invoices } = useMyInvoices(
+    { payableOnly: true, limit: 50 },
+    open,
+  );
   const [proofs, setProofs] = useState<File[]>([]);
 
   const form = useForm<SubmitPaymentInput>({
@@ -51,6 +55,36 @@ export function SubmitPaymentDialog({
       currency: 'USD',
     },
   });
+
+  const selectedInvoiceId = form.watch('invoiceId');
+  const selectedInvoice = invoices?.items.find(
+    (invoice) => invoice.id === selectedInvoiceId,
+  );
+
+  useEffect(() => {
+    if (!open) return;
+    const invoice =
+      invoices?.items.find((row) => row.id === defaultInvoiceId) ??
+      invoices?.items[0];
+    form.reset({
+      invoiceId: defaultInvoiceId ?? invoice?.id ?? '',
+      amountPaid: invoice?.totalAmountUsd ?? 0,
+      currency: invoice?.currency ?? 'USD',
+      transferReference: invoice?.paymentReference ?? '',
+    });
+    setProofs([]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [open, defaultInvoiceId, invoices?.items]);
+
+  useEffect(() => {
+    if (!selectedInvoice) return;
+    form.setValue('amountPaid', selectedInvoice.totalAmountUsd);
+    form.setValue('currency', selectedInvoice.currency);
+    if (!form.getValues('transferReference')) {
+      form.setValue('transferReference', selectedInvoice.paymentReference);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [selectedInvoice?.id]);
 
   const onSubmit = form.handleSubmit((values) => {
     submit.mutate(
@@ -84,12 +118,27 @@ export function SubmitPaymentDialog({
               <SelectContent>
                 {invoices?.items.map((inv) => (
                   <SelectItem key={inv.id} value={inv.id}>
-                    {inv.invoiceNumber} · {inv.status}
+                    {inv.invoiceNumber} · {formatUsd(inv.totalAmountUsd)} ·{' '}
+                    {inv.status.replaceAll('_', ' ').toLowerCase()}
                   </SelectItem>
                 ))}
               </SelectContent>
             </Select>
+            {(invoices?.items.length ?? 0) === 0 ? (
+              <p className="text-xs text-muted-foreground">
+                No payable invoices right now. Request an invoice first.
+              </p>
+            ) : null}
           </div>
+          {selectedInvoice ? (
+            <p className="rounded-md border bg-muted/30 p-3 text-xs text-muted-foreground">
+              Use payment reference{' '}
+              <span className="font-mono">
+                {selectedInvoice.paymentReference}
+              </span>{' '}
+              when transferring funds.
+            </p>
+          ) : null}
           <div className="grid gap-4 sm:grid-cols-2">
             <div className="space-y-1.5">
               <Label htmlFor="amount">Amount paid (USD)</Label>
@@ -135,7 +184,10 @@ export function SubmitPaymentDialog({
             >
               Cancel
             </Button>
-            <Button type="submit" disabled={submit.isPending}>
+            <Button
+              type="submit"
+              disabled={submit.isPending || (invoices?.items.length ?? 0) === 0}
+            >
               {submit.isPending ? 'Submitting…' : 'Submit payment'}
             </Button>
           </DialogFooter>

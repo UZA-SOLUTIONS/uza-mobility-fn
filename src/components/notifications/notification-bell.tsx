@@ -27,11 +27,13 @@ type NotificationBellProps = {
   /** Override when not inside a workspace (e.g. marketing navbar). */
   viewAllHref?: string;
   triggerClassName?: string;
+  badgeClassName?: string;
 };
 
 export function NotificationBell({
   viewAllHref,
   triggerClassName,
+  badgeClassName,
 }: NotificationBellProps) {
   const pathname = usePathname();
   const { data: session } = useSession();
@@ -74,7 +76,12 @@ export function NotificationBell({
         >
           <Bell className="size-5" />
           {unreadCount > 0 ? (
-            <span className="absolute -top-0.5 -right-0.5 flex h-4 min-w-4 items-center justify-center rounded-full bg-primary px-1 text-[10px] font-medium text-primary-foreground">
+            <span
+              className={cn(
+                'absolute -top-0.5 -right-0.5 flex h-4 min-w-4 items-center justify-center rounded-full bg-primary px-1 text-[10px] font-medium text-primary-foreground',
+                badgeClassName,
+              )}
+            >
               {unreadCount > 99 ? '99+' : unreadCount}
             </span>
           ) : null}

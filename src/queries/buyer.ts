@@ -14,6 +14,7 @@ import {
   getMyOrders,
   getMyPayments,
   getOrderTracking,
+  downloadInvoiceDocument,
   openInvoiceDocument,
   requestInvoice,
   browsePublishedListings,
@@ -177,6 +178,23 @@ export function useOpenInvoiceDocument() {
     onError: (error) =>
       toast.error(
         error instanceof Error ? error.message : 'Could not open document',
+      ),
+  });
+}
+
+export function useDownloadInvoiceDocument() {
+  return useMutation({
+    mutationFn: ({
+      invoiceId,
+      invoiceNumber,
+    }: {
+      invoiceId: string;
+      invoiceNumber: string;
+    }) => downloadInvoiceDocument(invoiceId, invoiceNumber),
+    onSuccess: () => toast.success('Invoice downloaded'),
+    onError: (error) =>
+      toast.error(
+        error instanceof Error ? error.message : 'Could not download invoice',
       ),
   });
 }

@@ -13,7 +13,7 @@ type NavbarCartProps = {
 };
 
 /**
- * Show cart only for logged-in buyers with pending draft invoices.
+ * Show cart when the buyer has an active purchase in progress.
  */
 export function NavbarCart({ overlay = false }: NavbarCartProps) {
   const { data: session } = useSession();
@@ -21,7 +21,7 @@ export function NavbarCart({ overlay = false }: NavbarCartProps) {
   const isBuyer = Boolean(me?.roles.includes('BUYER'));
 
   const pending = useMyInvoices(
-    { status: 'DRAFT', page: 1, limit: 1 },
+    { pendingPurchase: true, page: 1, limit: 1 },
     isBuyer,
   );
   const pendingCount = pending.data?.meta.total ?? 0;
@@ -34,7 +34,7 @@ export function NavbarCart({ overlay = false }: NavbarCartProps) {
       className={`flex items-center justify-center px-5 py-3 ${
         overlay ? 'text-white' : 'text-primary'
       }`}
-      aria-label="Open pending cart items"
+      aria-label="Open pending purchases"
     >
       <span className="relative">
         <ShoppingCart className="size-6" />

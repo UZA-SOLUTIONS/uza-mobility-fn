@@ -11,6 +11,13 @@ import {
 import { apiFetchPaginated } from '@/lib/api/api';
 import { siteConfig } from '@/config/site';
 import { getSession } from 'next-auth/react';
+import {
+  downloadInvoiceDocumentHtml,
+  fetchAuthenticatedInvoiceDocument,
+  invoiceDocumentFilename,
+  openInvoiceDocumentInNewTab,
+} from '@/lib/api/invoice-document';
+import { normalizeBuyerProfileBody } from '@/lib/buyer/profile-payload';
 import { toSearchParams } from '@/lib/api/query-params';
 import type {
   CreateBuyerProfileInput,
@@ -42,14 +49,14 @@ export function getBuyerProfile(accessToken?: string) {
 export function createBuyerProfile(body: CreateBuyerProfileInput) {
   return authenticatedFetch<MeBuyerProfile>('/users/buyer-profile', {
     method: 'POST',
-    body: JSON.stringify(body),
+    body: JSON.stringify(normalizeBuyerProfileBody(body)),
   });
 }
 
 export function updateBuyerProfile(body: UpdateBuyerProfileInput) {
   return authenticatedFetch<MeBuyerProfile>('/users/buyer-profile', {
     method: 'PATCH',
-    body: JSON.stringify(body),
+    body: JSON.stringify(normalizeBuyerProfileBody(body)),
   });
 }
 
@@ -96,21 +103,28 @@ export function requestInvoice(body: RequestInvoiceInput) {
   });
 }
 
-export async function openInvoiceDocument(invoiceId: string) {
+async function fetchBuyerInvoiceDocumentHtml(invoiceId: string) {
   const session = await getSession();
   const token = session?.accessToken;
   if (!token) throw new Error('Not authenticated');
 
-  const url = `${siteConfig.apiUrl}/invoices/${invoiceId}/document`;
-  const response = await fetch(url, {
-    headers: { Authorization: `Bearer ${token}` },
-  });
-  if (!response.ok) {
-    throw new Error('Could not load invoice document');
-  }
-  const html = await response.text();
-  const blob = new Blob([html], { type: 'text/html;charset=utf-8' });
-  window.open(URL.createObjectURL(blob), '_blank', 'noopener,noreferrer');
+  return fetchAuthenticatedInvoiceDocument(
+    `${siteConfig.apiUrl}/invoices/${invoiceId}/document`,
+    token,
+  );
+}
+
+export async function openInvoiceDocument(invoiceId: string) {
+  const html = await fetchBuyerInvoiceDocumentHtml(invoiceId);
+  openInvoiceDocumentInNewTab(html);
+}
+
+export async function downloadInvoiceDocument(
+  invoiceId: string,
+  invoiceNumber: string,
+) {
+  const html = await fetchBuyerInvoiceDocumentHtml(invoiceId);
+  downloadInvoiceDocumentHtml(html, invoiceDocumentFilename(invoiceNumber));
 }
 
 export function getMyPayments(
@@ -149,6 +163,9 @@ export function submitFinancingRequest(body: FinancingRequestInput) {
   });
 }
 
+/** Public GET /listings max page size enforced by the API. */
+export const PUBLIC_LISTINGS_PAGE_LIMIT = 48;
+
 export type BrowsePublishedListingsFilters = {
   q?: string;
   limit?: number;
@@ -159,8 +176,12 @@ export type BrowsePublishedListingsFilters = {
 export function browsePublishedListings(
   filters: BrowsePublishedListingsFilters = {},
 ) {
+  const limit = Math.min(
+    filters.limit ?? PUBLIC_LISTINGS_PAGE_LIMIT,
+    PUBLIC_LISTINGS_PAGE_LIMIT,
+  );
   const params = new URLSearchParams({
-    limit: String(filters.limit ?? 50),
+    limit: String(limit),
     page: String(filters.page ?? 1),
   });
   if (filters.q?.trim()) params.set('q', filters.q.trim());

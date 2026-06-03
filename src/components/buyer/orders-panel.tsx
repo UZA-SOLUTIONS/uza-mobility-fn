@@ -69,8 +69,8 @@ export function BuyerOrdersPanel() {
                   colSpan={5}
                   className="py-8 text-center text-muted-foreground"
                 >
-                  No orders yet. Request an invoice for a listing to start a
-                  purchase.
+                  No orders yet. After your payment is verified, your order will
+                  appear here with tracking updates.
                 </TableCell>
               </TableRow>
             ) : null}

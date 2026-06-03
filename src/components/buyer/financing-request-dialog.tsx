@@ -48,11 +48,13 @@ function parseBuyerType(value: string | undefined): BuyerType {
 type FinancingRequestDialogProps = {
   open: boolean;
   onOpenChange: (open: boolean) => void;
+  defaultInvoiceId?: string;
 };
 
 export function FinancingRequestDialog({
   open,
   onOpenChange,
+  defaultInvoiceId,
 }: FinancingRequestDialogProps) {
   const { user } = useSessionUser();
   const submit = useSubmitFinancing();
@@ -82,11 +84,11 @@ export function FinancingRequestDialog({
       phone: user.phone ?? '',
       buyerType: parseBuyerType(user.buyerProfile?.buyerType),
       organizationName: user.buyerProfile?.organizationName ?? '',
-      invoiceId: '',
+      invoiceId: defaultInvoiceId ?? '',
       listingId: '',
     });
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [open, user]);
+  }, [open, user, defaultInvoiceId]);
 
   const onSubmit = form.handleSubmit((values) => {
     submit.mutate(values, {

@@ -13,7 +13,10 @@ import {
 } from '@/components/ui/sheet';
 import { usePermissions } from '@/hooks/permissions';
 import { formatDate, formatUsd } from '@/lib/admin/format';
-import { openAdminInvoiceDocument } from '@/lib/api/commerce';
+import {
+  downloadAdminInvoiceDocument,
+  openAdminInvoiceDocument,
+} from '@/lib/api/commerce';
 import { useAdminInvoice, useCancelInvoice } from '@/queries/commerce';
 import { useState } from 'react';
 
@@ -157,7 +160,32 @@ export function InvoiceDetailSheet({
                       }
                     }}
                   >
-                    {docLoading ? 'Opening…' : 'View document'}
+                    {docLoading ? 'Opening…' : 'View'}
+                  </Button>
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    disabled={docLoading}
+                    onClick={async () => {
+                      if (!invoice) return;
+                      setDocLoading(true);
+                      try {
+                        await downloadAdminInvoiceDocument(
+                          invoice.id,
+                          invoice.invoiceNumber,
+                        );
+                      } catch (err) {
+                        window.alert(
+                          err instanceof Error
+                            ? err.message
+                            : 'Could not download invoice',
+                        );
+                      } finally {
+                        setDocLoading(false);
+                      }
+                    }}
+                  >
+                    {docLoading ? 'Downloading…' : 'Download'}
                   </Button>
                   {canCancel && can('invoices:cancel') ? (
                     <Button

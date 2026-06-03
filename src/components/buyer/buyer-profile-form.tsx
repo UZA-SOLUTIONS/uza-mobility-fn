@@ -18,10 +18,141 @@ import { useCreateBuyerProfile, useUpdateBuyerProfile } from '@/queries/buyer';
 import {
   buyerTypes,
   createBuyerProfileSchema,
+  requiresOrganizationName,
   updateBuyerProfileSchema,
+  type CreateBuyerProfileFormValues,
   type CreateBuyerProfileInput,
+  type UpdateBuyerProfileFormValues,
   type UpdateBuyerProfileInput,
 } from '@/schemas/buyer';
+
+function formatBuyerType(type: string) {
+  return type.replaceAll('_', ' ');
+}
+
+function organizationRequired(buyerType: string | undefined) {
+  return Boolean(
+    buyerType &&
+    requiresOrganizationName(
+      buyerType as CreateBuyerProfileFormValues['buyerType'],
+    ),
+  );
+}
+
+type BuyerProfileFieldsProps = {
+  buyerType: string;
+  register: ReturnType<
+    typeof useForm<CreateBuyerProfileFormValues>
+  >['register'];
+  errors: Record<string, { message?: string } | undefined>;
+  idPrefix: string;
+};
+
+function BuyerProfileFields({
+  buyerType,
+  register,
+  errors,
+  idPrefix,
+}: BuyerProfileFieldsProps) {
+  const needsOrganization = organizationRequired(buyerType);
+
+  return (
+    <>
+      <div className="space-y-1.5">
+        <Label htmlFor={`${idPrefix}-org`}>
+          {needsOrganization
+            ? 'Organization name'
+            : 'Organization name (optional)'}
+        </Label>
+        <Input
+          id={`${idPrefix}-org`}
+          placeholder={
+            needsOrganization
+              ? 'Company or association name'
+              : 'Leave blank if buying as an individual'
+          }
+          {...register('organizationName')}
+        />
+        {errors.organizationName?.message ? (
+          <p className="text-xs text-destructive">
+            {errors.organizationName.message}
+          </p>
+        ) : null}
+      </div>
+
+      <div className="space-y-1.5">
+        <Label htmlFor={`${idPrefix}-tax`}>Tax ID (optional)</Label>
+        <Input
+          id={`${idPrefix}-tax`}
+          placeholder="TIN or tax registration number"
+          {...register('taxId')}
+        />
+        {errors.taxId?.message ? (
+          <p className="text-xs text-destructive">{errors.taxId.message}</p>
+        ) : null}
+      </div>
+
+      <div className="space-y-1.5">
+        <Label htmlFor={`${idPrefix}-address`}>Address (optional)</Label>
+        <Input
+          id={`${idPrefix}-address`}
+          placeholder="Street address for delivery or billing"
+          {...register('address')}
+        />
+        {errors.address?.message ? (
+          <p className="text-xs text-destructive">{errors.address.message}</p>
+        ) : null}
+      </div>
+
+      <div className="grid gap-4 sm:grid-cols-2">
+        <div className="space-y-1.5">
+          <Label htmlFor={`${idPrefix}-city`}>City</Label>
+          <Input id={`${idPrefix}-city`} {...register('city')} />
+          {errors.city?.message ? (
+            <p className="text-xs text-destructive">{errors.city.message}</p>
+          ) : null}
+        </div>
+        <div className="space-y-1.5">
+          <Label htmlFor={`${idPrefix}-country`}>Country (ISO)</Label>
+          <Input
+            id={`${idPrefix}-country`}
+            maxLength={2}
+            placeholder="RW"
+            {...register('country')}
+          />
+          {errors.country?.message ? (
+            <p className="text-xs text-destructive">{errors.country.message}</p>
+          ) : null}
+        </div>
+      </div>
+
+      <div className="grid gap-4 sm:grid-cols-2">
+        <div className="space-y-1.5">
+          <Label htmlFor={`${idPrefix}-national-id`}>
+            National ID (optional)
+          </Label>
+          <Input id={`${idPrefix}-national-id`} {...register('nationalId')} />
+          {errors.nationalId?.message ? (
+            <p className="text-xs text-destructive">
+              {errors.nationalId.message}
+            </p>
+          ) : null}
+        </div>
+        <div className="space-y-1.5">
+          <Label htmlFor={`${idPrefix}-passport`}>
+            Passport number (optional)
+          </Label>
+          <Input id={`${idPrefix}-passport`} {...register('passportNumber')} />
+          {errors.passportNumber?.message ? (
+            <p className="text-xs text-destructive">
+              {errors.passportNumber.message}
+            </p>
+          ) : null}
+        </div>
+      </div>
+    </>
+  );
+}
 
 export function BuyerProfileForm() {
   const { user } = useSessionUser();
@@ -29,19 +160,27 @@ export function BuyerProfileForm() {
   const create = useCreateBuyerProfile();
   const update = useUpdateBuyerProfile();
 
-  const createForm = useForm<CreateBuyerProfileInput>({
+  const createForm = useForm<CreateBuyerProfileFormValues>({
     resolver: zodResolver(createBuyerProfileSchema),
     defaultValues: {
       buyerType: 'INDIVIDUAL',
-      country: 'RW',
+      organizationName: '',
+      taxId: '',
+      address: '',
       city: 'Kigali',
+      country: 'RW',
+      nationalId: '',
+      passportNumber: '',
     },
   });
 
-  const updateForm = useForm<UpdateBuyerProfileInput>({
+  const updateForm = useForm<UpdateBuyerProfileFormValues>({
     resolver: zodResolver(updateBuyerProfileSchema),
     defaultValues: {},
   });
+
+  const createBuyerType = createForm.watch('buyerType');
+  const updateBuyerType = updateForm.watch('buyerType') ?? 'INDIVIDUAL';
 
   const buyerProfileKey = user?.buyerProfile
     ? [
@@ -57,15 +196,19 @@ export function BuyerProfileForm() {
     const p = user.buyerProfile;
     updateForm.reset({
       buyerType: buyerTypes.includes(
-        p.buyerType as CreateBuyerProfileInput['buyerType'],
+        p.buyerType as CreateBuyerProfileFormValues['buyerType'],
       )
-        ? (p.buyerType as CreateBuyerProfileInput['buyerType'])
+        ? (p.buyerType as CreateBuyerProfileFormValues['buyerType'])
         : 'INDIVIDUAL',
       organizationName: p.organizationName ?? '',
+      taxId: p.taxId ?? '',
+      address: p.address ?? '',
       city: p.city ?? '',
       country: p.country ?? 'RW',
+      nationalId: p.nationalId ?? '',
+      passportNumber: p.passportNumber ?? '',
     });
-    // eslint-disable-next-line react-hooks/exhaustive-deps -- reset when profile data changes, not when form identity changes
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user?.id, buyerProfileKey]);
 
   if (!hasProfile) {
@@ -78,17 +221,19 @@ export function BuyerProfileForm() {
       >
         <h2 className="text-lg font-semibold">Complete buyer profile</h2>
         <p className="text-sm text-muted-foreground">
-          Required before requesting invoices. Choose how you are buying on UZA
-          Mobility.
+          Required before requesting invoices. Fields marked optional can be
+          left blank; empty values are not sent to the server.
         </p>
+
         <div className="space-y-1.5">
           <Label>Buyer type</Label>
           <Select
-            value={createForm.watch('buyerType')}
+            value={createBuyerType}
             onValueChange={(v) =>
               createForm.setValue(
                 'buyerType',
-                v as CreateBuyerProfileInput['buyerType'],
+                v as CreateBuyerProfileFormValues['buyerType'],
+                { shouldValidate: true },
               )
             }
           >
@@ -98,30 +243,25 @@ export function BuyerProfileForm() {
             <SelectContent>
               {buyerTypes.map((t) => (
                 <SelectItem key={t} value={t}>
-                  {t.replaceAll('_', ' ')}
+                  {formatBuyerType(t)}
                 </SelectItem>
               ))}
             </SelectContent>
           </Select>
+          {createForm.formState.errors.buyerType?.message ? (
+            <p className="text-xs text-destructive">
+              {createForm.formState.errors.buyerType.message}
+            </p>
+          ) : null}
         </div>
-        <div className="space-y-1.5">
-          <Label htmlFor="org">Organization (optional)</Label>
-          <Input id="org" {...createForm.register('organizationName')} />
-        </div>
-        <div className="grid gap-4 sm:grid-cols-2">
-          <div className="space-y-1.5">
-            <Label htmlFor="buyer-city">City</Label>
-            <Input id="buyer-city" {...createForm.register('city')} />
-          </div>
-          <div className="space-y-1.5">
-            <Label htmlFor="buyer-country">Country (ISO)</Label>
-            <Input
-              id="buyer-country"
-              maxLength={2}
-              {...createForm.register('country')}
-            />
-          </div>
-        </div>
+
+        <BuyerProfileFields
+          buyerType={createBuyerType}
+          register={createForm.register}
+          errors={createForm.formState.errors}
+          idPrefix="create"
+        />
+
         <Button type="submit" disabled={create.isPending}>
           {create.isPending ? 'Creating…' : 'Create buyer profile'}
         </Button>
@@ -132,16 +272,19 @@ export function BuyerProfileForm() {
   return (
     <form
       className="space-y-4"
-      onSubmit={updateForm.handleSubmit((values) => update.mutate(values))}
+      onSubmit={updateForm.handleSubmit((values) =>
+        update.mutate(updateBuyerProfileSchema.parse(values)),
+      )}
     >
       <div className="space-y-1.5">
         <Label>Buyer type</Label>
         <Select
-          value={updateForm.watch('buyerType') ?? 'INDIVIDUAL'}
+          value={updateBuyerType}
           onValueChange={(v) =>
             updateForm.setValue(
               'buyerType',
               v as UpdateBuyerProfileInput['buyerType'],
+              { shouldValidate: true },
             )
           }
         >
@@ -151,34 +294,20 @@ export function BuyerProfileForm() {
           <SelectContent>
             {buyerTypes.map((t) => (
               <SelectItem key={t} value={t}>
-                {t.replaceAll('_', ' ')}
+                {formatBuyerType(t)}
               </SelectItem>
             ))}
           </SelectContent>
         </Select>
       </div>
-      <div className="space-y-1.5">
-        <Label htmlFor="org-upd">Organization</Label>
-        <Input id="org-upd" {...updateForm.register('organizationName')} />
-      </div>
-      <div className="grid gap-4 sm:grid-cols-2">
-        <div className="space-y-1.5">
-          <Label htmlFor="city-upd">City</Label>
-          <Input id="city-upd" {...updateForm.register('city')} />
-        </div>
-        <div className="space-y-1.5">
-          <Label htmlFor="country-upd">Country (ISO)</Label>
-          <Input
-            id="country-upd"
-            maxLength={2}
-            {...updateForm.register('country')}
-          />
-        </div>
-      </div>
-      <div className="space-y-1.5">
-        <Label htmlFor="address-upd">Address</Label>
-        <Input id="address-upd" {...updateForm.register('address')} />
-      </div>
+
+      <BuyerProfileFields
+        buyerType={updateBuyerType}
+        register={updateForm.register as BuyerProfileFieldsProps['register']}
+        errors={updateForm.formState.errors}
+        idPrefix="update"
+      />
+
       <Button type="submit" disabled={update.isPending}>
         {update.isPending ? 'Saving…' : 'Save buyer profile'}
       </Button>

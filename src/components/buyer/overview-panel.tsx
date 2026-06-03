@@ -1,6 +1,7 @@
 'use client';
 
 import Link from 'next/link';
+import { BuyerNextSteps } from '@/components/buyer/buyer-next-steps';
 import { PageHeader } from '@/components/shared/page-header';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -38,6 +39,8 @@ export function BuyerOverviewPanel() {
         title="Buyer overview"
         description="Track orders, invoices, payments, and financing for your EV purchases."
       />
+
+      <BuyerNextSteps />
 
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
         <StatCard

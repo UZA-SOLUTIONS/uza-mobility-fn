@@ -12,22 +12,94 @@ export const buyerTypes = [
   'LOGISTICS_COMPANY',
 ] as const;
 
-export const createBuyerProfileSchema = z.object({
-  buyerType: z.enum(buyerTypes),
-  organizationName: z.string().max(255).optional(),
-  taxId: z.string().max(255).optional(),
-  address: z.string().max(255).optional(),
-  city: z.string().max(255).optional(),
-  country: z.string().length(2).optional(),
-  nationalId: z.string().max(255).optional(),
-  passportNumber: z.string().max(255).optional(),
-});
+export type BuyerType = (typeof buyerTypes)[number];
 
-export type CreateBuyerProfileInput = z.infer<typeof createBuyerProfileSchema>;
+/** Buyer types that must provide an organization / business name. */
+export const organizationBuyerTypes = buyerTypes.filter(
+  (type): type is Exclude<BuyerType, 'INDIVIDUAL'> => type !== 'INDIVIDUAL',
+);
 
-export const updateBuyerProfileSchema = createBuyerProfileSchema.partial();
+export function requiresOrganizationName(buyerType: BuyerType): boolean {
+  return buyerType !== 'INDIVIDUAL';
+}
 
-export type UpdateBuyerProfileInput = z.infer<typeof updateBuyerProfileSchema>;
+const optionalProfileString = (max: number) =>
+  z
+    .string()
+    .max(max)
+    .optional()
+    .or(z.literal(''))
+    .transform((value) => {
+      const trimmed = value?.trim();
+      return trimmed === '' ? undefined : trimmed;
+    });
+
+export const createBuyerProfileSchema = z
+  .object({
+    buyerType: z.enum(buyerTypes),
+    organizationName: optionalProfileString(255),
+    taxId: optionalProfileString(255),
+    address: optionalProfileString(255),
+    city: z
+      .string()
+      .trim()
+      .min(1, 'City is required')
+      .max(255, 'City is too long'),
+    country: z
+      .string()
+      .trim()
+      .length(2, 'Country must be a 2-letter ISO code (e.g. RW)'),
+    nationalId: optionalProfileString(255),
+    passportNumber: optionalProfileString(255),
+  })
+  .superRefine((data, ctx) => {
+    if (requiresOrganizationName(data.buyerType) && !data.organizationName) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: 'Organization name is required for this buyer type',
+        path: ['organizationName'],
+      });
+    }
+  });
+
+/** Raw form values (empty strings allowed before parse). */
+export type CreateBuyerProfileFormValues = z.input<
+  typeof createBuyerProfileSchema
+>;
+/** Parsed payload for API calls. */
+export type CreateBuyerProfileInput = z.output<typeof createBuyerProfileSchema>;
+
+export const updateBuyerProfileSchema = z
+  .object({
+    buyerType: z.enum(buyerTypes).optional(),
+    organizationName: optionalProfileString(255),
+    taxId: optionalProfileString(255),
+    address: optionalProfileString(255),
+    city: z.string().trim().min(1).max(255).optional().or(z.literal('')),
+    country: z
+      .string()
+      .trim()
+      .length(2, 'Country must be a 2-letter ISO code (e.g. RW)')
+      .optional()
+      .or(z.literal('')),
+    nationalId: optionalProfileString(255),
+    passportNumber: optionalProfileString(255),
+  })
+  .superRefine((data, ctx) => {
+    if (!data.buyerType) return;
+    if (requiresOrganizationName(data.buyerType) && !data.organizationName) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: 'Organization name is required for this buyer type',
+        path: ['organizationName'],
+      });
+    }
+  });
+
+export type UpdateBuyerProfileFormValues = z.input<
+  typeof updateBuyerProfileSchema
+>;
+export type UpdateBuyerProfileInput = z.output<typeof updateBuyerProfileSchema>;
 
 export const requestInvoiceSchema = z.object({
   listingId: z.string().min(1, 'Listing ID is required'),

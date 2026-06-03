@@ -1,7 +1,11 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
+import { useSearchParams } from 'next/navigation';
+import Link from 'next/link';
+import { InvoiceBankDetailsDialog } from '@/components/buyer/invoice-bank-details-dialog';
 import { RequestInvoiceDialog } from '@/components/buyer/request-invoice-dialog';
+import { SubmitPaymentDialog } from '@/components/buyer/submit-payment-dialog';
 import { StatusBadge } from '@/components/admin/shared/status-badge';
 import { PaginationBar } from '@/components/admin/shared/pagination-bar';
 import { PageHeader } from '@/components/shared/page-header';
@@ -15,26 +19,89 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
+import { workspaceRoutes } from '@/config/routes';
 import { formatUsd } from '@/lib/admin/format';
-import { useMyInvoices, useOpenInvoiceDocument } from '@/queries/buyer';
-import type { BuyerInvoicesFilters } from '@/types/buyer/commerce';
+import {
+  invoiceStatusHint,
+  isPayableInvoiceStatus,
+  publicListingToSummary,
+} from '@/lib/buyer/invoice-flow';
+import { cn } from '@/lib/utils';
+import { getListingBySlug } from '@/lib/api/marketplace';
+import {
+  useDownloadInvoiceDocument,
+  useMyInvoices,
+  useOpenInvoiceDocument,
+} from '@/queries/buyer';
+import type {
+  BuyerInvoice,
+  BuyerInvoicesFilters,
+} from '@/types/buyer/commerce';
+import type { PublicListingSummary } from '@/types/buyer/commerce';
 
 export function BuyerInvoicesPanel() {
+  const searchParams = useSearchParams();
+  const listingIdParam = searchParams.get('listingId');
+  const slugParam = searchParams.get('slug');
+  const shouldOpenRequest = searchParams.get('request') === '1';
+  const highlightId = searchParams.get('highlight');
+
   const [filters, setFilters] = useState<BuyerInvoicesFilters>({
     page: 1,
     limit: 20,
   });
   const [requestOpen, setRequestOpen] = useState(false);
-  const openDoc = useOpenInvoiceDocument();
+  const [paymentOpen, setPaymentOpen] = useState(false);
+  const [paymentInvoiceId, setPaymentInvoiceId] = useState<
+    string | undefined
+  >();
+  const [bankDetailsInvoice, setBankDetailsInvoice] =
+    useState<BuyerInvoice | null>(null);
+  const [initialListing, setInitialListing] =
+    useState<PublicListingSummary | null>(null);
 
+  const openDoc = useOpenInvoiceDocument();
+  const downloadDoc = useDownloadInvoiceDocument();
   const { data, isLoading, isError, error } = useMyInvoices(filters);
+
+  useEffect(() => {
+    if (!shouldOpenRequest || !listingIdParam) return;
+
+    let cancelled = false;
+
+    async function openRequestDialog() {
+      try {
+        if (slugParam) {
+          const listing = await getListingBySlug(slugParam);
+          if (!cancelled && listing.id === listingIdParam) {
+            setInitialListing(publicListingToSummary(listing));
+          }
+        }
+      } catch {
+        // Still open the dialog — listing id from the URL is enough to submit.
+      } finally {
+        if (!cancelled) setRequestOpen(true);
+      }
+    }
+
+    void openRequestDialog();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [shouldOpenRequest, listingIdParam, slugParam]);
+
+  const onSubmitPayment = (invoiceId: string) => {
+    setPaymentInvoiceId(invoiceId);
+    setPaymentOpen(true);
+  };
 
   return (
     <div className="space-y-6">
       <div className="flex flex-wrap items-start justify-between gap-4">
         <PageHeader
           title="My invoices"
-          description="Proforma and payment invoices for your purchases."
+          description="Proforma invoices for your vehicle purchases. Pay using the bank details on each invoice."
         />
         <Button onClick={() => setRequestOpen(true)}>Request invoice</Button>
       </div>
@@ -72,39 +139,89 @@ export function BuyerInvoicesPanel() {
                   colSpan={5}
                   className="py-8 text-center text-muted-foreground"
                 >
-                  No invoices yet.
+                  No invoices yet. Reserve a vehicle or request an invoice to
+                  start a purchase.
                 </TableCell>
               </TableRow>
             ) : null}
-            {data?.items.map((invoice) => (
-              <TableRow key={invoice.id}>
-                <TableCell>
-                  <div>
-                    <p className="font-medium">{invoice.invoiceNumber}</p>
-                    <p className="text-xs text-muted-foreground">
-                      Ref {invoice.paymentReference}
-                    </p>
-                  </div>
-                </TableCell>
-                <TableCell>
-                  {invoice.vehicleBrand} {invoice.vehicleModel}
-                </TableCell>
-                <TableCell>
-                  <StatusBadge status={invoice.status} />
-                </TableCell>
-                <TableCell>{formatUsd(invoice.totalAmountUsd)}</TableCell>
-                <TableCell className="text-right">
-                  <Button
-                    size="sm"
-                    variant="outline"
-                    disabled={openDoc.isPending}
-                    onClick={() => openDoc.mutate(invoice.id)}
-                  >
-                    View document
-                  </Button>
-                </TableCell>
-              </TableRow>
-            ))}
+            {data?.items.map((invoice) => {
+              const hint = invoiceStatusHint(invoice.status);
+              const payable = isPayableInvoiceStatus(invoice.status);
+              return (
+                <TableRow
+                  key={invoice.id}
+                  className={cn(highlightId === invoice.id && 'bg-primary/5')}
+                >
+                  <TableCell>
+                    <div>
+                      <p className="font-medium">{invoice.invoiceNumber}</p>
+                      <p className="text-xs text-muted-foreground">
+                        Ref {invoice.paymentReference}
+                      </p>
+                      {hint ? (
+                        <p className="mt-1 text-xs text-muted-foreground">
+                          {hint}
+                        </p>
+                      ) : null}
+                    </div>
+                  </TableCell>
+                  <TableCell>
+                    {invoice.vehicleBrand} {invoice.vehicleModel}
+                  </TableCell>
+                  <TableCell>
+                    <StatusBadge status={invoice.status} />
+                  </TableCell>
+                  <TableCell>{formatUsd(invoice.totalAmountUsd)}</TableCell>
+                  <TableCell className="text-right">
+                    <div className="flex flex-wrap justify-end gap-2">
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        disabled={openDoc.isPending}
+                        onClick={() => openDoc.mutate(invoice.id)}
+                      >
+                        View
+                      </Button>
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        disabled={downloadDoc.isPending}
+                        onClick={() =>
+                          downloadDoc.mutate({
+                            invoiceId: invoice.id,
+                            invoiceNumber: invoice.invoiceNumber,
+                          })
+                        }
+                      >
+                        Download
+                      </Button>
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        onClick={() => setBankDetailsInvoice(invoice)}
+                      >
+                        Bank details
+                      </Button>
+                      {payable ? (
+                        <Button
+                          size="sm"
+                          onClick={() => onSubmitPayment(invoice.id)}
+                        >
+                          Pay
+                        </Button>
+                      ) : null}
+                      <Button size="sm" variant="ghost" asChild>
+                        <Link
+                          href={`${workspaceRoutes.accountFinancing}?invoiceId=${invoice.id}`}
+                        >
+                          Financing
+                        </Link>
+                      </Button>
+                    </div>
+                  </TableCell>
+                </TableRow>
+              );
+            })}
           </TableBody>
         </Table>
       </div>
@@ -116,7 +233,27 @@ export function BuyerInvoicesPanel() {
         />
       ) : null}
 
-      <RequestInvoiceDialog open={requestOpen} onOpenChange={setRequestOpen} />
+      <RequestInvoiceDialog
+        open={requestOpen}
+        onOpenChange={setRequestOpen}
+        defaultListingId={listingIdParam ?? undefined}
+        initialListing={initialListing}
+      />
+
+      <SubmitPaymentDialog
+        open={paymentOpen}
+        onOpenChange={setPaymentOpen}
+        defaultInvoiceId={paymentInvoiceId}
+      />
+
+      <InvoiceBankDetailsDialog
+        invoice={bankDetailsInvoice}
+        open={Boolean(bankDetailsInvoice)}
+        onOpenChange={(open) => {
+          if (!open) setBankDetailsInvoice(null);
+        }}
+        onSubmitPayment={onSubmitPayment}
+      />
     </div>
   );
 }

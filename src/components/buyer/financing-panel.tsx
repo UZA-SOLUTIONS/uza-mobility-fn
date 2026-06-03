@@ -1,6 +1,7 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
+import { useSearchParams } from 'next/navigation';
 import { FinancingRequestDialog } from '@/components/buyer/financing-request-dialog';
 import { StatusBadge } from '@/components/admin/shared/status-badge';
 import { PageHeader } from '@/components/shared/page-header';
@@ -18,8 +19,19 @@ import { formatDate, formatUsd } from '@/lib/admin/format';
 import { useMyFinancing } from '@/queries/buyer';
 
 export function BuyerFinancingPanel() {
+  const searchParams = useSearchParams();
+  const invoiceIdParam = searchParams.get('invoiceId');
   const [requestOpen, setRequestOpen] = useState(false);
+  const [defaultInvoiceId, setDefaultInvoiceId] = useState<
+    string | undefined
+  >();
   const { data, isLoading, isError, error } = useMyFinancing();
+
+  useEffect(() => {
+    if (!invoiceIdParam) return;
+    setDefaultInvoiceId(invoiceIdParam);
+    setRequestOpen(true);
+  }, [invoiceIdParam]);
 
   return (
     <div className="space-y-6">
@@ -28,7 +40,14 @@ export function BuyerFinancingPanel() {
           title="Financing support"
           description="Track facilitation requests submitted to UZA and partner banks."
         />
-        <Button onClick={() => setRequestOpen(true)}>New request</Button>
+        <Button
+          onClick={() => {
+            setDefaultInvoiceId(undefined);
+            setRequestOpen(true);
+          }}
+        >
+          New request
+        </Button>
       </div>
 
       {isError ? (
@@ -88,6 +107,7 @@ export function BuyerFinancingPanel() {
       <FinancingRequestDialog
         open={requestOpen}
         onOpenChange={setRequestOpen}
+        defaultInvoiceId={defaultInvoiceId}
       />
     </div>
   );

@@ -2,7 +2,7 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { Battery, Car, Gauge, MapPin, Settings2 } from 'lucide-react';
 import { VehicleDetailGallery } from '@/components/marketing/vehicle-detail-gallery';
-import { authRoutes } from '@/config/routes';
+import { VehicleDetailReserveAction } from '@/components/marketing/vehicle-detail-reserve-action';
 import { vehiclesHref } from '@/lib/marketing/vehicles-url';
 import {
   buildVehicleSpecRows,
@@ -11,10 +11,7 @@ import {
   getListingPhotos,
   resolveListingVideoUrl,
 } from '@/lib/marketing/listing-detail';
-import {
-  formatListingPrice,
-  listingDetailHref,
-} from '@/lib/marketing/listing-display';
+import { formatListingPrice } from '@/lib/marketing/listing-display';
 import { brand } from '@/lib/marketing/colors';
 import type { PublicListing } from '@/types/marketplace/public-listing';
 
@@ -38,7 +35,6 @@ type VehicleDetailViewProps = {
 export function VehicleDetailView({ listing }: VehicleDetailViewProps) {
   const photos = getListingPhotos(listing);
   const specRows = buildVehicleSpecRows(listing);
-  const reserveHref = `${authRoutes.register}?callbackUrl=${encodeURIComponent(listingDetailHref(listing.slug))}`;
 
   return (
     <>
@@ -109,13 +105,7 @@ export function VehicleDetailView({ listing }: VehicleDetailViewProps) {
                   </div>
                 </div>
 
-                <Link
-                  href={reserveHref}
-                  className="mt-8 flex h-10 w-full items-center justify-center rounded-full text-sm font-semibold text-white"
-                  style={{ backgroundColor: brand.forest }}
-                >
-                  Reserve This Vehicle
-                </Link>
+                <VehicleDetailReserveAction listing={listing} />
               </div>
 
               <div className="rounded-2xl border border-[#E9E9E9] p-8">

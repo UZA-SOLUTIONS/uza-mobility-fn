@@ -18,6 +18,9 @@ export type BuyerOrdersFilters = {
 
 export type BuyerInvoicesFilters = {
   status?: import('@/types/admin/commerce').InvoiceStatus;
+  pendingPurchase?: boolean;
+  payableOnly?: boolean;
+  listingId?: string;
   page?: number;
   limit?: number;
 };

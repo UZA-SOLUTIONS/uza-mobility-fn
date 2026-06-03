@@ -5,6 +5,7 @@ import { SearchablePicker } from '@/components/admin/shared/searchable-picker';
 import type { SearchablePickerOption } from '@/components/admin/shared/searchable-picker';
 import { formatUsd } from '@/lib/admin/format';
 import { useDebounce } from '@/hooks/use-debounce';
+import { PUBLIC_LISTINGS_PAGE_LIMIT } from '@/lib/api/buyer';
 import { usePublishedListings } from '@/queries/buyer';
 import type { PublicListingSummary } from '@/types/buyer/commerce';
 
@@ -55,7 +56,10 @@ export function PublishedListingPicker({
   const [search, setSearch] = useState('');
   const debouncedSearch = useDebounce(search, 300);
   const listingFilters = useMemo(
-    () => ({ q: debouncedSearch || undefined, limit: 50 }),
+    () => ({
+      q: debouncedSearch || undefined,
+      limit: PUBLIC_LISTINGS_PAGE_LIMIT,
+    }),
     [debouncedSearch],
   );
 
