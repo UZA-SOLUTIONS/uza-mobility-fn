@@ -1,4 +1,5 @@
 import { MarketingPageHero } from '@/components/marketing/marketing-page-hero';
+import { marketingProseSection } from '@/lib/marketing/layout-classes';
 
 export default function BlogPage() {
   return (
@@ -8,7 +9,7 @@ export default function BlogPage() {
         description="News and updates from UZA Mobility."
       />
       <div className="bg-white">
-        <div className="mx-auto max-w-3xl px-[60px] py-16 text-[#356769]">
+        <div className={`${marketingProseSection} text-[#356769]`}>
           <p className="text-base leading-relaxed">Content coming soon.</p>
         </div>
       </div>

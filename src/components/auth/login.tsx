@@ -3,6 +3,7 @@
 import Link from 'next/link';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
+import { AuthFormCard } from '@/components/auth/auth-form-card';
 import { PageHeader } from '@/components/shared/page-header';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -36,7 +37,7 @@ export function Login() {
   });
 
   return (
-    <div className="space-y-6 rounded-xl border border-white/40 bg-white/95 p-6 shadow-xl backdrop-blur-sm">
+    <AuthFormCard>
       <PageHeader
         title="Log in"
         description="Access your buyer, seller, or admin account."
@@ -94,6 +95,6 @@ export function Login() {
           Create account
         </Link>
       </p>
-    </div>
+    </AuthFormCard>
   );
 }

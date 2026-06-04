@@ -15,6 +15,7 @@ import {
 } from '@/lib/marketing/listing-detail';
 import { formatListingPrice } from '@/lib/marketing/listing-display';
 import { brand } from '@/lib/marketing/colors';
+import { marketingContainer } from '@/lib/marketing/layout-classes';
 import type { PublicListing } from '@/types/marketplace/public-listing';
 
 type VehicleDetailViewProps = {
@@ -27,8 +28,8 @@ export function VehicleDetailView({ listing }: VehicleDetailViewProps) {
   const extendedSpecGroups = buildVehicleExtendedSpecGroups(listing);
 
   return (
-    <div className="bg-white py-14">
-      <div className="mx-auto max-w-[1440px] px-[60px]">
+    <div className="bg-white py-8 sm:py-14">
+      <div className={marketingContainer}>
         <div className="grid gap-8 xl:grid-cols-[minmax(0,1fr)_429px]">
           <div className="space-y-5">
             <VehicleDetailGallery
@@ -38,7 +39,7 @@ export function VehicleDetailView({ listing }: VehicleDetailViewProps) {
             />
 
             {listing.description?.trim() ? (
-              <div className="rounded-2xl border border-[#E9E9E9] p-8">
+              <div className="rounded-2xl border border-[#E9E9E9] p-4 sm:p-8">
                 <h2 className="mb-4 text-lg font-semibold text-[#151515]">
                   Description
                 </h2>
@@ -54,7 +55,7 @@ export function VehicleDetailView({ listing }: VehicleDetailViewProps) {
           </div>
 
           <div className="space-y-5 xl:sticky xl:top-24 xl:self-start">
-            <div className="rounded-2xl border border-[#E9E9E9] p-8">
+            <div className="rounded-2xl border border-[#E9E9E9] p-4 sm:p-8">
               <p className="text-sm font-medium" style={{ color: brand.teal }}>
                 The Price
               </p>

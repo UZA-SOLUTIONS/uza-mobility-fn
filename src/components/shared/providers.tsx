@@ -14,7 +14,7 @@ export function Providers({ children }: { children: React.ReactNode }) {
       <QueryProvider>
         <SessionRefresh />
         <NotificationSocketListener />
-        <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
+        <ThemeProvider attribute="class" defaultTheme="light" enableSystem>
           <NavigationProgress />
           {children}
           <Toaster richColors closeButton position="top-right" />

@@ -1,6 +1,7 @@
 import { Skeleton } from '@/components/ui/skeleton';
 import { ListingGridSkeleton } from '@/components/marketing/listing-grid-skeleton';
 import { brand } from '@/lib/marketing/colors';
+import { marketingContainer } from '@/lib/marketing/layout-classes';
 
 export function VehiclesPageSkeleton() {
   return (
@@ -10,12 +11,12 @@ export function VehiclesPageSkeleton() {
         style={{ backgroundColor: brand.forest }}
         aria-hidden
       >
-        <div className="mx-auto w-full max-w-[1440px] px-[60px] pt-28 pb-12">
+        <div className={`${marketingContainer} pt-24 pb-10 sm:pt-28 sm:pb-12`}>
           <Skeleton className="h-10 w-48 bg-white/20" />
         </div>
       </section>
       <div className="bg-white" aria-busy aria-label="Loading vehicles">
-        <div className="mx-auto max-w-[1440px] px-[60px] py-[60px]">
+        <div className={`${marketingContainer} py-10 sm:py-14 lg:py-[60px]`}>
           <div className="mb-8 flex flex-col gap-4 sm:flex-row">
             <Skeleton className="h-[52px] flex-1 rounded" />
             <Skeleton className="h-12 w-full max-w-[247px] rounded" />

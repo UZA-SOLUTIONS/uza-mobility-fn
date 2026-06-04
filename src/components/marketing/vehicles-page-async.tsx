@@ -13,6 +13,7 @@ import {
   VEHICLES_PAGE_SIZE,
   type BrowseFilterOptions,
 } from '@/lib/marketing/vehicles-browse';
+import { marketingContainer } from '@/lib/marketing/layout-classes';
 import type { PublicListing } from '@/types/marketplace/public-listing';
 
 type VehiclesPageAsyncProps = {
@@ -93,7 +94,7 @@ export async function VehiclesPageAsync({
     <>
       <VehiclesHero title={heroTitle} />
       <div className="bg-white">
-        <div className="mx-auto w-full max-w-[1440px] px-[60px] py-[60px]">
+        <div className={`${marketingContainer} py-10 sm:py-14 lg:py-[60px]`}>
           {!isLocalStock ? <VehiclesBrowseToolbar filters={filters} /> : null}
 
           <div className="flex flex-col gap-8 lg:flex-row lg:gap-8">

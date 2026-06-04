@@ -1,4 +1,5 @@
 import { MarketingPageHero } from '@/components/marketing/marketing-page-hero';
+import { marketingProseSection } from '@/lib/marketing/layout-classes';
 
 export default function ForBusinessPage() {
   return (
@@ -8,7 +9,7 @@ export default function ForBusinessPage() {
         description="Programs for buyers, sellers, and fleet partners."
       />
       <div className="bg-white">
-        <div className="mx-auto max-w-3xl px-[60px] py-16 text-[#356769]">
+        <div className={`${marketingProseSection} text-[#356769]`}>
           <p className="text-base leading-relaxed">
             Contact us for fleet quotes, seller onboarding, and financing
             facilitation. Detailed pricing will be published here soon.

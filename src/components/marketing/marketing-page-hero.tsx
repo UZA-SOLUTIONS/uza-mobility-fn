@@ -1,4 +1,5 @@
 import { brand } from '@/lib/marketing/colors';
+import { marketingContainer } from '@/lib/marketing/layout-classes';
 
 type MarketingPageHeroProps = {
   title: string;
@@ -14,7 +15,7 @@ export function MarketingPageHero({
       className="flex min-h-[280px] w-full items-end md:min-h-[320px]"
       style={{ backgroundColor: brand.forest }}
     >
-      <div className="mx-auto w-full max-w-[1440px] px-[60px] pt-28 pb-12">
+      <div className={`${marketingContainer} pt-24 pb-10 sm:pt-28 sm:pb-12`}>
         <div className="max-w-3xl space-y-3">
           <h1 className="text-4xl font-semibold tracking-tight text-white md:text-[42px]">
             {title}

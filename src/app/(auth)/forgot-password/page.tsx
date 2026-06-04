@@ -1,4 +1,5 @@
 import Link from 'next/link';
+import { AuthFormCard } from '@/components/auth/auth-form-card';
 import { PageHeader } from '@/components/shared/page-header';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -6,7 +7,7 @@ import { Label } from '@/components/ui/label';
 
 export default function ForgotPasswordPage() {
   return (
-    <div className="space-y-6 rounded-xl border border-white/40 bg-white/95 p-6 shadow-xl backdrop-blur-sm">
+    <AuthFormCard>
       <PageHeader
         title="Forgot password"
         description="We will send reset instructions when this flow is connected to the API."
@@ -25,6 +26,6 @@ export default function ForgotPasswordPage() {
           Back to log in
         </Link>
       </p>
-    </div>
+    </AuthFormCard>
   );
 }

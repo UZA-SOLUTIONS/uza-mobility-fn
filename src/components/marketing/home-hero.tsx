@@ -2,6 +2,7 @@ import Link from 'next/link';
 import { HomeHeroMedia } from '@/components/marketing/home-hero-media';
 import { HomeHeroOverlay } from '@/components/marketing/home-hero-overlay';
 import { brand } from '@/lib/marketing/colors';
+import { marketingContainer } from '@/lib/marketing/layout-classes';
 
 export function HomeHero() {
   return (
@@ -10,7 +11,9 @@ export function HomeHero() {
         <HomeHeroMedia />
         <HomeHeroOverlay />
       </div>
-      <div className="relative z-10 mx-auto w-full max-w-[1440px] px-[60px] pt-32 pb-20">
+      <div
+        className={`relative z-10 ${marketingContainer} pt-24 pb-12 sm:pt-28 sm:pb-16 lg:pt-32 lg:pb-20`}
+      >
         <div className="max-w-xl space-y-8">
           <div className="space-y-2">
             <h1 className="text-4xl font-semibold tracking-tight text-white md:text-5xl">

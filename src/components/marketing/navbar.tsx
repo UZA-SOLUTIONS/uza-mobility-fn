@@ -5,9 +5,12 @@ import Link from 'next/link';
 import { Search } from 'lucide-react';
 import type { NavItem } from '@/config/navigation';
 import { authRoutes } from '@/config/routes';
+import { MarketingNavLink } from '@/components/marketing/marketing-nav-link';
 import { NavbarCart } from '@/components/marketing/navbar-cart';
 import { NavbarAuth } from '@/components/marketing/navbar-auth';
+import { NavbarMobileMenu } from '@/components/marketing/navbar-mobile-menu';
 import { brand } from '@/lib/marketing/colors';
+import { marketingOverlayNav } from '@/lib/marketing/layout-classes';
 
 type MarketingNavbarProps = {
   /** Transparent glass bar over the hero (homepage). */
@@ -23,7 +26,7 @@ export function MarketingNavbar({
     <header
       className={
         overlay
-          ? 'absolute inset-x-0 top-0 z-20 px-[60px] pt-[30px]'
+          ? `absolute inset-x-0 top-0 z-20 ${marketingOverlayNav}`
           : 'border-b bg-background'
       }
     >
@@ -52,21 +55,22 @@ export function MarketingNavbar({
           />
         </Link>
 
-        <nav className="hidden items-center gap-1 lg:flex">
+        <nav
+          className="hidden items-center gap-0.5 lg:flex"
+          aria-label="Main navigation"
+        >
           {navItems.map((item) => (
-            <Link
+            <MarketingNavLink
               key={item.label}
-              href={item.href}
-              className={`px-5 py-2 text-sm ${
-                overlay ? 'text-white' : 'text-primary/80 hover:text-primary'
-              }`}
-            >
-              {item.label}
-            </Link>
+              item={item}
+              overlay={overlay}
+              variant="desktop"
+            />
           ))}
         </nav>
 
-        <div className="flex items-center">
+        <div className="flex items-center gap-0.5">
+          <NavbarMobileMenu navItems={navItems} overlay={overlay} />
           <NavbarCart overlay={overlay} />
           <Link
             href="/vehicles"

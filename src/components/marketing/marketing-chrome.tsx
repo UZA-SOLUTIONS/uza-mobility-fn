@@ -25,7 +25,7 @@ export function MarketingChrome({
 
   return (
     <MarketingCatalogProvider categories={categories}>
-      <div className="flex min-h-full flex-col">
+      <div className="flex min-h-full flex-col overflow-x-hidden">
         <div className="relative">
           <MarketingNavbar overlay={overlayNav} navItems={navItems} />
           <main className="flex-1">{children}</main>

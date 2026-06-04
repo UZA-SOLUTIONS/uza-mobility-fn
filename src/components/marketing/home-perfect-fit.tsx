@@ -8,6 +8,7 @@ import { useMarketingCategories } from '@/components/marketing/marketing-catalog
 import { browseListings } from '@/lib/api/marketplace';
 import { buildPerfectFitTabs } from '@/lib/marketing/marketing-catalog-nav';
 import { brand } from '@/lib/marketing/colors';
+import { marketingContainer } from '@/lib/marketing/layout-classes';
 import type { PublicListing } from '@/types/marketplace/public-listing';
 
 export function HomePerfectFit() {
@@ -70,7 +71,7 @@ export function HomePerfectFit() {
 
   return (
     <section className="bg-white py-20">
-      <div className="mx-auto max-w-[1440px] px-[60px]">
+      <div className={marketingContainer}>
         <div className="mb-10 space-y-6">
           <h2 className="text-3xl font-semibold text-[#151515]">
             Find Your Perfect Fit

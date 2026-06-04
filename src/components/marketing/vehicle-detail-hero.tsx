@@ -6,6 +6,7 @@ import {
 } from '@/lib/marketing/listing-detail';
 import { resolveMediaUrl } from '@/lib/marketing/listing-display';
 import { brand } from '@/lib/marketing/colors';
+import { marketingPageX } from '@/lib/marketing/layout-classes';
 import type { PublicListing } from '@/types/marketplace/public-listing';
 
 type VehicleDetailHeroProps = {
@@ -46,7 +47,9 @@ export function VehicleDetailHero({ listing }: VehicleDetailHeroProps) {
         <HomeHeroOverlay />
       </div>
 
-      <div className="relative z-10 flex h-full items-end justify-center px-[60px] pt-28 pb-16">
+      <div
+        className={`relative z-10 flex h-full items-end justify-center ${marketingPageX} pt-24 pb-10 sm:pt-28 sm:pb-16`}
+      >
         <div className="max-w-3xl space-y-2 text-center">
           <h1 className="text-3xl font-semibold text-white md:text-4xl">
             {listing.listingTitle}

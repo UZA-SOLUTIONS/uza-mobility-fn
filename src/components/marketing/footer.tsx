@@ -2,6 +2,7 @@ import Image from 'next/image';
 import Link from 'next/link';
 import type { MarketingFooterColumn } from '@/config/navigation';
 import { brand } from '@/lib/marketing/colors';
+import { marketingFooterX } from '@/lib/marketing/layout-classes';
 
 function FacebookIcon({ className }: { className?: string }) {
   return (
@@ -62,7 +63,9 @@ type MarketingFooterProps = {
 export function MarketingFooter({ columns }: MarketingFooterProps) {
   return (
     <footer style={{ backgroundColor: brand.forest }} className="text-white">
-      <div className="mx-auto max-w-[1440px] border-b border-white/20 px-20 py-20">
+      <div
+        className={`mx-auto max-w-[1440px] border-b border-white/20 py-12 sm:py-16 lg:py-20 ${marketingFooterX}`}
+      >
         <div className="flex flex-col gap-12 lg:flex-row lg:justify-between">
           <Link href="/" className="relative block h-14 w-32 shrink-0">
             <Image
@@ -121,7 +124,7 @@ export function MarketingFooter({ columns }: MarketingFooterProps) {
           </div>
         </div>
       </div>
-      <div className="px-20 py-6 text-center">
+      <div className={`py-6 text-center ${marketingFooterX}`}>
         <p className="text-sm" style={{ color: brand.lime }}>
           UZA Mobility © {new Date().getFullYear()}
         </p>

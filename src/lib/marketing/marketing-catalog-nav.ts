@@ -23,12 +23,12 @@ function categoryNavLinks(categories: Category[]): NavItem[] {
 }
 
 /** Top nav from live category tree (`GET /categories`). */
-export function buildMarketingNav(categories: Category[]): NavItem[] {
+export function buildMarketingNav(_categories: Category[]): NavItem[] {
   return [
     { label: 'Vehicles', href: vehiclesHref() },
     { label: 'Spare Parts', href: '/spare-parts' },
     { label: 'For Business', href: '/for-business' },
-    { label: 'About UZA Mobility', href: '/about' },
+    { label: 'About', href: '/about' },
   ];
 }
 

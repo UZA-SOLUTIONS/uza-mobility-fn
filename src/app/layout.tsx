@@ -1,7 +1,7 @@
 import type { Metadata } from 'next';
 import { Syne } from 'next/font/google';
 import { Providers } from '@/components/shared/providers';
-import { siteConfig } from '@/config/site';
+import { getSiteOrigin, siteConfig } from '@/config/site';
 import './globals.css';
 
 const syne = Syne({
@@ -11,6 +11,7 @@ const syne = Syne({
 });
 
 export const metadata: Metadata = {
+  metadataBase: new URL(getSiteOrigin()),
   title: {
     default: siteConfig.name,
     template: `%s | ${siteConfig.name}`,

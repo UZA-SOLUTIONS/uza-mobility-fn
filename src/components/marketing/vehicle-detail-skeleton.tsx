@@ -1,4 +1,5 @@
 import { Skeleton } from '@/components/ui/skeleton';
+import { marketingContainer } from '@/lib/marketing/layout-classes';
 
 export function VehicleDetailHeroSkeleton() {
   return <Skeleton className="h-[min(650px,85vh)] w-full rounded-none" />;
@@ -11,7 +12,7 @@ export function VehicleDetailContentSkeleton() {
       aria-busy
       aria-label="Loading vehicle details"
     >
-      <div className="mx-auto max-w-[1440px] px-[60px]">
+      <div className={marketingContainer}>
         <div className="grid gap-8 xl:grid-cols-[minmax(0,1fr)_429px]">
           <div className="space-y-5">
             <Skeleton className="aspect-[859/528] w-full rounded-2xl" />

@@ -1,6 +1,7 @@
 import Image from 'next/image';
 import Link from 'next/link';
 import { brand } from '@/lib/marketing/colors';
+import { marketingContainer } from '@/lib/marketing/layout-classes';
 
 function PromoCard({
   title,
@@ -22,7 +23,7 @@ function PromoCard({
       className="flex min-h-[283px] flex-1 overflow-hidden rounded-lg"
       style={{ backgroundColor: brand.tealCard }}
     >
-      <div className="flex flex-1 flex-col justify-between p-8">
+      <div className="flex flex-1 flex-col justify-between p-5 sm:p-8">
         <div className="space-y-4">
           <h3 className="text-2xl leading-tight font-semibold text-white md:text-4xl">
             {title}
@@ -48,8 +49,13 @@ function PromoCard({
 
 export function HomePromoGrid() {
   return (
-    <section className="py-20" style={{ backgroundColor: brand.forest }}>
-      <div className="mx-auto flex max-w-[1440px] flex-col gap-10 px-[60px] md:flex-row">
+    <section
+      className="py-12 sm:py-20"
+      style={{ backgroundColor: brand.forest }}
+    >
+      <div
+        className={`${marketingContainer} flex flex-col gap-6 md:flex-row md:gap-10`}
+      >
         <PromoCard
           title="Buy for Your Business"
           description="Electrify your delivery service, taxi association, or corporate fleet with bulk pricing and dedicated support."
