@@ -41,9 +41,23 @@ function buildImageRemotePatterns(): NonNullable<
   return patterns;
 }
 
+const apiUrl = (
+  process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:7000'
+).replace(/\/$/, '');
+
 const config: NextConfig = {
   // React Compiler (already enabled in this project)
   reactCompiler: true,
+
+  /** Proxy API uploads so next/image can load them from the app origin (dev + prod). */
+  async rewrites() {
+    return [
+      {
+        source: '/uploads/:path*',
+        destination: `${apiUrl}/uploads/:path*`,
+      },
+    ];
+  },
 
   // Bundle only what's used from large icon/chart/UI packages
   experimental: {
@@ -54,6 +68,8 @@ const config: NextConfig = {
   images: {
     formats: ['image/avif', 'image/webp'],
     remotePatterns: buildImageRemotePatterns(),
+    // Dev: allow next/image to optimize remote API URLs when not proxied via /uploads.
+    dangerouslyAllowLocalIP: process.env.NODE_ENV === 'development',
   },
 
   // Security & compression

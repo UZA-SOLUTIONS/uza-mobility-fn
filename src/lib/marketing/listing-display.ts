@@ -1,17 +1,24 @@
 import { siteConfig } from '@/config/site';
 import type { PublicListing } from '@/types/marketplace/public-listing';
 
-/** Normalize API photo URLs for next/image (local /uploads + legacy Cloudinary). */
+/** Normalize API photo URLs for next/image (proxied /uploads + legacy Cloudinary). */
 export function resolveMediaUrl(url: string | null | undefined): string | null {
   if (!url?.trim()) return null;
   const trimmed = url.trim();
+  const apiBase = siteConfig.apiUrl.replace(/\/$/, '');
+
+  // API file storage — same-origin path (see next.config rewrites → backend /uploads)
+  if (trimmed.startsWith(`${apiBase}/uploads/`)) {
+    return trimmed.slice(apiBase.length);
+  }
+  if (trimmed.startsWith('/uploads/')) {
+    return trimmed;
+  }
+
   if (trimmed.startsWith('http://') || trimmed.startsWith('https://')) {
     return trimmed;
   }
-  if (trimmed.startsWith('/uploads')) {
-    const apiBase = siteConfig.apiUrl.replace(/\/$/, '');
-    return `${apiBase}${trimmed}`;
-  }
+
   return trimmed;
 }
 

@@ -73,10 +73,15 @@ export function MarketingFooter({ columns }: MarketingFooterProps) {
             />
           </Link>
 
-          <div className="grid flex-1 grid-cols-2 gap-10 sm:grid-cols-4 lg:max-w-3xl">
+          <nav
+            aria-label="Footer"
+            className="grid flex-1 grid-cols-2 gap-x-10 gap-y-8 sm:grid-cols-4 lg:max-w-3xl"
+          >
             {columns.map((column) => (
-              <div key={column.title} className="space-y-2">
-                <h3 className="text-sm font-medium">{column.title}</h3>
+              <div key={column.title} className="space-y-3">
+                <h3 className="text-sm font-medium text-white">
+                  {column.title}
+                </h3>
                 <ul className="space-y-0">
                   {column.links.map((link) => (
                     <li key={`${column.title}-${link.label}`}>
@@ -91,7 +96,7 @@ export function MarketingFooter({ columns }: MarketingFooterProps) {
                 </ul>
               </div>
             ))}
-          </div>
+          </nav>
 
           <div className="space-y-3 lg:pl-8">
             <p className="text-sm font-medium">Connect with us</p>

@@ -11,9 +11,16 @@ export type PublicListingPhoto = {
 export type PublicListingEvSpec = {
   batteryCapacityKwh?: number | null;
   batteryHealthPercent?: number | null;
+  batteryHealthReport?: boolean;
   rangeKm?: number | null;
   chargingType?: string | null;
   fastChargingSupported?: boolean;
+  chargingTimeHours?: number | null;
+  motorPowerKw?: number | null;
+  topSpeedKmh?: number | null;
+  payloadCapacityKg?: number | null;
+  grossVehicleWeightKg?: number | null;
+  seatingCapacity?: number | null;
 };
 
 export type PublicListingPricing = {
@@ -50,11 +57,19 @@ export type PublicListing = {
   status: string;
   sellerType?: string;
   bodyType?: string | null;
+  powertrainType?: string | null;
   condition?: string | null;
   mileageKm?: number | null;
   color?: string | null;
   seats?: number | null;
+  steeringPosition?: string | null;
   isNew?: boolean;
+  hasWarranty?: boolean;
+  warrantyDetails?: string | null;
+  ownershipCount?: number | null;
+  registrationStatus?: string | null;
+  vehicleLocation?: string | null;
+  verificationLevel?: string | null;
   videoUrl?: string | null;
   city?: string | null;
   country?: string;
@@ -63,7 +78,7 @@ export type PublicListing = {
   description?: string | null;
   listingPricing?: PublicListingPricing | null;
   photos?: PublicListingPhoto[];
-  evSpecs?: PublicListingEvSpec & { chargingTimeHours?: number | null };
+  evSpecs?: PublicListingEvSpec | null;
   category?: PublicListingCategory | null;
   subcategory?: { id: string; name: string; slug: string } | null;
   displayBadge?: string | null;

@@ -1,3 +1,4 @@
+import { HomeHeroOverlay } from '@/components/marketing/home-hero-overlay';
 import { listingSubtitle } from '@/lib/marketing/listing-display';
 import {
   getListingPhotos,
@@ -11,6 +12,9 @@ type VehicleDetailHeroProps = {
   listing: PublicListing;
 };
 
+const HERO_MEDIA_CLASS =
+  'pointer-events-none absolute top-1/2 left-1/2 z-0 h-auto min-h-full w-auto min-w-full -translate-x-1/2 -translate-y-1/2 object-cover object-center';
+
 export function VehicleDetailHero({ listing }: VehicleDetailHeroProps) {
   const photos = getListingPhotos(listing);
   const primary = photos.find((p) => p.isPrimary) ?? photos[0];
@@ -19,35 +23,28 @@ export function VehicleDetailHero({ listing }: VehicleDetailHeroProps) {
 
   return (
     <section className="relative h-[min(650px,85vh)] w-full overflow-hidden">
-      {videoUrl ? (
-        <video
-          className="pointer-events-none absolute top-1/2 left-1/2 h-auto min-h-full w-auto min-w-full -translate-x-1/2 -translate-y-1/2 object-cover"
-          autoPlay
-          muted
-          loop
-          playsInline
-          preload="metadata"
-        >
-          <source src={videoUrl} type="video/mp4" />
-        </video>
-      ) : imageUrl ? (
-        // eslint-disable-next-line @next/next/no-img-element
-        <img
-          src={imageUrl}
-          alt=""
-          className="absolute inset-0 h-full w-full object-cover"
-        />
-      ) : (
-        <div className="absolute inset-0 bg-[#174438]" />
-      )}
-
       <div
-        className="absolute inset-0"
-        style={{
-          background: `linear-gradient(180deg, rgba(${brand.forestRgb}, 0.25) 0%, rgba(${brand.forestRgb}, 0.55) 100%)`,
-        }}
+        className="absolute inset-0 z-0"
+        style={{ backgroundColor: brand.forest }}
         aria-hidden
-      />
+      >
+        {videoUrl ? (
+          <video
+            className={HERO_MEDIA_CLASS}
+            autoPlay
+            muted
+            loop
+            playsInline
+            preload="metadata"
+          >
+            <source src={videoUrl} type="video/mp4" />
+          </video>
+        ) : imageUrl ? (
+          // eslint-disable-next-line @next/next/no-img-element
+          <img src={imageUrl} alt="" className={HERO_MEDIA_CLASS} />
+        ) : null}
+        <HomeHeroOverlay />
+      </div>
 
       <div className="relative z-10 flex h-full items-end justify-center px-[60px] pt-28 pb-16">
         <div className="max-w-3xl space-y-2 text-center">
