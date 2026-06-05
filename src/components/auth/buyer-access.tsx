@@ -60,7 +60,10 @@ export function BuyerAccess({ children }: BuyerAccessProps) {
     router.replace(authRedirect(effectiveUser));
   }, [status, canAccessBuyer, effectiveUser, router]);
 
-  if (status === 'loading' || (isLoading && !effectiveUser)) {
+  if (
+    (status === 'loading' && !effectiveUser) ||
+    (isLoading && !effectiveUser)
+  ) {
     return (
       <div className="flex h-dvh items-center justify-center overflow-hidden">
         <Spinner className="size-8" />

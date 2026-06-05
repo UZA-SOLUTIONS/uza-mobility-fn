@@ -17,6 +17,7 @@ import {
   downloadInvoiceDocument,
   openInvoiceDocument,
   requestInvoice,
+  cancelMyInvoice,
   browsePublishedListings,
   submitFinancingRequest,
   submitPayment,
@@ -25,6 +26,7 @@ import {
 import type { BrowsePublishedListingsFilters } from '@/lib/api/buyer';
 import { authKeys } from '@/queries/auth';
 import type {
+  BuyerInvoice,
   BuyerInvoicesFilters,
   BuyerOrdersFilters,
   BuyerPaymentsFilters,
@@ -58,6 +60,39 @@ function mutationError(error: unknown) {
   return error instanceof ApiClientError
     ? error.message
     : 'Something went wrong. Please try again.';
+}
+
+type PaginatedInvoices = {
+  items: BuyerInvoice[];
+  meta: { total: number; page: number; limit: number; totalPages: number };
+};
+
+function isMineInvoicesQuery(queryKey: readonly unknown[]) {
+  return queryKey[0] === 'buyer' && queryKey[1] === 'invoices';
+}
+
+function removeInvoiceFromMineCaches(
+  queryClient: ReturnType<typeof useQueryClient>,
+  invoiceId: string,
+) {
+  queryClient.setQueriesData<PaginatedInvoices>(
+    {
+      predicate: (query) => isMineInvoicesQuery(query.queryKey),
+    },
+    (old) => {
+      if (!old?.items) return old;
+      const items = old.items.filter((row) => row.id !== invoiceId);
+      if (items.length === old.items.length) return old;
+      return {
+        ...old,
+        items,
+        meta: {
+          ...old.meta,
+          total: Math.max(0, old.meta.total - 1),
+        },
+      };
+    },
+  );
 }
 
 /** Session access token for buyer queries — avoids calling getSession() per request. */
@@ -169,6 +204,29 @@ export function useRequestInvoice() {
       });
     },
     onError: (error) => toast.error(mutationError(error)),
+  });
+}
+
+export function useCancelMyInvoice() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: cancelMyInvoice,
+    onMutate: async (invoiceId) => {
+      await queryClient.cancelQueries({
+        predicate: (query) => isMineInvoicesQuery(query.queryKey),
+      });
+      removeInvoiceFromMineCaches(queryClient, invoiceId);
+    },
+    onSuccess: (_invoice, invoiceId) => {
+      removeInvoiceFromMineCaches(queryClient, invoiceId);
+      toast.success('Reservation cancelled');
+    },
+    onError: (error) => {
+      void queryClient.invalidateQueries({
+        predicate: (query) => isMineInvoicesQuery(query.queryKey),
+      });
+      toast.error(mutationError(error));
+    },
   });
 }
 

@@ -40,15 +40,23 @@ export function SessionRefresh() {
       void update();
     }, REFRESH_INTERVAL_MS);
 
+    let focusTimer: number | undefined;
+
     const onFocus = () => {
       if (session?.error) return;
-      void update();
+      window.clearTimeout(focusTimer);
+      // OS file pickers close with a window focus event — debounce so we do not
+      // refresh the session mid-upload and remount account pages.
+      focusTimer = window.setTimeout(() => {
+        void update();
+      }, 600);
     };
 
     window.addEventListener('focus', onFocus);
 
     return () => {
       window.clearInterval(interval);
+      window.clearTimeout(focusTimer);
       window.removeEventListener('focus', onFocus);
     };
   }, [queryClient, session?.error, status, update]);

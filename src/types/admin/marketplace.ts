@@ -59,6 +59,7 @@ export type AdminListingPricing = {
   currency: string;
   basePriceUsd?: number | null;
   fobPriceUsd?: number | null;
+  discountUsd?: number | null;
 };
 
 export const verificationLevels = [
@@ -100,13 +101,25 @@ export type AdminListing = {
   model: string;
   trim: string | null;
   manufacturingYear: number;
-  isNew: boolean;
   condition: string;
+  bodyType?: string | null;
+  powertrainType?: string | null;
+  color?: string | null;
+  seats?: number | null;
+  steeringPosition?: string | null;
+  drivetrain?: string | null;
+  hasWarranty?: boolean | null;
+  warrantyDetails?: string | null;
+  hasAccidentHistory?: boolean | null;
+  ownershipCount?: number | null;
+  registrationStatus?: string | null;
+  videoUrl?: string | null;
   mileageKm: number | null;
   description: string | null;
   vehicleLocation: string | null;
   city: string | null;
   country: string;
+  deliveryEstimateDays?: number | null;
   sellerType: SellerType;
   verificationLevel: VerificationLevel;
   isFeatured: boolean;
@@ -121,9 +134,19 @@ export type AdminListing = {
   listingPricing: AdminListingPricing | null;
   evSpecs: {
     rangeKm: number | null;
+    batteryCapacityKwh?: number | null;
     batteryHealthPercent: number | null;
+    batteryHealthReport?: boolean | null;
     chargingType?: string | null;
+    fastChargingSupported?: boolean | null;
+    chargingTimeHours?: number | null;
+    motorPowerKw?: number | null;
+    topSpeedKmh?: number | null;
+    payloadCapacityKg?: number | null;
+    grossVehicleWeightKg?: number | null;
+    seatingCapacity?: number | null;
   } | null;
+  useCaseTags?: { useCase: string }[];
   photos: AdminListingPhoto[];
   verificationReport: AdminVerificationReport | null;
   createdBy: AdminListingCreatedBy | null;

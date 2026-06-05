@@ -3,6 +3,7 @@ import { ElementType } from 'react';
 import {
   Home,
   List,
+  Car,
   Users,
   Tag,
   Wrench,
@@ -19,6 +20,7 @@ import {
   Activity,
   Percent,
   Bell,
+  Settings,
 } from 'lucide-react';
 
 export type NavItem = {
@@ -97,6 +99,11 @@ export const buyerNavGroups: NavGroup[] = [
         label: 'Invoices',
         href: workspaceRoutes.accountInvoices,
         icon: FileText,
+      },
+      {
+        label: 'Bookings',
+        href: workspaceRoutes.accountBookings,
+        icon: Car,
       },
       {
         label: 'Payments',
@@ -269,6 +276,12 @@ export const adminNavGroups: NavGroup[] = [
         permissions: ['payments:verify', 'payments:reject', 'payments:refund'],
       },
       {
+        label: 'Bookings',
+        href: adminRoutes.bookings,
+        icon: Car,
+        permissions: ['bookings:manage', 'bookings:verify', 'bookings:reject'],
+      },
+      {
         label: 'Invoices',
         href: adminRoutes.invoices,
         icon: FileText,
@@ -342,6 +355,12 @@ export const adminNavGroups: NavGroup[] = [
         href: adminRoutes.pricingRules,
         icon: Percent,
         superAdminOnly: true,
+      },
+      {
+        label: 'Platform settings',
+        href: adminRoutes.platformSettings,
+        icon: Settings,
+        permissions: ['platform-settings:manage'],
       },
       {
         label: 'Profile',

@@ -69,7 +69,6 @@ export function PricingRuleFormDialog({
         clearingFeeUsd: rule.clearingFeeUsd ?? undefined,
         platformMarginPercent: rule.platformMarginPercent ?? undefined,
         commissionRate: rule.commissionRate ?? undefined,
-        exchangeRateRwf: rule.exchangeRateRwf ?? undefined,
         deliveryDaysMin: rule.deliveryDaysMin ?? undefined,
         deliveryDaysMax: rule.deliveryDaysMax ?? undefined,
         isActive: rule.isActive,
@@ -207,13 +206,6 @@ export function PricingRuleFormDialog({
                 id="pr-commission"
                 step="0.01"
                 {...form.register('commissionRate', numberRegisterOptions())}
-              />
-            </div>
-            <div className="space-y-1.5">
-              <Label htmlFor="pr-rwf">USD → RWF rate</Label>
-              <NumberInput
-                id="pr-rwf"
-                {...form.register('exchangeRateRwf', numberRegisterOptions())}
               />
             </div>
             <div className="space-y-1.5">

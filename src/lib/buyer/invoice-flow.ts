@@ -22,8 +22,19 @@ export const PAYMENT_REVIEW_INVOICE_STATUSES: InvoiceStatus[] = [
   'UNDER_VERIFICATION',
 ];
 
+export const BUYER_CANCELLABLE_INVOICE_STATUSES: InvoiceStatus[] = [
+  'SENT',
+  'AWAITING_PAYMENT',
+];
+
 export function isPayableInvoiceStatus(status: InvoiceStatus): boolean {
   return PAYABLE_INVOICE_STATUSES.includes(status);
+}
+
+export function isCancellableByBuyerInvoiceStatus(
+  status: InvoiceStatus,
+): boolean {
+  return BUYER_CANCELLABLE_INVOICE_STATUSES.includes(status);
 }
 
 export function isPendingPurchaseInvoiceStatus(status: InvoiceStatus): boolean {

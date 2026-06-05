@@ -82,6 +82,7 @@ export type PublicListing = {
   category?: PublicListingCategory | null;
   subcategory?: { id: string; name: string; slug: string } | null;
   displayBadge?: string | null;
+  isBooked?: boolean;
   useCaseTags?: PublicListingUseCaseTag[];
   seller?: PublicListingSeller | null;
 };

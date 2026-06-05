@@ -1,4 +1,5 @@
 import { HomeHeroOverlay } from '@/components/marketing/home-hero-overlay';
+import { VehicleDetailHeroMedia } from '@/components/marketing/vehicle-detail-hero-media';
 import { listingSubtitle } from '@/lib/marketing/listing-display';
 import {
   getListingPhotos,
@@ -25,25 +26,15 @@ export function VehicleDetailHero({ listing }: VehicleDetailHeroProps) {
   return (
     <section className="relative h-[min(650px,85vh)] w-full overflow-hidden">
       <div
-        className="absolute inset-0 z-0"
+        className="absolute inset-0 z-0 overflow-hidden"
         style={{ backgroundColor: brand.forest }}
         aria-hidden
       >
-        {videoUrl ? (
-          <video
-            className={HERO_MEDIA_CLASS}
-            autoPlay
-            muted
-            loop
-            playsInline
-            preload="metadata"
-          >
-            <source src={videoUrl} type="video/mp4" />
-          </video>
-        ) : imageUrl ? (
-          // eslint-disable-next-line @next/next/no-img-element
-          <img src={imageUrl} alt="" className={HERO_MEDIA_CLASS} />
-        ) : null}
+        <VehicleDetailHeroMedia
+          posterUrl={imageUrl}
+          videoUrl={videoUrl}
+          mediaClassName={HERO_MEDIA_CLASS}
+        />
         <HomeHeroOverlay />
       </div>
 

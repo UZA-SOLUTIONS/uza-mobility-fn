@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { toast } from 'sonner';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -46,8 +46,14 @@ import {
   adminListingStatusEditOptions,
   adminUpdateListingSchema,
   formatListingChargingType,
+  formatListingEnumLabel,
+  listingBodyTypes,
   listingChargingTypes,
   listingConditions,
+  listingDrivetrains,
+  listingPowertrainTypes,
+  listingSteeringPositions,
+  listingUseCases,
   MAX_LISTING_PHOTOS,
   type AdminListingFormInput,
 } from '@/schemas/admin';
@@ -70,6 +76,9 @@ export function ListingFormDialog({
   const { data: categories } = useAdminCategories({ isActive: true }, open);
   const [photos, setPhotos] = useState<PendingPhoto[]>([]);
   const [removedPhotoIds, setRemovedPhotoIds] = useState<string[]>([]);
+  const [videoFile, setVideoFile] = useState<File | null>(null);
+  const [removeVideo, setRemoveVideo] = useState(false);
+  const videoInputRef = useRef<HTMLInputElement>(null);
   const existingPhotos = listing?.photos ?? [];
   const keptExistingPhotos = useMemo(
     () => existingPhotos.filter((photo) => !removedPhotoIds.includes(photo.id)),
@@ -93,7 +102,6 @@ export function ListingFormDialog({
       model: '',
       trim: '',
       manufacturingYear: new Date().getFullYear(),
-      isNew: true,
       condition: 'NEW',
       vehicleLocation: '',
       city: 'Kigali',
@@ -120,6 +128,11 @@ export function ListingFormDialog({
       return [];
     });
     setRemovedPhotoIds([]);
+    setVideoFile(null);
+    setRemoveVideo(false);
+    if (videoInputRef.current) {
+      videoInputRef.current.value = '';
+    }
     if (listing) {
       form.reset(adminListingToFormValues(listing));
     } else {
@@ -133,7 +146,6 @@ export function ListingFormDialog({
         model: '',
         trim: '',
         manufacturingYear: new Date().getFullYear(),
-        isNew: true,
         condition: 'NEW',
         vehicleLocation: '',
         city: 'Kigali',
@@ -157,6 +169,7 @@ export function ListingFormDialog({
         ...values,
         removePhotoIds:
           removedPhotoIds.length > 0 ? removedPhotoIds : undefined,
+        removeVideo: removeVideo || undefined,
       });
 
       update.mutate(
@@ -164,6 +177,7 @@ export function ListingFormDialog({
           id: listing.id,
           body,
           photos: newPhotos,
+          video: videoFile,
         },
         {
           onSuccess: () => {
@@ -177,7 +191,11 @@ export function ListingFormDialog({
     }
 
     create.mutate(
-      { body: adminCreateListingSchema.parse(values), photos: newPhotos },
+      {
+        body: adminCreateListingSchema.parse(values),
+        photos: newPhotos,
+        video: videoFile,
+      },
       {
         onSuccess: () => {
           revokePendingPhotos(photos);
@@ -335,7 +353,7 @@ export function ListingFormDialog({
             </div>
           </div>
 
-          <div className="grid gap-4 sm:grid-cols-3">
+          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
             <div className="space-y-1.5">
               <Label htmlFor="brand">Brand</Label>
               <Input id="brand" {...form.register('brand')} />
@@ -343,6 +361,10 @@ export function ListingFormDialog({
             <div className="space-y-1.5">
               <Label htmlFor="model">Model</Label>
               <Input id="model" {...form.register('model')} />
+            </div>
+            <div className="space-y-1.5">
+              <Label htmlFor="trim">Trim</Label>
+              <Input id="trim" {...form.register('trim')} />
             </div>
             <div className="space-y-1.5">
               <Label htmlFor="year">Year</Label>
@@ -385,59 +407,362 @@ export function ListingFormDialog({
                 {...form.register('mileageKm', numberRegisterOptions())}
               />
             </div>
-            <div className="space-y-1.5">
-              <Label htmlFor="range">Electric range (km)</Label>
-              <NumberInput
-                id="range"
-                min={1}
-                {...form.register('rangeKm', numberRegisterOptions())}
-              />
+          </div>
+
+          <div className="space-y-3 rounded-lg border p-4">
+            <p className="text-sm font-medium">Vehicle details (optional)</p>
+            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+              <div className="space-y-1.5">
+                <Label>Body type</Label>
+                <Select
+                  value={form.watch('bodyType') ?? ''}
+                  onValueChange={(value) =>
+                    form.setValue(
+                      'bodyType',
+                      value === 'none'
+                        ? undefined
+                        : (value as AdminListingFormInput['bodyType']),
+                    )
+                  }
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Optional" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="none">None</SelectItem>
+                    {listingBodyTypes.map((type) => (
+                      <SelectItem key={type} value={type}>
+                        {formatListingEnumLabel(type)}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="space-y-1.5">
+                <Label>Powertrain</Label>
+                <Select
+                  value={form.watch('powertrainType') ?? ''}
+                  onValueChange={(value) =>
+                    form.setValue(
+                      'powertrainType',
+                      value === 'none'
+                        ? undefined
+                        : (value as AdminListingFormInput['powertrainType']),
+                    )
+                  }
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Optional" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="none">None</SelectItem>
+                    {listingPowertrainTypes.map((type) => (
+                      <SelectItem key={type} value={type}>
+                        {type}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="space-y-1.5">
+                <Label htmlFor="color">Color</Label>
+                <Input id="color" {...form.register('color')} />
+              </div>
+              <div className="space-y-1.5">
+                <Label htmlFor="seats">Seats</Label>
+                <NumberInput
+                  id="seats"
+                  min={1}
+                  {...form.register('seats', numberRegisterOptions())}
+                />
+              </div>
+              <div className="space-y-1.5">
+                <Label>Steering</Label>
+                <Select
+                  value={form.watch('steeringPosition') ?? ''}
+                  onValueChange={(value) =>
+                    form.setValue(
+                      'steeringPosition',
+                      value === 'none'
+                        ? undefined
+                        : (value as AdminListingFormInput['steeringPosition']),
+                    )
+                  }
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Optional" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="none">None</SelectItem>
+                    {listingSteeringPositions.map((type) => (
+                      <SelectItem key={type} value={type}>
+                        {formatListingEnumLabel(type)}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="space-y-1.5">
+                <Label>Drivetrain</Label>
+                <Select
+                  value={form.watch('drivetrain') ?? ''}
+                  onValueChange={(value) =>
+                    form.setValue(
+                      'drivetrain',
+                      value === 'none'
+                        ? undefined
+                        : (value as AdminListingFormInput['drivetrain']),
+                    )
+                  }
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Optional" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="none">None</SelectItem>
+                    {listingDrivetrains.map((type) => (
+                      <SelectItem key={type} value={type}>
+                        {type}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="space-y-1.5">
+                <Label htmlFor="ownership-count">Ownership count</Label>
+                <NumberInput
+                  id="ownership-count"
+                  min={0}
+                  {...form.register('ownershipCount', numberRegisterOptions())}
+                />
+              </div>
+              <div className="space-y-1.5 sm:col-span-2">
+                <Label htmlFor="registration-status">Registration status</Label>
+                <Input
+                  id="registration-status"
+                  {...form.register('registrationStatus')}
+                />
+              </div>
+              <div className="flex items-end gap-2 pb-2">
+                <input
+                  id="has-warranty"
+                  type="checkbox"
+                  className="size-4 rounded border"
+                  checked={form.watch('hasWarranty') ?? false}
+                  onChange={(event) =>
+                    form.setValue('hasWarranty', event.target.checked)
+                  }
+                />
+                <Label htmlFor="has-warranty">Has warranty</Label>
+              </div>
+              <div className="flex items-end gap-2 pb-2">
+                <input
+                  id="has-accident"
+                  type="checkbox"
+                  className="size-4 rounded border"
+                  checked={form.watch('hasAccidentHistory') ?? false}
+                  onChange={(event) =>
+                    form.setValue('hasAccidentHistory', event.target.checked)
+                  }
+                />
+                <Label htmlFor="has-accident">Accident history</Label>
+              </div>
             </div>
-            <div className="space-y-1.5">
-              <Label>Charging type</Label>
-              <Select
-                value={form.watch('chargingType') ?? ''}
-                onValueChange={(value) =>
-                  form.setValue(
-                    'chargingType',
-                    value as AdminListingFormInput['chargingType'],
-                    { shouldValidate: true },
-                  )
-                }
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder="Select charging type" />
-                </SelectTrigger>
-                <SelectContent>
-                  {listingChargingTypes.map((type) => (
-                    <SelectItem key={type} value={type}>
-                      {formatListingChargingType(type)}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-              {form.formState.errors.chargingType ? (
-                <p className="text-sm text-destructive">
-                  {form.formState.errors.chargingType.message}
-                </p>
-              ) : null}
+            {form.watch('hasWarranty') ? (
+              <div className="space-y-1.5">
+                <Label htmlFor="warranty-details">Warranty details</Label>
+                <Textarea
+                  id="warranty-details"
+                  rows={2}
+                  {...form.register('warrantyDetails')}
+                />
+              </div>
+            ) : null}
+            <div className="space-y-2">
+              <Label>Use cases (optional)</Label>
+              <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
+                {listingUseCases.map((useCase) => {
+                  const selected = form.watch('useCases') ?? [];
+                  const checked = selected.includes(useCase);
+                  return (
+                    <label
+                      key={useCase}
+                      className="flex items-center gap-2 text-sm"
+                    >
+                      <input
+                        type="checkbox"
+                        className="size-4 rounded border"
+                        checked={checked}
+                        onChange={(event) => {
+                          const next = event.target.checked
+                            ? [...selected, useCase]
+                            : selected.filter((value) => value !== useCase);
+                          form.setValue(
+                            'useCases',
+                            next.length ? next : undefined,
+                          );
+                        }}
+                      />
+                      {formatListingEnumLabel(useCase)}
+                    </label>
+                  );
+                })}
+              </div>
             </div>
           </div>
 
-          {form.watch('condition') !== 'NEW' ? (
-            <div className="space-y-1.5">
-              <Label htmlFor="battery-health">Battery health (%)</Label>
-              <NumberInput
-                id="battery-health"
-                min={0}
-                max={100}
-                {...form.register(
-                  'batteryHealthPercent',
-                  numberRegisterOptions(),
-                )}
-              />
+          <div className="space-y-3 rounded-lg border p-4">
+            <p className="text-sm font-medium">EV specifications</p>
+            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+              <div className="space-y-1.5">
+                <Label htmlFor="range">Electric range (km)</Label>
+                <NumberInput
+                  id="range"
+                  min={1}
+                  {...form.register('rangeKm', numberRegisterOptions())}
+                />
+              </div>
+              <div className="space-y-1.5">
+                <Label>Charging type</Label>
+                <Select
+                  value={form.watch('chargingType') ?? ''}
+                  onValueChange={(value) =>
+                    form.setValue(
+                      'chargingType',
+                      value as AdminListingFormInput['chargingType'],
+                      { shouldValidate: true },
+                    )
+                  }
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select charging type" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {listingChargingTypes.map((type) => (
+                      <SelectItem key={type} value={type}>
+                        {formatListingChargingType(type)}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                {form.formState.errors.chargingType ? (
+                  <p className="text-sm text-destructive">
+                    {form.formState.errors.chargingType.message}
+                  </p>
+                ) : null}
+              </div>
+              {form.watch('condition') !== 'NEW' ? (
+                <div className="space-y-1.5">
+                  <Label htmlFor="battery-health">Battery health (%)</Label>
+                  <NumberInput
+                    id="battery-health"
+                    min={0}
+                    max={100}
+                    {...form.register(
+                      'batteryHealthPercent',
+                      numberRegisterOptions(),
+                    )}
+                  />
+                </div>
+              ) : null}
+              <div className="space-y-1.5">
+                <Label htmlFor="battery-capacity">Battery capacity (kWh)</Label>
+                <NumberInput
+                  id="battery-capacity"
+                  min={0}
+                  step="0.1"
+                  {...form.register(
+                    'batteryCapacityKwh',
+                    numberRegisterOptions(),
+                  )}
+                />
+              </div>
+              <div className="space-y-1.5">
+                <Label htmlFor="charging-time">Charging time (hours)</Label>
+                <NumberInput
+                  id="charging-time"
+                  min={0}
+                  step="0.1"
+                  {...form.register(
+                    'chargingTimeHours',
+                    numberRegisterOptions(),
+                  )}
+                />
+              </div>
+              <div className="space-y-1.5">
+                <Label htmlFor="motor-power">Motor power (kW)</Label>
+                <NumberInput
+                  id="motor-power"
+                  min={0}
+                  {...form.register('motorPowerKw', numberRegisterOptions())}
+                />
+              </div>
+              <div className="space-y-1.5">
+                <Label htmlFor="top-speed">Top speed (km/h)</Label>
+                <NumberInput
+                  id="top-speed"
+                  min={0}
+                  {...form.register('topSpeedKmh', numberRegisterOptions())}
+                />
+              </div>
+              <div className="space-y-1.5">
+                <Label htmlFor="payload">Payload (kg)</Label>
+                <NumberInput
+                  id="payload"
+                  min={0}
+                  {...form.register(
+                    'payloadCapacityKg',
+                    numberRegisterOptions(),
+                  )}
+                />
+              </div>
+              <div className="space-y-1.5">
+                <Label htmlFor="gvwr">Gross vehicle weight (kg)</Label>
+                <NumberInput
+                  id="gvwr"
+                  min={0}
+                  {...form.register(
+                    'grossVehicleWeightKg',
+                    numberRegisterOptions(),
+                  )}
+                />
+              </div>
+              <div className="space-y-1.5">
+                <Label htmlFor="seating-capacity">Seating capacity</Label>
+                <NumberInput
+                  id="seating-capacity"
+                  min={1}
+                  {...form.register('seatingCapacity', numberRegisterOptions())}
+                />
+              </div>
+              <div className="flex items-end gap-2 pb-2">
+                <input
+                  id="battery-health-report"
+                  type="checkbox"
+                  className="size-4 rounded border"
+                  checked={form.watch('batteryHealthReport') ?? false}
+                  onChange={(event) =>
+                    form.setValue('batteryHealthReport', event.target.checked)
+                  }
+                />
+                <Label htmlFor="battery-health-report">
+                  Battery health report
+                </Label>
+              </div>
+              <div className="flex items-end gap-2 pb-2">
+                <input
+                  id="fast-charging"
+                  type="checkbox"
+                  className="size-4 rounded border"
+                  checked={form.watch('fastChargingSupported') ?? false}
+                  onChange={(event) =>
+                    form.setValue('fastChargingSupported', event.target.checked)
+                  }
+                />
+                <Label htmlFor="fast-charging">Fast charging supported</Label>
+              </div>
             </div>
-          ) : null}
+          </div>
 
           <div className="grid gap-4 sm:grid-cols-2">
             <div className="space-y-1.5">
@@ -448,37 +773,70 @@ export function ListingFormDialog({
               <Label htmlFor="city">City</Label>
               <Input id="city" {...form.register('city')} />
             </div>
+            <div className="space-y-1.5">
+              <Label htmlFor="delivery-days">Delivery estimate (days)</Label>
+              <NumberInput
+                id="delivery-days"
+                min={0}
+                {...form.register(
+                  'deliveryEstimateDays',
+                  numberRegisterOptions(),
+                )}
+              />
+            </div>
           </div>
 
           {sellerType === 'UZA_RWANDA_STOCK' ? (
-            <div className="space-y-1.5">
-              <Label htmlFor="base-price">Base price (USD)</Label>
-              <NumberInput
-                id="base-price"
-                min={0}
-                step="0.01"
-                {...form.register('basePriceUsd', numberRegisterOptions())}
-              />
-              {form.formState.errors.basePriceUsd ? (
-                <p className="text-sm text-destructive">
-                  {form.formState.errors.basePriceUsd.message}
-                </p>
-              ) : null}
+            <div className="grid gap-4 sm:grid-cols-2">
+              <div className="space-y-1.5">
+                <Label htmlFor="base-price">Base price (USD)</Label>
+                <NumberInput
+                  id="base-price"
+                  min={0}
+                  step="0.01"
+                  {...form.register('basePriceUsd', numberRegisterOptions())}
+                />
+                {form.formState.errors.basePriceUsd ? (
+                  <p className="text-sm text-destructive">
+                    {form.formState.errors.basePriceUsd.message}
+                  </p>
+                ) : null}
+              </div>
+              <div className="space-y-1.5">
+                <Label htmlFor="discount">Discount (USD, optional)</Label>
+                <NumberInput
+                  id="discount"
+                  min={0}
+                  step="0.01"
+                  {...form.register('discountUsd', numberRegisterOptions())}
+                />
+              </div>
             </div>
           ) : (
-            <div className="space-y-1.5">
-              <Label htmlFor="fob-price">FOB price (USD)</Label>
-              <NumberInput
-                id="fob-price"
-                min={0}
-                step="0.01"
-                {...form.register('fobPriceUsd', numberRegisterOptions())}
-              />
-              {form.formState.errors.fobPriceUsd ? (
-                <p className="text-sm text-destructive">
-                  {form.formState.errors.fobPriceUsd.message}
-                </p>
-              ) : null}
+            <div className="grid gap-4 sm:grid-cols-2">
+              <div className="space-y-1.5">
+                <Label htmlFor="fob-price">FOB price (USD)</Label>
+                <NumberInput
+                  id="fob-price"
+                  min={0}
+                  step="0.01"
+                  {...form.register('fobPriceUsd', numberRegisterOptions())}
+                />
+                {form.formState.errors.fobPriceUsd ? (
+                  <p className="text-sm text-destructive">
+                    {form.formState.errors.fobPriceUsd.message}
+                  </p>
+                ) : null}
+              </div>
+              <div className="space-y-1.5">
+                <Label htmlFor="discount-china">Discount (USD, optional)</Label>
+                <NumberInput
+                  id="discount-china"
+                  min={0}
+                  step="0.01"
+                  {...form.register('discountUsd', numberRegisterOptions())}
+                />
+              </div>
             </div>
           )}
 
@@ -518,6 +876,55 @@ export function ListingFormDialog({
             maxPhotos={isEdit ? remainingPhotoSlots : MAX_LISTING_PHOTOS}
             label={isEdit ? 'Add photos' : 'Listing photos'}
           />
+
+          <div className="space-y-2 rounded-lg border p-4">
+            <Label htmlFor="listing-video">Hero video (optional)</Label>
+            <p className="text-xs text-muted-foreground">
+              MP4, WebM, or MOV. Shown on the vehicle page after the primary
+              photo loads, like the homepage hero.
+            </p>
+            {isEdit && listing?.videoUrl && !removeVideo ? (
+              <p className="text-sm text-muted-foreground">
+                Current video is attached to this listing.
+              </p>
+            ) : null}
+            {isEdit && listing?.videoUrl ? (
+              <label className="flex items-center gap-2 text-sm">
+                <input
+                  type="checkbox"
+                  className="size-4 rounded border"
+                  checked={removeVideo}
+                  onChange={(event) => {
+                    setRemoveVideo(event.target.checked);
+                    if (event.target.checked) {
+                      setVideoFile(null);
+                      if (videoInputRef.current) {
+                        videoInputRef.current.value = '';
+                      }
+                    }
+                  }}
+                />
+                Remove existing video
+              </label>
+            ) : null}
+            <Input
+              id="listing-video"
+              ref={videoInputRef}
+              type="file"
+              accept="video/mp4,video/webm,video/quicktime"
+              disabled={removeVideo}
+              onChange={(event) => {
+                const file = event.target.files?.[0] ?? null;
+                setVideoFile(file);
+                if (file) setRemoveVideo(false);
+              }}
+            />
+            {videoFile ? (
+              <p className="text-xs text-muted-foreground">
+                Selected: {videoFile.name}
+              </p>
+            ) : null}
+          </div>
 
           <DialogFooter>
             <Button

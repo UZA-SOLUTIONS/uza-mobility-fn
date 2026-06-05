@@ -1,8 +1,10 @@
 'use client';
 
 import Link from 'next/link';
+import { useState } from 'react';
 import { useSession } from 'next-auth/react';
 import { toast } from 'sonner';
+import { ConfirmDialog } from '@/components/admin/shared/confirm-dialog';
 import { Button } from '@/components/ui/button';
 import { Spinner } from '@/components/ui/spinner';
 import { authRoutes, workspaceRoutes } from '@/config/routes';
@@ -10,16 +12,21 @@ import { brand } from '@/lib/marketing/colors';
 import {
   buyerInvoiceRequestHref,
   invoiceStatusHint,
+  isCancellableByBuyerInvoiceStatus,
   isPayableInvoiceStatus,
 } from '@/lib/buyer/invoice-flow';
+import { findActiveBuyerBooking } from '@/lib/buyer/booking-flow';
 import { useAppRouter } from '@/lib/navigation/use-app-router';
 import {
   useBuyerProfile,
+  useCancelMyInvoice,
   useMyInvoices,
   useRequestInvoice,
 } from '@/queries/buyer';
+import { useMyBookings } from '@/queries/bookings';
 import { isMeUser } from '@/types/auth/me-user';
 import type { PublicListing } from '@/types/marketplace/public-listing';
+import type { BuyerInvoice } from '@/types/buyer/commerce';
 
 type VehicleDetailReserveActionProps = {
   listing: PublicListing;
@@ -31,8 +38,12 @@ export function VehicleDetailReserveAction({
   const router = useAppRouter();
   const { data: session, status } = useSession();
   const me = isMeUser(session?.user) ? session.user : null;
-  const isBuyer = Boolean(me?.roles.includes('BUYER'));
+  const isAuthenticatedBuyer =
+    status === 'authenticated' && Boolean(me?.roles.includes('BUYER'));
+
   const request = useRequestInvoice();
+  const cancelReservation = useCancelMyInvoice();
+  const [cancelTarget, setCancelTarget] = useState<BuyerInvoice | null>(null);
 
   const invoiceRequestHref = buyerInvoiceRequestHref({
     id: listing.id,
@@ -41,18 +52,54 @@ export function VehicleDetailReserveAction({
   const loginHref = `${authRoutes.login}?callbackUrl=${encodeURIComponent(invoiceRequestHref)}`;
   const profileHref = `${workspaceRoutes.accountProfile}?returnTo=${encodeURIComponent(invoiceRequestHref)}`;
 
-  const { data: listingInvoices, isLoading: invoicesLoading } = useMyInvoices(
+  const {
+    data: listingInvoices,
+    isLoading: invoicesLoading,
+    isFetched: invoicesFetched,
+  } = useMyInvoices(
     { listingId: listing.id, pendingPurchase: true, limit: 5 },
-    isBuyer,
+    isAuthenticatedBuyer,
   );
-  const activeInvoice = listingInvoices?.items[0] ?? null;
+
+  const {
+    data: listingBookings,
+    isLoading: bookingsLoading,
+    isFetched: bookingsFetched,
+  } = useMyBookings(
+    { listingId: listing.id, limit: 5, activeOnly: true },
+    isAuthenticatedBuyer,
+  );
 
   const { data: buyerProfile, isLoading: profileLoading } =
-    useBuyerProfile(isBuyer);
+    useBuyerProfile(isAuthenticatedBuyer);
+
+  const buyerDataReady =
+    !isAuthenticatedBuyer ||
+    ((!bookingsLoading || bookingsFetched) &&
+      (!invoicesLoading || invoicesFetched));
+
+  const activeBooking = isAuthenticatedBuyer
+    ? findActiveBuyerBooking(listingBookings?.items)
+    : null;
+
+  const activeInvoice = isAuthenticatedBuyer
+    ? (listingInvoices?.items[0] ?? null)
+    : null;
 
   const hasBuyerProfile = Boolean(me?.buyerProfile ?? buyerProfile);
 
-  if (status === 'loading' || (isBuyer && invoicesLoading)) {
+  const confirmCancelReservation = () => {
+    if (!cancelTarget) return;
+    const invoiceId = cancelTarget.id;
+    setCancelTarget(null);
+    cancelReservation.mutate(invoiceId);
+  };
+
+  if (listing.isBooked || activeBooking) {
+    return null;
+  }
+
+  if (status === 'loading' || (isAuthenticatedBuyer && !buyerDataReady)) {
     return (
       <div className="mt-8 flex h-10 w-full items-center justify-center">
         <Spinner className="size-5" />
@@ -60,46 +107,7 @@ export function VehicleDetailReserveAction({
     );
   }
 
-  if (activeInvoice) {
-    const hint = invoiceStatusHint(activeInvoice.status);
-    return (
-      <div className="mt-8 space-y-3">
-        <div className="rounded-xl border border-[#E9E9E9] bg-[#f8faf9] p-4 text-sm">
-          <p className="font-medium text-[#151515]">
-            Invoice {activeInvoice.invoiceNumber}
-          </p>
-          <p className="mt-1 text-[#356769] capitalize">
-            {activeInvoice.status.replaceAll('_', ' ').toLowerCase()}
-          </p>
-          {hint ? <p className="mt-2 text-[#356769]">{hint}</p> : null}
-        </div>
-        <div className="flex flex-col gap-2 sm:flex-row">
-          <Button
-            asChild
-            className="h-10 flex-1 rounded-full"
-            style={{ backgroundColor: brand.forest }}
-          >
-            <Link href={workspaceRoutes.accountInvoices}>View invoice</Link>
-          </Button>
-          {isPayableInvoiceStatus(activeInvoice.status) ? (
-            <Button
-              asChild
-              variant="outline"
-              className="h-10 flex-1 rounded-full"
-            >
-              <Link
-                href={`${workspaceRoutes.accountPayments}?invoiceId=${activeInvoice.id}`}
-              >
-                Submit payment
-              </Link>
-            </Button>
-          ) : null}
-        </div>
-      </div>
-    );
-  }
-
-  if (!me) {
+  if (!isAuthenticatedBuyer) {
     return (
       <div className="mt-8 space-y-2">
         <Link
@@ -116,16 +124,72 @@ export function VehicleDetailReserveAction({
     );
   }
 
-  if (!isBuyer) {
+  if (activeInvoice) {
+    const hint = invoiceStatusHint(activeInvoice.status);
     return (
-      <div className="mt-8 space-y-2">
-        <Button asChild className="h-10 w-full rounded-full">
-          <Link href={workspaceRoutes.account}>Open workspace</Link>
-        </Button>
-        <p className="text-center text-xs text-[#356769]">
-          Use a buyer account to reserve vehicles on UZA Mobility.
-        </p>
-      </div>
+      <>
+        <div className="mt-8 space-y-3">
+          <div className="rounded-xl border border-[#E9E9E9] bg-[#f8faf9] p-4 text-sm">
+            <p className="font-medium text-[#151515]">
+              Invoice {activeInvoice.invoiceNumber}
+            </p>
+            <p className="mt-1 text-[#356769] capitalize">
+              {activeInvoice.status.replaceAll('_', ' ').toLowerCase()}
+            </p>
+            {hint ? <p className="mt-2 text-[#356769]">{hint}</p> : null}
+          </div>
+          <div className="flex flex-col gap-2 sm:flex-row">
+            <Button
+              asChild
+              className="h-10 flex-1 rounded-full"
+              style={{ backgroundColor: brand.forest }}
+            >
+              <Link href={workspaceRoutes.accountInvoices}>View invoice</Link>
+            </Button>
+            {isPayableInvoiceStatus(activeInvoice.status) ? (
+              <Button
+                asChild
+                variant="outline"
+                className="h-10 flex-1 rounded-full"
+              >
+                <Link
+                  href={`${workspaceRoutes.accountPayments}?invoiceId=${activeInvoice.id}`}
+                >
+                  Submit payment
+                </Link>
+              </Button>
+            ) : null}
+          </div>
+          {isCancellableByBuyerInvoiceStatus(activeInvoice.status) ? (
+            <Button
+              type="button"
+              variant="outline"
+              className="h-10 w-full rounded-full text-destructive hover:text-destructive"
+              disabled={cancelReservation.isPending}
+              onClick={() => setCancelTarget(activeInvoice)}
+            >
+              Cancel reservation
+            </Button>
+          ) : null}
+        </div>
+
+        <ConfirmDialog
+          open={Boolean(cancelTarget)}
+          onOpenChange={(open) => {
+            if (!open) setCancelTarget(null);
+          }}
+          title="Cancel reservation?"
+          description={
+            cancelTarget
+              ? `${cancelTarget.invoiceNumber} will be cancelled and the vehicle released back to the marketplace.`
+              : ''
+          }
+          confirmLabel="Cancel reservation"
+          variant="destructive"
+          loading={cancelReservation.isPending}
+          onConfirm={confirmCancelReservation}
+        />
+      </>
     );
   }
 

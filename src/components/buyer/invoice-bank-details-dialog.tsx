@@ -49,9 +49,6 @@ export function InvoiceBankDetailsDialog({
             <dt className="text-muted-foreground">Amount due</dt>
             <dd className="font-medium">
               {formatUsd(invoice.totalAmountUsd)} {invoice.currency}
-              {invoice.totalAmountRwf != null
-                ? ` · ${invoice.totalAmountRwf.toLocaleString()} RWF`
-                : null}
             </dd>
           </div>
           <div>

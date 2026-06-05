@@ -103,6 +103,12 @@ export function requestInvoice(body: RequestInvoiceInput) {
   });
 }
 
+export function cancelMyInvoice(id: string) {
+  return authenticatedFetch<BuyerInvoice>(`/invoices/${id}/cancel`, {
+    method: 'PATCH',
+  });
+}
+
 async function fetchBuyerInvoiceDocumentHtml(invoiceId: string) {
   const session = await getSession();
   const token = session?.accessToken;

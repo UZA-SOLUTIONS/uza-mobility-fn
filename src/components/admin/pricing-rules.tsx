@@ -109,8 +109,8 @@ export function AdminPricingRulesPanel() {
                   <TableCell className="text-sm">
                     {rule.platformMarginPercent != null
                       ? `${rule.platformMarginPercent}% margin`
-                      : rule.exchangeRateRwf != null
-                        ? `${rule.exchangeRateRwf} RWF/USD`
+                      : rule.commissionRate != null
+                        ? `${(rule.commissionRate * 100).toFixed(1)}% commission`
                         : '—'}
                   </TableCell>
                   <TableCell>

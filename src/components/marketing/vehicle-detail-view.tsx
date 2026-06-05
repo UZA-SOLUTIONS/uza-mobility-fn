@@ -2,6 +2,7 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { Car, MapPin } from 'lucide-react';
 import { VehicleDetailGallery } from '@/components/marketing/vehicle-detail-gallery';
+import { VehicleDetailBookingAction } from '@/components/marketing/vehicle-detail-booking-action';
 import { VehicleDetailReserveAction } from '@/components/marketing/vehicle-detail-reserve-action';
 import { VehicleDetailSidebarSpecs } from '@/components/marketing/vehicle-detail-sidebar-specs';
 import { VehicleDetailSpecs } from '@/components/marketing/vehicle-detail-specs';
@@ -90,7 +91,10 @@ export function VehicleDetailView({ listing }: VehicleDetailViewProps) {
                 </div>
               </div>
 
-              <VehicleDetailReserveAction listing={listing} />
+              <VehicleDetailBookingAction listing={listing} />
+              {!listing.isBooked ? (
+                <VehicleDetailReserveAction listing={listing} />
+              ) : null}
             </div>
 
             <VehicleDetailSidebarSpecs rows={sidebarSpecs} />

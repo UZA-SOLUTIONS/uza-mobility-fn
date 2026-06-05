@@ -129,10 +129,12 @@ export function useCreateAdminListing() {
     mutationFn: ({
       body,
       photos = [],
+      video,
     }: {
       body: AdminCreateListingInput;
       photos?: File[];
-    }) => createAdminListing(toAdminCreateListingBody(body), photos),
+      video?: File | null;
+    }) => createAdminListing(toAdminCreateListingBody(body), photos, video),
     onSuccess: () => {
       toast.success('Listing created');
       void queryClient.invalidateQueries({ queryKey: adminKeys.all });
@@ -149,11 +151,13 @@ export function useUpdateAdminListing() {
       id,
       body,
       photos = [],
+      video,
     }: {
       id: string;
       body: AdminUpdateListingInput;
       photos?: File[];
-    }) => updateAdminListing(id, toAdminUpdateListingBody(body), photos),
+      video?: File | null;
+    }) => updateAdminListing(id, toAdminUpdateListingBody(body), photos, video),
     onSuccess: () => {
       toast.success('Listing updated');
       void queryClient.invalidateQueries({ queryKey: adminKeys.all });

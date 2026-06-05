@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react';
 import { useSearchParams } from 'next/navigation';
 import Link from 'next/link';
+import { ConfirmDialog } from '@/components/admin/shared/confirm-dialog';
 import { InvoiceBankDetailsDialog } from '@/components/buyer/invoice-bank-details-dialog';
 import { RequestInvoiceDialog } from '@/components/buyer/request-invoice-dialog';
 import { SubmitPaymentDialog } from '@/components/buyer/submit-payment-dialog';
@@ -23,12 +24,14 @@ import { workspaceRoutes } from '@/config/routes';
 import { formatUsd } from '@/lib/admin/format';
 import {
   invoiceStatusHint,
+  isCancellableByBuyerInvoiceStatus,
   isPayableInvoiceStatus,
   publicListingToSummary,
 } from '@/lib/buyer/invoice-flow';
 import { cn } from '@/lib/utils';
 import { getListingBySlug } from '@/lib/api/marketplace';
 import {
+  useCancelMyInvoice,
   useDownloadInvoiceDocument,
   useMyInvoices,
   useOpenInvoiceDocument,
@@ -59,9 +62,11 @@ export function BuyerInvoicesPanel() {
     useState<BuyerInvoice | null>(null);
   const [initialListing, setInitialListing] =
     useState<PublicListingSummary | null>(null);
+  const [cancelInvoice, setCancelInvoice] = useState<BuyerInvoice | null>(null);
 
   const openDoc = useOpenInvoiceDocument();
   const downloadDoc = useDownloadInvoiceDocument();
+  const cancelReservation = useCancelMyInvoice();
   const { data, isLoading, isError, error } = useMyInvoices(filters);
 
   useEffect(() => {
@@ -147,6 +152,9 @@ export function BuyerInvoicesPanel() {
             {data?.items.map((invoice) => {
               const hint = invoiceStatusHint(invoice.status);
               const payable = isPayableInvoiceStatus(invoice.status);
+              const cancellable = isCancellableByBuyerInvoiceStatus(
+                invoice.status,
+              );
               return (
                 <TableRow
                   key={invoice.id}
@@ -210,6 +218,16 @@ export function BuyerInvoicesPanel() {
                           Pay
                         </Button>
                       ) : null}
+                      {cancellable ? (
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          className="text-destructive hover:text-destructive"
+                          onClick={() => setCancelInvoice(invoice)}
+                        >
+                          Cancel reservation
+                        </Button>
+                      ) : null}
                       <Button size="sm" variant="ghost" asChild>
                         <Link
                           href={`${workspaceRoutes.accountFinancing}?invoiceId=${invoice.id}`}
@@ -253,6 +271,28 @@ export function BuyerInvoicesPanel() {
           if (!open) setBankDetailsInvoice(null);
         }}
         onSubmitPayment={onSubmitPayment}
+      />
+
+      <ConfirmDialog
+        open={Boolean(cancelInvoice)}
+        onOpenChange={(open) => {
+          if (!open) setCancelInvoice(null);
+        }}
+        title="Cancel reservation?"
+        description={
+          cancelInvoice
+            ? `${cancelInvoice.invoiceNumber} will be cancelled and the vehicle released back to the marketplace. You can reserve again later if it is still available.`
+            : ''
+        }
+        confirmLabel="Cancel reservation"
+        variant="destructive"
+        loading={cancelReservation.isPending}
+        onConfirm={() => {
+          if (!cancelInvoice) return;
+          cancelReservation.mutate(cancelInvoice.id, {
+            onSuccess: () => setCancelInvoice(null),
+          });
+        }}
       />
     </div>
   );

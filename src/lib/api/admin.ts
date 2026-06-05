@@ -41,19 +41,40 @@ export function getDashboard() {
 type AdminListingFormFlattenKeys =
   | 'rangeKm'
   | 'batteryHealthPercent'
+  | 'batteryCapacityKwh'
+  | 'batteryHealthReport'
   | 'chargingType'
+  | 'fastChargingSupported'
+  | 'chargingTimeHours'
+  | 'motorPowerKw'
+  | 'topSpeedKmh'
+  | 'payloadCapacityKg'
+  | 'grossVehicleWeightKg'
+  | 'seatingCapacity'
   | 'basePriceUsd'
-  | 'fobPriceUsd';
+  | 'fobPriceUsd'
+  | 'discountUsd';
 
 type AdminListingApiExtras = {
+  isNew: boolean;
   pricing: {
     basePriceUsd?: number;
     fobPriceUsd?: number;
+    discountUsd?: number;
   };
   evSpecs: {
     rangeKm: number;
     chargingType: string;
     batteryHealthPercent?: number;
+    batteryCapacityKwh?: number;
+    batteryHealthReport?: boolean;
+    fastChargingSupported?: boolean;
+    chargingTimeHours?: number;
+    motorPowerKw?: number;
+    topSpeedKmh?: number;
+    payloadCapacityKg?: number;
+    grossVehicleWeightKg?: number;
+    seatingCapacity?: number;
   };
 };
 
@@ -75,33 +96,59 @@ function buildAdminListingApiBody(
   const {
     basePriceUsd,
     fobPriceUsd,
+    discountUsd,
     subcategoryId,
     description,
     trim,
     mileageKm,
     rangeKm,
     batteryHealthPercent,
+    batteryCapacityKwh,
+    batteryHealthReport,
     chargingType,
+    fastChargingSupported,
+    chargingTimeHours,
+    motorPowerKw,
+    topSpeedKmh,
+    payloadCapacityKg,
+    grossVehicleWeightKg,
+    seatingCapacity,
+    useCases,
     ...rest
   } = input;
 
+  const evSpecs = {
+    rangeKm: rangeKm!,
+    chargingType: chargingType!,
+    batteryHealthPercent:
+      input.condition === 'NEW' ? undefined : batteryHealthPercent,
+    ...(batteryCapacityKwh != null ? { batteryCapacityKwh } : {}),
+    ...(batteryHealthReport != null ? { batteryHealthReport } : {}),
+    ...(fastChargingSupported != null ? { fastChargingSupported } : {}),
+    ...(chargingTimeHours != null ? { chargingTimeHours } : {}),
+    ...(motorPowerKw != null ? { motorPowerKw } : {}),
+    ...(topSpeedKmh != null ? { topSpeedKmh } : {}),
+    ...(payloadCapacityKg != null ? { payloadCapacityKg } : {}),
+    ...(grossVehicleWeightKg != null ? { grossVehicleWeightKg } : {}),
+    ...(seatingCapacity != null ? { seatingCapacity } : {}),
+  };
+
   return {
     ...rest,
+    isNew: input.condition === 'NEW',
     subcategoryId: subcategoryId?.trim() || undefined,
     description: description?.trim() || undefined,
     trim: trim?.trim() || undefined,
     mileageKm,
-    evSpecs: {
-      rangeKm: rangeKm!,
-      chargingType: chargingType!,
-      batteryHealthPercent:
-        input.condition === 'NEW' ? undefined : input.batteryHealthPercent,
-    },
+    useCases: useCases?.length ? useCases : undefined,
+    evSpecs,
     pricing: {
       basePriceUsd:
         input.sellerType === 'UZA_RWANDA_STOCK' ? basePriceUsd : undefined,
       fobPriceUsd:
         input.sellerType === 'UZA_CHINA_SOURCING' ? fobPriceUsd : undefined,
+      discountUsd:
+        discountUsd != null && discountUsd > 0 ? discountUsd : undefined,
     },
   };
 }
@@ -121,10 +168,13 @@ export function toAdminUpdateListingBody(
 export function createAdminListing(
   body: AdminCreateListingBody,
   photos: File[] = [],
+  video?: File | null,
 ) {
-  const form = buildMultipartFormData(body, [
-    { field: 'photos', files: photos },
-  ]);
+  const fileEntries = [{ field: 'photos', files: photos }];
+  if (video) {
+    fileEntries.push({ field: 'video', files: [video] });
+  }
+  const form = buildMultipartFormData(body, fileEntries);
   return authenticatedMultipartFetch<AdminListing>('/admin/listings', form);
 }
 
@@ -132,10 +182,13 @@ export function updateAdminListing(
   id: string,
   body: AdminUpdateListingBody,
   photos: File[] = [],
+  video?: File | null,
 ) {
-  const form = buildMultipartFormData(body, [
-    { field: 'photos', files: photos },
-  ]);
+  const fileEntries = [{ field: 'photos', files: photos }];
+  if (video) {
+    fileEntries.push({ field: 'video', files: [video] });
+  }
+  const form = buildMultipartFormData(body, fileEntries);
   return authenticatedMultipartFetch<AdminListing>(
     `/admin/listings/${id}`,
     form,

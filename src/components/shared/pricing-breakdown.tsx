@@ -107,12 +107,6 @@ export function PricingBreakdown({
           emphasis
         />
       )}
-      {breakdown.finalPriceRwf != null ? (
-        <Line
-          label="Approx. RWF"
-          value={new Intl.NumberFormat('en-RW').format(breakdown.finalPriceRwf)}
-        />
-      ) : null}
       <p className="text-xs text-muted-foreground">
         Final numbers are fixed when an administrator approves the listing.
       </p>

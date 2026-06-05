@@ -50,6 +50,67 @@ export function formatListingChargingType(value: string): string {
   return value.replaceAll('_', ' ');
 }
 
+export const listingBodyTypes = [
+  'SEDAN',
+  'SUV',
+  'HATCHBACK',
+  'CROSSOVER',
+  'COUPE',
+  'MPV',
+  'PICKUP_TRUCK',
+  'WAGON',
+  'MINIVAN',
+  'BUS',
+  'MINIBUS',
+  'VAN',
+  'CARGO_VAN',
+  'TRUCK',
+  'LIGHT_TRUCK',
+  'HEAVY_DUTY_TRUCK',
+  'UTILITY_VEHICLE',
+  'DELIVERY_VEHICLE',
+  'FORKLIFT',
+  'INDUSTRIAL',
+  'SHUTTLE',
+  'MOTORCYCLE',
+  'SCOOTER',
+  'BICYCLE',
+  'TRICYCLE',
+  'CARGO_BIKE',
+] as const;
+
+export const listingPowertrainTypes = ['BEV', 'PHEV', 'HEV', 'EREV'] as const;
+
+export const listingSteeringPositions = [
+  'LEFT_HAND_DRIVE',
+  'RIGHT_HAND_DRIVE',
+] as const;
+
+export const listingDrivetrains = ['FWD', 'RWD', 'AWD', 'FOUR_WD'] as const;
+
+export const listingUseCases = [
+  'FAMILY',
+  'TAXI',
+  'DELIVERY',
+  'CORPORATE',
+  'FLEET',
+  'SCHOOL',
+  'HOTEL',
+  'LOGISTICS',
+  'INDUSTRIAL',
+  'GOVERNMENT',
+  'AGRICULTURE',
+  'WAREHOUSE',
+  'PERSONAL_MOBILITY',
+  'COURIER',
+  'CAMPUS',
+  'LAST_MILE',
+] as const;
+
+export function formatListingEnumLabel(value: string): string {
+  return value.replaceAll('_', ' ');
+}
+
 export const adminListingSellerTypes = [
   'UZA_RWANDA_STOCK',
   'UZA_CHINA_SOURCING',
@@ -85,18 +146,40 @@ const adminListingFormFieldsSchema = z.object({
   model: z.string().min(1).max(100),
   trim: z.string().max(100).optional(),
   manufacturingYear: z.number().int().min(1990).max(2100),
-  isNew: z.boolean(),
   condition: z.enum(listingConditions),
+  bodyType: z.enum(listingBodyTypes).optional(),
+  powertrainType: z.enum(listingPowertrainTypes).optional(),
+  color: z.string().max(100).optional(),
+  seats: z.number().int().min(1).optional(),
+  steeringPosition: z.enum(listingSteeringPositions).optional(),
+  drivetrain: z.enum(listingDrivetrains).optional(),
+  hasWarranty: z.boolean().optional(),
+  warrantyDetails: z.string().max(500).optional(),
+  hasAccidentHistory: z.boolean().optional(),
+  ownershipCount: z.number().int().min(0).optional(),
+  registrationStatus: z.string().max(200).optional(),
+  useCases: z.array(z.enum(listingUseCases)).optional(),
+  deliveryEstimateDays: z.number().int().min(0).optional(),
   vehicleLocation: z.string().min(1).max(255),
   city: z.string().min(1).max(100),
   country: z.string().length(2),
   description: z.string().max(5000).optional(),
   mileageKm: z.number().min(0).optional(),
   rangeKm: z.number().min(1).optional(),
+  batteryCapacityKwh: z.number().min(0).optional(),
   batteryHealthPercent: z.number().min(0).max(100).optional(),
+  batteryHealthReport: z.boolean().optional(),
   chargingType: z.enum(listingChargingTypes).optional(),
+  fastChargingSupported: z.boolean().optional(),
+  chargingTimeHours: z.number().min(0).optional(),
+  motorPowerKw: z.number().min(0).optional(),
+  topSpeedKmh: z.number().min(0).optional(),
+  payloadCapacityKg: z.number().min(0).optional(),
+  grossVehicleWeightKg: z.number().min(0).optional(),
+  seatingCapacity: z.number().int().min(1).optional(),
   basePriceUsd: z.number().min(0).optional(),
   fobPriceUsd: z.number().min(0).optional(),
+  discountUsd: z.number().min(0).optional(),
 });
 
 function refineListingEvSpecs(
@@ -176,6 +259,7 @@ export const adminListingFormSchema = adminListingFormFieldsSchema
       ])
       .optional(),
     removePhotoIds: z.array(z.string().min(1)).optional(),
+    removeVideo: z.boolean().optional(),
   })
   .superRefine(refineAdminListingPricing)
   .superRefine(refineListingEvSpecs);
@@ -199,6 +283,7 @@ export const adminUpdateListingSchema = adminListingFormFieldsSchema
       ])
       .optional(),
     removePhotoIds: z.array(z.string().min(1)).optional(),
+    removeVideo: z.boolean().optional(),
   })
   .superRefine(refineAdminListingPricing)
   .superRefine(refineListingEvSpecs);

@@ -8,6 +8,7 @@ export const workspaceRoutes = {
   account: '/account',
   accountOrders: '/account/orders',
   accountInvoices: '/account/invoices',
+  accountBookings: '/account/bookings',
   accountPayments: '/account/payments',
   accountFinancing: '/account/financing',
   accountProfile: '/account/profile',
@@ -36,6 +37,7 @@ export const adminRoutes = {
   sellers: '/admin/sellers',
   orders: '/admin/orders',
   payments: '/admin/payments',
+  bookings: '/admin/bookings',
   invoices: '/admin/invoices',
   financing: '/admin/financing',
   stations: '/admin/stations',
@@ -46,6 +48,7 @@ export const adminRoutes = {
   users: '/admin/users',
   activityLogs: '/admin/activity-logs',
   pricingRules: '/admin/pricing-rules',
+  platformSettings: '/admin/platform-settings',
   settings: '/admin/settings',
   notifications: '/admin/notifications',
 } as const;
