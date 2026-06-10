@@ -4,7 +4,7 @@ import type {
   UpdateSellerListingInput,
 } from '@/schemas/seller';
 import type { SellerListing } from '@/types/seller/marketplace';
-import { listingChargingTypes, listingConditions } from '@/schemas/admin';
+import { listingChargingTypes, listingConditions } from '@/schemas/marketplace';
 
 export function sellerListingToFormValues(
   listing: SellerListing,

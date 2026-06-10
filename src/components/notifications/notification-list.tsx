@@ -1,7 +1,7 @@
 'use client';
 
 import { cn } from '@/lib/utils';
-import { formatDateTime } from '@/lib/admin/format';
+import { formatDateTime } from '@/lib/format';
 import type { AppNotification } from '@/types/notifications';
 
 type NotificationListProps = {

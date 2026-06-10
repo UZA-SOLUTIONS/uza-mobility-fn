@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { FinancingRequestDialog } from '@/components/buyer/financing-request-dialog';
-import { StatusBadge } from '@/components/admin/shared/status-badge';
+import { StatusBadge } from '@/components/shared/status-badge';
 import { PageHeader } from '@/components/shared/page-header';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -15,7 +15,7 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
-import { formatDate, formatUsd } from '@/lib/admin/format';
+import { formatDate, formatUsd } from '@/lib/format';
 import { useMyFinancing } from '@/queries/buyer';
 
 export function BuyerFinancingPanel() {

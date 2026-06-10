@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { listingChargingTypes, listingConditions } from '@/schemas/admin';
+import { listingChargingTypes, listingConditions } from '@/schemas/marketplace';
 
 export const marketplaceListingSellerTypes = [
   'LOCAL_SELLER',
@@ -116,8 +116,8 @@ export {
   partConditions,
   createPartSchema,
   updatePartSchema,
-} from '@/schemas/admin';
-export type { CreatePartInput, UpdatePartInput } from '@/schemas/admin';
+} from '@/schemas/marketplace';
+export type { CreatePartInput, UpdatePartInput } from '@/schemas/marketplace';
 
 export const createSellerProfileSchema = z.object({
   sellerType: z.enum(marketplaceListingSellerTypes),

@@ -8,16 +8,16 @@ export type {
   OrderStatus as BuyerOrderStatus,
   PaymentStatus as BuyerPaymentStatus,
   FinancingStatus as BuyerFinancingStatus,
-} from '@/types/admin/commerce';
+} from '@/types/commerce';
 
 export type BuyerOrdersFilters = {
-  status?: import('@/types/admin/commerce').OrderStatus;
+  status?: import('@/types/commerce').OrderStatus;
   page?: number;
   limit?: number;
 };
 
 export type BuyerInvoicesFilters = {
-  status?: import('@/types/admin/commerce').InvoiceStatus;
+  status?: import('@/types/commerce').InvoiceStatus;
   pendingPurchase?: boolean;
   payableOnly?: boolean;
   listingId?: string;
@@ -26,7 +26,7 @@ export type BuyerInvoicesFilters = {
 };
 
 export type BuyerPaymentsFilters = {
-  status?: import('@/types/admin/commerce').PaymentStatus;
+  status?: import('@/types/commerce').PaymentStatus;
   page?: number;
   limit?: number;
 };
@@ -35,11 +35,11 @@ export type BuyerOrderTracking = {
   order: {
     id: string;
     orderNumber: string;
-    status: import('@/types/admin/commerce').OrderStatus;
+    status: import('@/types/commerce').OrderStatus;
     sellerType: string;
-    stages: import('@/types/admin/commerce').OrderStatus[];
+    stages: import('@/types/commerce').OrderStatus[];
   };
-  events: import('@/types/admin/commerce').OrderTrackingEvent[];
+  events: import('@/types/commerce').OrderTrackingEvent[];
 };
 
 export type PublicListingSummary = {

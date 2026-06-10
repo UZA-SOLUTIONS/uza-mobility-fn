@@ -2,7 +2,10 @@ import Link from 'next/link';
 import { ArrowUpRight } from 'lucide-react';
 import { ListingCard } from '@/components/marketing/listing-card';
 import { brand } from '@/lib/marketing/colors';
-import { marketingContainer } from '@/lib/marketing/layout-classes';
+import {
+  marketingContainer,
+  marketingWhiteSurface,
+} from '@/lib/marketing/layout-classes';
 import type { PublicListing } from '@/types/marketplace/public-listing';
 
 type HomeAvailableSectionProps = {
@@ -11,7 +14,7 @@ type HomeAvailableSectionProps = {
 
 export function HomeAvailableSection({ listings }: HomeAvailableSectionProps) {
   return (
-    <section className="bg-white py-12 sm:py-20">
+    <section className={`${marketingWhiteSurface} py-12 sm:py-20`}>
       <div className={marketingContainer}>
         <div className="mb-10 flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
           <div className="space-y-2">

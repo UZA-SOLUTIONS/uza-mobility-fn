@@ -3,12 +3,12 @@
 import { useEffect, useState } from 'react';
 import { useSearchParams } from 'next/navigation';
 import Link from 'next/link';
-import { ConfirmDialog } from '@/components/admin/shared/confirm-dialog';
+import { ConfirmDialog } from '@/components/shared/confirm-dialog';
 import { InvoiceBankDetailsDialog } from '@/components/buyer/invoice-bank-details-dialog';
 import { RequestInvoiceDialog } from '@/components/buyer/request-invoice-dialog';
 import { SubmitPaymentDialog } from '@/components/buyer/submit-payment-dialog';
-import { StatusBadge } from '@/components/admin/shared/status-badge';
-import { PaginationBar } from '@/components/admin/shared/pagination-bar';
+import { StatusBadge } from '@/components/shared/status-badge';
+import { PaginationBar } from '@/components/shared/pagination-bar';
 import { PageHeader } from '@/components/shared/page-header';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -21,7 +21,7 @@ import {
   TableRow,
 } from '@/components/ui/table';
 import { workspaceRoutes } from '@/config/routes';
-import { formatUsd } from '@/lib/admin/format';
+import { formatUsd } from '@/lib/format';
 import {
   invoiceStatusHint,
   isCancellableByBuyerInvoiceStatus,
@@ -150,7 +150,7 @@ export function BuyerInvoicesPanel() {
               </TableRow>
             ) : null}
             {data?.items.map((invoice) => {
-              const hint = invoiceStatusHint(invoice.status);
+              const hint = invoiceStatusHint(invoice.status, invoice.notes);
               const payable = isPayableInvoiceStatus(invoice.status);
               const cancellable = isCancellableByBuyerInvoiceStatus(
                 invoice.status,

@@ -4,12 +4,8 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
 import { ApiClientError } from '@/lib/api';
 import {
-  adminConfirmBooking,
-  adminListBookings,
-  adminRejectBooking,
-  adminUpdateBookingFee,
-  getBookingFeeQuote,
   cancelMyBooking,
+  getBookingFeeQuote,
   getMyBookings,
   requestVehicleBooking,
   submitBookingPayment,
@@ -24,6 +20,7 @@ type PaginatedBookings = {
 };
 
 export type MyBookingsFilters = {
+  page?: number;
   listingId?: string;
   status?: string;
   limit?: number;
@@ -42,8 +39,6 @@ export const bookingKeys = {
       filters.limit ?? null,
       filters.activeOnly ?? null,
     ] as const,
-  admin: (filters: { status?: string; page?: number; limit?: number }) =>
-    [...bookingKeys.all, 'admin', filters] as const,
 };
 
 function toastError(error: unknown, fallback: string) {
@@ -160,59 +155,5 @@ export function useSubmitBookingPayment() {
       toast.success('Booking payment submitted for verification');
     },
     onError: (error) => toastError(error, 'Unable to submit booking payment'),
-  });
-}
-
-export function useAdminBookings(
-  filters: { status?: string; page?: number; limit?: number } = {},
-  enabled = true,
-) {
-  return useQuery({
-    queryKey: bookingKeys.admin(filters),
-    queryFn: () => adminListBookings(filters),
-    enabled,
-  });
-}
-
-export function useConfirmBooking() {
-  const queryClient = useQueryClient();
-  return useMutation({
-    mutationFn: adminConfirmBooking,
-    onSuccess: () => {
-      void queryClient.invalidateQueries({ queryKey: bookingKeys.all });
-      toast.success('Booking confirmed');
-    },
-    onError: (error) => toastError(error, 'Unable to confirm booking'),
-  });
-}
-
-export function useRejectBooking() {
-  const queryClient = useQueryClient();
-  return useMutation({
-    mutationFn: ({ id, reason }: { id: string; reason?: string }) =>
-      adminRejectBooking(id, { reason }),
-    onSuccess: () => {
-      void queryClient.invalidateQueries({ queryKey: bookingKeys.all });
-      toast.success('Booking rejected');
-    },
-    onError: (error) => toastError(error, 'Unable to reject booking'),
-  });
-}
-
-export function useUpdateBookingFee() {
-  const queryClient = useQueryClient();
-  return useMutation({
-    mutationFn: ({
-      id,
-      bookingFeeUsd,
-    }: {
-      id: string;
-      bookingFeeUsd: number;
-    }) => adminUpdateBookingFee(id, { bookingFeeUsd }),
-    onSuccess: () => {
-      void queryClient.invalidateQueries({ queryKey: bookingKeys.all });
-      toast.success('Booking fee updated');
-    },
-    onError: (error) => toastError(error, 'Unable to update booking fee'),
   });
 }

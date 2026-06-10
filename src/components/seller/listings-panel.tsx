@@ -2,8 +2,8 @@
 
 import Link from 'next/link';
 import { useState } from 'react';
-import { ConfirmDialog } from '@/components/admin/shared/confirm-dialog';
-import { StatusBadge } from '@/components/admin/shared/status-badge';
+import { ConfirmDialog } from '@/components/shared/confirm-dialog';
+import { StatusBadge } from '@/components/shared/status-badge';
 import { SellerListingFormDialog } from '@/components/seller/listing-form-dialog';
 import {
   SellerStatusBanner,

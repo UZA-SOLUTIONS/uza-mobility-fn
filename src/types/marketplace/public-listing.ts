@@ -71,6 +71,8 @@ export type PublicListing = {
   vehicleLocation?: string | null;
   verificationLevel?: string | null;
   videoUrl?: string | null;
+  brochureUrl?: string | null;
+  isFullOption?: boolean;
   city?: string | null;
   country?: string;
   drivetrain?: string | null;

@@ -1,6 +1,6 @@
 import { MarketingChrome } from '@/components/marketing/marketing-chrome';
 import { getPublicCategories } from '@/lib/api/catalog';
-import type { Category } from '@/types/admin/marketplace';
+import type { Category } from '@/types/catalog';
 
 export default async function MarketingLayout({
   children,

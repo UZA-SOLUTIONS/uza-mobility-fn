@@ -2,8 +2,8 @@
 
 import { useState } from 'react';
 import { BuyerOrderDetailSheet } from '@/components/buyer/order-detail-sheet';
-import { StatusBadge } from '@/components/admin/shared/status-badge';
-import { PaginationBar } from '@/components/admin/shared/pagination-bar';
+import { StatusBadge } from '@/components/shared/status-badge';
+import { PaginationBar } from '@/components/shared/pagination-bar';
 import { PageHeader } from '@/components/shared/page-header';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -15,7 +15,7 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
-import { formatUsd } from '@/lib/admin/format';
+import { formatUsd } from '@/lib/format';
 import { useMyOrders } from '@/queries/buyer';
 import type { BuyerOrder, BuyerOrdersFilters } from '@/types/buyer/commerce';
 

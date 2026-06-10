@@ -1,10 +1,11 @@
 import { workspaceRoutes } from '@/config/routes';
 import {
   canAccessOperatorPath,
-  hasAdminAccess,
   hasBuyerWorkspace,
+  hasMarketplaceWorkspace,
   hasOperatorWorkspace,
   hasSellerWorkspace,
+  isStaffOnlyAccount,
 } from '@/lib/permissions';
 import type { MeUser } from '@/types/auth/me-user';
 
@@ -14,10 +15,13 @@ function pathStartsWith(path: string, prefix: string) {
 
 /** Whether this signed-in user may open a protected workspace path. */
 export function canAccessWorkspacePath(me: MeUser, path: string): boolean {
-  if (pathStartsWith(path, workspaceRoutes.admin)) {
-    return hasAdminAccess(me.permissions, me.roles);
+  if (isStaffOnlyAccount(me)) {
+    return false;
   }
-  if (pathStartsWith(path, workspaceRoutes.account)) {
+  if (
+    pathStartsWith(path, workspaceRoutes.account) ||
+    pathStartsWith(path, '/account')
+  ) {
     return hasBuyerWorkspace(me.permissions, me.roles);
   }
   if (pathStartsWith(path, workspaceRoutes.seller)) {
@@ -31,7 +35,6 @@ export function canAccessWorkspacePath(me: MeUser, path: string): boolean {
 
 /**
  * After login, honor callbackUrl only when the user is allowed on that workspace.
- * Prevents admins being sent to /account via a stale callbackUrl query param.
  */
 export function resolvePostLoginRedirect(
   me: MeUser,
@@ -47,10 +50,10 @@ export function resolvePostLoginRedirect(
   return fallback;
 }
 
+/** Default destination for a signed-in marketplace user (buyer / seller / operator). */
 export function authRedirect(me: MeUser): string {
-  // Staff always wins — incl. super admin (`*`) and users with both SELLER + staff roles.
-  if (hasAdminAccess(me.permissions, me.roles)) {
-    return workspaceRoutes.admin;
+  if (isStaffOnlyAccount(me) || !hasMarketplaceWorkspace(me)) {
+    return '/';
   }
 
   const isSeller = hasSellerWorkspace(me.permissions, me.seller, me.sellers);
@@ -65,17 +68,13 @@ export function authRedirect(me: MeUser): string {
     return workspaceRoutes.operator;
   }
 
-  if (isBuyer && !isSeller) {
-    return workspaceRoutes.account;
-  }
-
-  if (isSeller && isBuyer) {
-    return workspaceRoutes.account;
+  if (isBuyer) {
+    return '/vehicles';
   }
 
   if (isSeller) {
     return workspaceRoutes.seller;
   }
 
-  return workspaceRoutes.account;
+  return '/vehicles';
 }

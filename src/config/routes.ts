@@ -2,17 +2,22 @@ export const authRoutes = {
   login: '/login',
   register: '/register',
   forgotPassword: '/forgot-password',
+  resetPassword: '/reset-password',
+  verifyEmail: '/verify-email',
+  checkEmail: '/check-email',
+  googleCallback: '/auth/google/callback',
 } as const;
 
 export const workspaceRoutes = {
-  account: '/account',
-  accountOrders: '/account/orders',
-  accountInvoices: '/account/invoices',
-  accountBookings: '/account/bookings',
-  accountPayments: '/account/payments',
-  accountFinancing: '/account/financing',
-  accountProfile: '/account/profile',
-  accountNotifications: '/account/notifications',
+  account: '/my',
+  accountOrders: '/my/orders',
+  accountInvoices: '/my/invoices',
+  accountBookings: '/my/bookings',
+  accountPayments: '/my/payments',
+  accountFinancing: '/my/financing',
+  accountProfile: '/my/profile',
+  accountNotifications: '/my/notifications',
+  accountWishlist: '/my/wishlist',
   /** @deprecated Use accountProfile */
   accountSettings: '/account/profile',
   /** @deprecated Use accountInvoices */
@@ -26,42 +31,18 @@ export const workspaceRoutes = {
   operatorStations: '/operator/stations',
   operatorProfile: '/operator/profile',
   operatorNotifications: '/operator/notifications',
-  admin: '/admin',
-} as const;
-
-export const adminRoutes = {
-  root: '/admin',
-  listings: '/admin/listings',
-  categories: '/admin/categories',
-  parts: '/admin/parts',
-  sellers: '/admin/sellers',
-  orders: '/admin/orders',
-  payments: '/admin/payments',
-  bookings: '/admin/bookings',
-  invoices: '/admin/invoices',
-  financing: '/admin/financing',
-  stations: '/admin/stations',
-  fleet: '/admin/fleet',
-  energy: '/admin/energy',
-  promotions: '/admin/promotions',
-  sustainability: '/admin/sustainability',
-  users: '/admin/users',
-  activityLogs: '/admin/activity-logs',
-  pricingRules: '/admin/pricing-rules',
-  platformSettings: '/admin/platform-settings',
-  settings: '/admin/settings',
-  notifications: '/admin/notifications',
 } as const;
 
 export const publicOnlyAuthPaths = [
   authRoutes.login,
   authRoutes.register,
   authRoutes.forgotPassword,
+  authRoutes.checkEmail,
+  authRoutes.googleCallback,
 ] as const;
 
 export const protectedWorkspacePrefixes = [
   workspaceRoutes.account,
   workspaceRoutes.seller,
   workspaceRoutes.operator,
-  workspaceRoutes.admin,
 ] as const;

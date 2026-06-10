@@ -39,6 +39,28 @@ export function getListingBySlug(slug: string) {
   return apiFetch<PublicListing>(`/listings/${encodeURIComponent(slug)}`);
 }
 
+export function getWishlistIds(token: string) {
+  return apiFetch<string[]>('/listings/wishlist/ids', { token });
+}
+
+export function getWishlist(token: string) {
+  return apiFetch<PublicListing[]>('/listings/wishlist', { token });
+}
+
+export function addToWishlist(listingId: string, token: string) {
+  return apiFetch<{ message: string }>(
+    `/listings/${encodeURIComponent(listingId)}/wishlist`,
+    { method: 'POST', token },
+  );
+}
+
+export function removeFromWishlist(listingId: string, token: string) {
+  return apiFetch<{ message: string }>(
+    `/listings/${encodeURIComponent(listingId)}/wishlist`,
+    { method: 'DELETE', token },
+  );
+}
+
 export function browseListings(filters: BrowseListingsFilters = {}) {
   const params = new URLSearchParams({
     limit: String(filters.limit ?? 24),

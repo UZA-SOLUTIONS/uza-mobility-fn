@@ -1,7 +1,10 @@
 import Image from 'next/image';
 import Link from 'next/link';
 import { brand } from '@/lib/marketing/colors';
-import { marketingContainer } from '@/lib/marketing/layout-classes';
+import {
+  marketingContainer,
+  marketingForestSurface,
+} from '@/lib/marketing/layout-classes';
 
 function PromoCard({
   title,
@@ -49,10 +52,7 @@ function PromoCard({
 
 export function HomePromoGrid() {
   return (
-    <section
-      className="py-12 sm:py-20"
-      style={{ backgroundColor: brand.forest }}
-    >
+    <section className={`py-12 sm:py-20 ${marketingForestSurface}`}>
       <div
         className={`${marketingContainer} flex flex-col gap-6 md:flex-row md:gap-10`}
       >

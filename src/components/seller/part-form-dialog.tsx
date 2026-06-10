@@ -47,7 +47,7 @@ import {
   partConditions,
   type CreatePartInput,
 } from '@/schemas/seller';
-import type { Category } from '@/types/admin/marketplace';
+import type { Category } from '@/types/catalog';
 import type { SellerPart } from '@/types/seller/marketplace';
 
 const PARTS_CATEGORY_TYPE = 'EV_PARTS_ACCESSORIES' as const;

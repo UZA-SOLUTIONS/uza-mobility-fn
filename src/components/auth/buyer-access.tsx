@@ -24,14 +24,7 @@ export function BuyerAccess({ children }: BuyerAccessProps) {
   const queryClient = useQueryClient();
   const logout = useLogout();
   const { data: session, status } = useSession();
-  const {
-    user,
-    isLoading,
-    hasSellerWorkspace,
-    hasAdminAccess,
-    hasOperatorWorkspace,
-    hasOperatorApplication,
-  } = usePermissions();
+  const { user, isLoading } = usePermissions();
 
   const sessionUser = isMeUser(session?.user) ? session.user : null;
   const effectiveUser = user ?? sessionUser;
@@ -90,31 +83,9 @@ export function BuyerAccess({ children }: BuyerAccessProps) {
               : 'This area is for buyers. Sign in with a buyer account to continue.'}
           </p>
           <div className="flex flex-wrap gap-2">
-            {hasSellerWorkspace ? (
-              <Button asChild>
-                <Link href={workspaceRoutes.seller}>Seller workspace</Link>
-              </Button>
-            ) : null}
-            {hasAdminAccess ? (
-              <Button asChild variant="outline">
-                <Link href={workspaceRoutes.admin}>Admin workspace</Link>
-              </Button>
-            ) : null}
-            {hasOperatorWorkspace || hasOperatorApplication ? (
-              <Button asChild variant="outline">
-                <Link href={workspaceRoutes.operator}>
-                  {hasOperatorWorkspace
-                    ? 'Operator workspace'
-                    : 'Charging operator application'}
-                </Link>
-              </Button>
-            ) : (
-              <Button asChild variant="outline">
-                <Link href={workspaceRoutes.operator}>
-                  Become a charging operator
-                </Link>
-              </Button>
-            )}
+            <Button asChild variant="outline">
+              <Link href="/vehicles">Browse vehicles</Link>
+            </Button>
             <Button
               type="button"
               variant="outline"

@@ -25,7 +25,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { formatUsd } from '@/lib/admin/format';
+import { formatUsd } from '@/lib/format';
 import { useMyInvoices, useSubmitPayment } from '@/queries/buyer';
 import { submitPaymentSchema, type SubmitPaymentInput } from '@/schemas/buyer';
 

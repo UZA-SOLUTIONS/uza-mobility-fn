@@ -26,7 +26,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { formatUsd } from '@/lib/admin/format';
+import { formatUsd } from '@/lib/format';
 import { useSessionUser } from '@/hooks/session-user';
 import { useMyInvoices, useSubmitFinancing } from '@/queries/buyer';
 import {

@@ -3,7 +3,11 @@ import { HomeHeroPoster } from '@/components/marketing/home-hero-poster';
 import { HomeAvailableSectionSkeleton } from '@/components/marketing/home-available-section-skeleton';
 import { HomePerfectFitSkeleton } from '@/components/marketing/home-perfect-fit-skeleton';
 import { Skeleton } from '@/components/ui/skeleton';
-import { marketingContainer } from '@/lib/marketing/layout-classes';
+import {
+  marketingContainer,
+  marketingForestSurface,
+  marketingWhiteSurface,
+} from '@/lib/marketing/layout-classes';
 
 /** Matches home hero layout so navigation to / does not flash. */
 export default function HomeLoading() {
@@ -25,7 +29,7 @@ export default function HomeLoading() {
         </div>
       </section>
       <HomeAvailableSectionSkeleton />
-      <div className="bg-white py-20">
+      <div className={`${marketingWhiteSurface} py-20`}>
         <div className={marketingContainer}>
           <div className="grid gap-4 md:grid-cols-2">
             <Skeleton className="h-[283px] rounded-lg" />
@@ -34,7 +38,9 @@ export default function HomeLoading() {
         </div>
       </div>
       <HomePerfectFitSkeleton />
-      <section className="relative h-[400px] w-full overflow-hidden bg-[#174438]">
+      <section
+        className={`relative h-[400px] w-full overflow-hidden ${marketingForestSurface}`}
+      >
         <div className="absolute inset-0 bg-[#17443866]" aria-hidden />
       </section>
     </>

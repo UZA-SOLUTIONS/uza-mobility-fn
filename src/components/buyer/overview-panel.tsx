@@ -7,42 +7,29 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
 import { workspaceRoutes } from '@/config/routes';
-import {
-  useMyFinancing,
-  useMyInvoices,
-  useMyOrders,
-  useMyPayments,
-} from '@/queries/buyer';
-import {
-  ShoppingCart,
-  FileText,
-  CreditCard,
-  DollarSign,
-  List,
-} from 'lucide-react';
+import { useMyOrders } from '@/queries/buyer';
+import { useMyBookings } from '@/queries/bookings';
+import { Car, List, ShoppingCart } from 'lucide-react';
 
 export function BuyerOverviewPanel() {
   const { data: orders, isLoading: ordersLoading } = useMyOrders({
     limit: 1,
   });
-  const { data: invoices, isLoading: invoicesLoading } = useMyInvoices({
+  const { data: bookings, isLoading: bookingsLoading } = useMyBookings({
     limit: 1,
+    activeOnly: true,
   });
-  const { data: payments, isLoading: paymentsLoading } = useMyPayments({
-    limit: 1,
-  });
-  const { data: financing, isLoading: financingLoading } = useMyFinancing();
 
   return (
     <div className="space-y-8">
       <PageHeader
         title="Buyer overview"
-        description="Track orders, invoices, payments, and financing for your EV purchases."
+        description="Track orders and bookings for your EV purchases."
       />
 
       <BuyerNextSteps />
 
-      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+      <div className="grid gap-4 sm:grid-cols-2">
         <StatCard
           title="Orders"
           value={orders?.meta.total}
@@ -50,22 +37,10 @@ export function BuyerOverviewPanel() {
           icon={ShoppingCart}
         />
         <StatCard
-          title="Invoices"
-          value={invoices?.meta.total}
-          loading={invoicesLoading}
-          icon={FileText}
-        />
-        <StatCard
-          title="Payments"
-          value={payments?.meta.total}
-          loading={paymentsLoading}
-          icon={CreditCard}
-        />
-        <StatCard
-          title="Financing requests"
-          value={financing?.length}
-          loading={financingLoading}
-          icon={DollarSign}
+          title="Active bookings"
+          value={bookings?.meta.total}
+          loading={bookingsLoading}
+          icon={Car}
         />
       </div>
 
@@ -76,11 +51,11 @@ export function BuyerOverviewPanel() {
         <CardContent className="flex flex-wrap gap-2">
           <Button asChild>
             <Link
-              href={workspaceRoutes.accountInvoices}
+              href={workspaceRoutes.accountBookings}
               className="flex items-center"
             >
-              <FileText className="size-4" />
-              Request invoice
+              <Car className="size-4" />
+              View bookings
             </Link>
           </Button>
           <Button variant="outline" asChild>
@@ -90,24 +65,6 @@ export function BuyerOverviewPanel() {
             >
               <List className="size-4" />
               View orders
-            </Link>
-          </Button>
-          <Button variant="outline" asChild>
-            <Link
-              href={workspaceRoutes.accountPayments}
-              className="flex items-center"
-            >
-              <CreditCard className="size-4" />
-              Submit payment
-            </Link>
-          </Button>
-          <Button variant="outline" asChild>
-            <Link
-              href={workspaceRoutes.accountFinancing}
-              className="flex items-center"
-            >
-              <DollarSign className="size-4" />
-              Financing support
             </Link>
           </Button>
         </CardContent>
@@ -133,7 +90,7 @@ function StatCard({
         {icon ? (
           <span className="text-muted-foreground">
             {(() => {
-              const Icon = icon as any;
+              const Icon = icon as React.ElementType;
               return <Icon className="size-5" />;
             })()}
           </span>

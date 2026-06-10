@@ -1,14 +1,19 @@
 'use client';
 
 import { useCallback, useEffect, useMemo, useState } from 'react';
-import { ChevronLeft, ChevronRight } from 'lucide-react';
+import Link from 'next/link';
+import { ArrowUpRight, ChevronLeft, ChevronRight } from 'lucide-react';
 import { ListingCard } from '@/components/marketing/listing-card';
 import { ListingGridSkeleton } from '@/components/marketing/listing-grid-skeleton';
 import { useMarketingCategories } from '@/components/marketing/marketing-catalog-context';
 import { browseListings } from '@/lib/api/marketplace';
 import { buildPerfectFitTabs } from '@/lib/marketing/marketing-catalog-nav';
 import { brand } from '@/lib/marketing/colors';
-import { marketingContainer } from '@/lib/marketing/layout-classes';
+import {
+  marketingContainer,
+  marketingWhiteSurface,
+} from '@/lib/marketing/layout-classes';
+import { vehiclesHref } from '@/lib/marketing/vehicles-url';
 import type { PublicListing } from '@/types/marketplace/public-listing';
 
 export function HomePerfectFit() {
@@ -37,7 +42,7 @@ export function HomePerfectFit() {
     setLoading(true);
     try {
       const result = await browseListings({
-        limit: 4,
+        limit: 8,
         page: pageNum,
         category: categorySlug,
       });
@@ -70,12 +75,24 @@ export function HomePerfectFit() {
   }
 
   return (
-    <section className="bg-white py-20">
+    <section className={`${marketingWhiteSurface} py-20`}>
       <div className={marketingContainer}>
         <div className="mb-10 space-y-6">
-          <h2 className="text-3xl font-semibold text-[#151515]">
-            Find Your Perfect Fit
-          </h2>
+          <div className="flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
+            <h2 className="text-3xl font-semibold text-[#151515]">
+              Find Your Perfect Fit
+            </h2>
+            {activeTab ? (
+              <Link
+                href={vehiclesHref({ category: activeTab.categorySlug })}
+                className="inline-flex shrink-0 items-center gap-1 text-sm font-medium"
+                style={{ color: brand.forest }}
+              >
+                View All
+                <ArrowUpRight className="size-3.5" aria-hidden />
+              </Link>
+            ) : null}
+          </div>
           <div className="flex flex-wrap gap-8 border-b border-transparent">
             {tabs.map((tab) => {
               const active = tab.id === activeTab?.id;
@@ -105,7 +122,7 @@ export function HomePerfectFit() {
         </div>
 
         {loading ? (
-          <ListingGridSkeleton count={4} />
+          <ListingGridSkeleton count={8} />
         ) : listings.length > 0 ? (
           <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
             {listings.map((listing) => (

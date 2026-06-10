@@ -1,5 +1,8 @@
 import { Skeleton } from '@/components/ui/skeleton';
-import { marketingContainer } from '@/lib/marketing/layout-classes';
+import {
+  marketingContainer,
+  marketingWhiteSurface,
+} from '@/lib/marketing/layout-classes';
 
 export function VehicleDetailHeroSkeleton() {
   return <Skeleton className="h-[min(650px,85vh)] w-full rounded-none" />;
@@ -8,7 +11,7 @@ export function VehicleDetailHeroSkeleton() {
 export function VehicleDetailContentSkeleton() {
   return (
     <div
-      className="bg-white py-14"
+      className={`${marketingWhiteSurface} py-14`}
       aria-busy
       aria-label="Loading vehicle details"
     >

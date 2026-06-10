@@ -1,5 +1,6 @@
-import { BuyerFinancingPanel } from '@/components/buyer/financing-panel';
+import { redirect } from 'next/navigation';
+import { workspaceRoutes } from '@/config/routes';
 
 export default function AccountFinancingPage() {
-  return <BuyerFinancingPanel />;
+  redirect(workspaceRoutes.account);
 }

@@ -4,16 +4,19 @@ import Link from 'next/link';
 import { useState } from 'react';
 import { useSession } from 'next-auth/react';
 import { toast } from 'sonner';
-import { ConfirmDialog } from '@/components/admin/shared/confirm-dialog';
+import { VehicleInquiryDialog } from '@/components/marketing/vehicle-inquiry-dialog';
+import { ConfirmDialog } from '@/components/shared/confirm-dialog';
 import { Button } from '@/components/ui/button';
 import { Spinner } from '@/components/ui/spinner';
-import { authRoutes, workspaceRoutes } from '@/config/routes';
+import { workspaceRoutes } from '@/config/routes';
 import { brand } from '@/lib/marketing/colors';
-import { formatUsd } from '@/lib/admin/format';
+import { formatUsd } from '@/lib/format';
 import {
   findActiveBuyerBooking,
   isCancellableBuyerBooking,
 } from '@/lib/buyer/booking-flow';
+import { findSupersededBooking } from '@/lib/buyer/purchase-conflict';
+import { VehiclePurchaseUnavailable } from '@/components/marketing/vehicle-purchase-unavailable';
 import { useAppRouter } from '@/lib/navigation/use-app-router';
 import {
   useBookingFeeQuote,
@@ -21,7 +24,7 @@ import {
   useMyBookings,
   useRequestVehicleBooking,
 } from '@/queries/bookings';
-import { useBuyerProfile, useMyInvoices } from '@/queries/buyer';
+import { useBuyerProfile } from '@/queries/buyer';
 import { isMeUser } from '@/types/auth/me-user';
 import type { PublicListing } from '@/types/marketplace/public-listing';
 import type { VehicleBooking } from '@/types/buyer/bookings';
@@ -36,17 +39,16 @@ export function VehicleDetailBookingAction({
   const router = useAppRouter();
   const { data: session, status } = useSession();
   const me = isMeUser(session?.user) ? session.user : null;
-  const isChinaStock = listing.sellerType === 'UZA_CHINA_SOURCING';
   const isAuthenticatedBuyer =
     status === 'authenticated' && Boolean(me?.roles.includes('BUYER'));
 
-  const { data: feeQuote } = useBookingFeeQuote(isChinaStock);
+  const { data: feeQuote } = useBookingFeeQuote();
   const request = useRequestVehicleBooking();
   const cancelBooking = useCancelBooking();
   const [cancelTarget, setCancelTarget] = useState<VehicleBooking | null>(null);
+  const [inquiryOpen, setInquiryOpen] = useState(false);
 
   const bookingReturnHref = `/vehicles/${listing.slug}`;
-  const loginHref = `${authRoutes.login}?callbackUrl=${encodeURIComponent(bookingReturnHref)}`;
   const profileHref = `${workspaceRoutes.accountProfile}?returnTo=${encodeURIComponent(bookingReturnHref)}`;
 
   const {
@@ -55,32 +57,26 @@ export function VehicleDetailBookingAction({
     isFetched: bookingsFetched,
   } = useMyBookings(
     { listingId: listing.id, limit: 5, activeOnly: true },
-    isAuthenticatedBuyer && isChinaStock,
+    isAuthenticatedBuyer,
   );
 
-  const {
-    data: listingInvoices,
-    isLoading: invoicesLoading,
-    isFetched: invoicesFetched,
-  } = useMyInvoices(
-    { listingId: listing.id, pendingPurchase: true, limit: 5 },
-    isAuthenticatedBuyer && isChinaStock,
+  const { data: bookingHistory } = useMyBookings(
+    { listingId: listing.id, limit: 10, activeOnly: false },
+    isAuthenticatedBuyer,
   );
 
   const { data: buyerProfile, isLoading: profileLoading } =
     useBuyerProfile(isAuthenticatedBuyer);
 
   const buyerDataReady =
-    !isAuthenticatedBuyer ||
-    ((!bookingsLoading || bookingsFetched) &&
-      (!invoicesLoading || invoicesFetched));
+    !isAuthenticatedBuyer || !bookingsLoading || bookingsFetched;
 
   const activeBooking = isAuthenticatedBuyer
     ? findActiveBuyerBooking(myBookings?.items)
     : null;
 
-  const activeInvoice = isAuthenticatedBuyer
-    ? (listingInvoices?.items[0] ?? null)
+  const supersededBooking = isAuthenticatedBuyer
+    ? findSupersededBooking(bookingHistory?.items)
     : null;
 
   const confirmCancelBooking = () => {
@@ -90,57 +86,71 @@ export function VehicleDetailBookingAction({
     cancelBooking.mutate(bookingId);
   };
 
-  if (!isChinaStock) {
-    return null;
-  }
-
   if (status === 'loading' || (isAuthenticatedBuyer && !buyerDataReady)) {
     return (
-      <div className="mt-6 flex h-10 w-full items-center justify-center">
+      <div className="mt-8 flex h-10 w-full items-center justify-center">
         <Spinner className="size-5" />
       </div>
     );
   }
 
   if (!isAuthenticatedBuyer) {
-    if (listing.isBooked) {
+    if (listing.isBooked || listing.status === 'SOLD') {
       return (
-        <div className="mt-6 rounded-xl border border-[#E9E9E9] bg-[#f8faf9] p-4 text-sm text-[#356769]">
-          This vehicle is currently booked. Contact UZA Mobility for next steps.
+        <div className="mt-8">
+          <VehiclePurchaseUnavailable
+            variant={listing.status === 'SOLD' ? 'sold' : 'booked'}
+          />
         </div>
       );
     }
 
     return (
-      <div className="mt-6 space-y-2">
-        <Link
-          href={loginHref}
-          className="flex h-10 w-full items-center justify-center rounded-full text-sm font-semibold text-white"
-          style={{ backgroundColor: brand.tealCard }}
-        >
-          Book This Vehicle
-        </Link>
-        <p className="text-center text-xs text-[#356769]">
-          Sign in to book this China-sourced vehicle (
-          {feeQuote ? formatUsd(feeQuote.bookingFeeUsd) : 'USD fee applies'}).
-        </p>
+      <>
+        <div className="mt-8 space-y-2">
+          <Button
+            type="button"
+            onClick={() => setInquiryOpen(true)}
+            className="h-10 w-full rounded-full text-sm font-semibold text-white"
+            style={{ backgroundColor: brand.forest }}
+          >
+            Book This Vehicle
+          </Button>
+          <p className="text-center text-xs text-[#356769]">
+            Share your details to receive a quote and next steps for this
+            vehicle.
+          </p>
+        </div>
+        <VehicleInquiryDialog
+          listing={listing}
+          open={inquiryOpen}
+          onOpenChange={setInquiryOpen}
+          variant="book"
+        />
+      </>
+    );
+  }
+
+  if (supersededBooking) {
+    return (
+      <div className="mt-8">
+        <VehiclePurchaseUnavailable variant="superseded" />
       </div>
     );
   }
 
   if (listing.isBooked && !activeBooking) {
     return (
-      <div className="mt-6 rounded-xl border border-[#E9E9E9] bg-[#f8faf9] p-4 text-sm text-[#356769]">
-        This vehicle is currently booked. Contact UZA Mobility for next steps.
+      <div className="mt-8">
+        <VehiclePurchaseUnavailable variant="booked" />
       </div>
     );
   }
 
-  if (activeInvoice) {
+  if (listing.status === 'SOLD' && !activeBooking) {
     return (
-      <div className="mt-6 rounded-xl border border-[#E9E9E9] bg-[#f8faf9] p-4 text-sm text-[#356769]">
-        You already have an active invoice for this vehicle. Complete that
-        purchase flow before starting a booking.
+      <div className="mt-8">
+        <VehiclePurchaseUnavailable variant="sold" />
       </div>
     );
   }
@@ -148,7 +158,7 @@ export function VehicleDetailBookingAction({
   if (activeBooking) {
     return (
       <>
-        <div className="mt-6 space-y-3">
+        <div className="mt-8 space-y-3">
           <div className="rounded-xl border border-[#E9E9E9] bg-[#f8faf9] p-4 text-sm">
             <p className="font-medium text-[#151515]">
               Booking {activeBooking.bookingNumber}
@@ -216,13 +226,9 @@ export function VehicleDetailBookingAction({
     );
   }
 
-  if (listing.isBooked) {
-    return null;
-  }
-
   if (profileLoading) {
     return (
-      <div className="mt-6 flex h-10 w-full items-center justify-center">
+      <div className="mt-8 flex h-10 w-full items-center justify-center">
         <Spinner className="size-5" />
       </div>
     );
@@ -232,14 +238,17 @@ export function VehicleDetailBookingAction({
 
   if (!hasBuyerProfile) {
     return (
-      <div className="mt-6 space-y-2">
+      <div className="mt-8 space-y-2">
         <Button
           asChild
           className="h-10 w-full rounded-full"
-          style={{ backgroundColor: brand.tealCard }}
+          style={{ backgroundColor: brand.forest }}
         >
           <Link href={profileHref}>Complete buyer profile to book</Link>
         </Button>
+        <p className="text-center text-xs text-[#356769]">
+          Complete your buyer profile before booking this vehicle.
+        </p>
       </div>
     );
   }
@@ -259,18 +268,18 @@ export function VehicleDetailBookingAction({
   };
 
   return (
-    <div className="mt-6 space-y-2">
+    <div className="mt-8 space-y-2">
       <Button
         type="button"
         disabled={request.isPending}
         onClick={handleBook}
         className="h-10 w-full rounded-full text-sm font-semibold text-white"
-        style={{ backgroundColor: brand.tealCard }}
+        style={{ backgroundColor: brand.forest }}
       >
         {request.isPending ? 'Creating booking…' : 'Book This Vehicle'}
       </Button>
       <p className="text-center text-xs text-[#356769]">
-        Secure this import with a{' '}
+        Secure this vehicle with a{' '}
         {feeQuote ? formatUsd(feeQuote.bookingFeeUsd) : 'small USD'} booking
         fee. Payment is verified by our finance team.
       </p>

@@ -6,8 +6,10 @@ import {
   resolveListingVideoUrl,
 } from '@/lib/marketing/listing-detail';
 import { resolveMediaUrl } from '@/lib/marketing/listing-display';
-import { brand } from '@/lib/marketing/colors';
-import { marketingPageX } from '@/lib/marketing/layout-classes';
+import {
+  marketingForestSurface,
+  marketingPageX,
+} from '@/lib/marketing/layout-classes';
 import type { PublicListing } from '@/types/marketplace/public-listing';
 
 type VehicleDetailHeroProps = {
@@ -26,8 +28,7 @@ export function VehicleDetailHero({ listing }: VehicleDetailHeroProps) {
   return (
     <section className="relative h-[min(650px,85vh)] w-full overflow-hidden">
       <div
-        className="absolute inset-0 z-0 overflow-hidden"
-        style={{ backgroundColor: brand.forest }}
+        className={`absolute inset-0 z-0 overflow-hidden ${marketingForestSurface}`}
         aria-hidden
       >
         <VehicleDetailHeroMedia

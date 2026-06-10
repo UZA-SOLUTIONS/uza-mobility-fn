@@ -7,7 +7,7 @@ import { marketplaceMeSeller } from '@/lib/auth/seller-profiles';
 import { canSellerTrade, sellerTradeBlockedMessage } from '@/lib/seller/trade';
 import { useSessionUser } from '@/hooks/session-user';
 import { workspaceRoutes } from '@/config/routes';
-import { StatusBadge } from '@/components/admin/shared/status-badge';
+import { StatusBadge } from '@/components/shared/status-badge';
 
 export function SellerStatusBanner() {
   const { user } = useSessionUser();

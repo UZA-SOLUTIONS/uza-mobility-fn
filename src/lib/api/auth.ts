@@ -11,13 +11,25 @@ export function login(input: LoginInput) {
   });
 }
 
+export function completeGoogleSignIn(code: string) {
+  return apiFetch<AuthTokens>('/auth/google/complete', {
+    method: 'POST',
+    body: JSON.stringify({ code }),
+  });
+}
+
+export type RegisterResponse = {
+  message: string;
+  email: string;
+};
+
 export function register(input: RegisterInput) {
   const payload = {
     ...input,
     phone: input.phone?.trim() ? input.phone.trim() : undefined,
   };
 
-  return apiFetch<AuthTokens>('/auth/register', {
+  return apiFetch<RegisterResponse>('/auth/register', {
     method: 'POST',
     body: JSON.stringify(payload),
   });
@@ -40,4 +52,39 @@ export function refresh(refreshToken: string) {
 /** Profile for a given access token (server / authorize). */
 export function getMe(accessToken: string) {
   return apiFetch<MeUser>('/auth/me', { token: accessToken });
+}
+
+export function forgotPassword(email: string) {
+  return apiFetch<{ message: string }>('/auth/forgot-password', {
+    method: 'POST',
+    body: JSON.stringify({ email }),
+  });
+}
+
+export function resetPassword(input: { token: string; password: string }) {
+  return apiFetch<{ message: string }>('/auth/reset-password', {
+    method: 'POST',
+    body: JSON.stringify(input),
+  });
+}
+
+export function verifyEmail(token: string) {
+  return apiFetch<{ message: string }>('/auth/verify-email', {
+    method: 'POST',
+    body: JSON.stringify({ token }),
+  });
+}
+
+export function resendVerificationByEmail(email: string) {
+  return apiFetch<{ message: string }>('/auth/resend-verification', {
+    method: 'POST',
+    body: JSON.stringify({ email }),
+  });
+}
+
+export function resendVerificationForMe(accessToken: string) {
+  return apiFetch<{ message: string }>('/auth/me/resend-verification', {
+    method: 'POST',
+    token: accessToken,
+  });
 }

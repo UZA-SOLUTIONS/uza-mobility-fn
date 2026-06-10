@@ -6,7 +6,7 @@ import {
   parseStationCoordinates,
   StationLocationFields,
 } from '@/components/operator/station-location-fields';
-import { StatusBadge } from '@/components/admin/shared/status-badge';
+import { StatusBadge } from '@/components/shared/status-badge';
 import { PageHeader } from '@/components/shared/page-header';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';

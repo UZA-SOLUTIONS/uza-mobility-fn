@@ -1,5 +1,7 @@
-import { brand } from '@/lib/marketing/colors';
-import { marketingContainer } from '@/lib/marketing/layout-classes';
+import {
+  marketingContainer,
+  marketingForestSurface,
+} from '@/lib/marketing/layout-classes';
 
 type MarketingPageHeroProps = {
   title: string;
@@ -12,8 +14,7 @@ export function MarketingPageHero({
 }: MarketingPageHeroProps) {
   return (
     <section
-      className="flex min-h-[280px] w-full items-end md:min-h-[320px]"
-      style={{ backgroundColor: brand.forest }}
+      className={`flex min-h-[280px] w-full items-end md:min-h-[320px] ${marketingForestSurface}`}
     >
       <div className={`${marketingContainer} pt-24 pb-10 sm:pt-28 sm:pb-12`}>
         <div className="max-w-3xl space-y-3">

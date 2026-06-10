@@ -1,6 +1,9 @@
 import { MarketingPageHero } from '@/components/marketing/marketing-page-hero';
 import { siteConfig } from '@/config/site';
-import { marketingProseSection } from '@/lib/marketing/layout-classes';
+import {
+  marketingProseSection,
+  marketingWhiteSurface,
+} from '@/lib/marketing/layout-classes';
 
 export default function AboutPage() {
   return (
@@ -9,7 +12,7 @@ export default function AboutPage() {
         title={`About ${siteConfig.name}`}
         description="Electric mobility marketplace built for Rwanda and the region."
       />
-      <div className="bg-white">
+      <div className={marketingWhiteSurface}>
         <div className={`${marketingProseSection} text-[#356769]`}>
           <p className="text-base leading-relaxed">
             We connect buyers with verified electric vehicles, transparent

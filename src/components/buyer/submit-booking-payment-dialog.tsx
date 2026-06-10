@@ -10,7 +10,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog';
-import { formatUsd } from '@/lib/admin/format';
+import { formatUsd } from '@/lib/format';
 import { useSubmitBookingPayment } from '@/queries/bookings';
 import type { VehicleBooking } from '@/types/buyer/bookings';
 

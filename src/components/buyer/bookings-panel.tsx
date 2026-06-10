@@ -3,13 +3,13 @@
 import { useEffect, useState } from 'react';
 import { useSearchParams } from 'next/navigation';
 import Link from 'next/link';
-import { ConfirmDialog } from '@/components/admin/shared/confirm-dialog';
+import { ConfirmDialog } from '@/components/shared/confirm-dialog';
 import { PageHeader } from '@/components/shared/page-header';
 import { SubmitBookingPaymentDialog } from '@/components/buyer/submit-booking-payment-dialog';
 import { Button } from '@/components/ui/button';
 import { Spinner } from '@/components/ui/spinner';
-import { StatusBadge } from '@/components/admin/shared/status-badge';
-import { formatUsd } from '@/lib/admin/format';
+import { StatusBadge } from '@/components/shared/status-badge';
+import { formatUsd } from '@/lib/format';
 import { workspaceRoutes } from '@/config/routes';
 import { useCancelBooking, useMyBookings } from '@/queries/bookings';
 import type { VehicleBooking } from '@/types/buyer/bookings';
@@ -68,7 +68,7 @@ export function BuyerBookingsPanel() {
     <div className="space-y-6">
       <PageHeader
         title="Vehicle bookings"
-        description="Booking fees for China-sourced vehicles awaiting import."
+        description="Your vehicle bookings and booking fee payments."
       />
 
       {isLoading ? (

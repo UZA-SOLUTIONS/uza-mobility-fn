@@ -1,14 +1,14 @@
 'use client';
 
 import { useState } from 'react';
-import { ConfirmDialog } from '@/components/admin/shared/confirm-dialog';
+import { ConfirmDialog } from '@/components/shared/confirm-dialog';
 import { SellerPartFormDialog } from '@/components/seller/part-form-dialog';
 import {
   SellerStatusBanner,
   useSellerCanTrade,
 } from '@/components/seller/seller-status-banner';
 import { PageHeader } from '@/components/shared/page-header';
-import { StatusBadge } from '@/components/admin/shared/status-badge';
+import { StatusBadge } from '@/components/shared/status-badge';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
 import {

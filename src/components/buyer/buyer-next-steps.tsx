@@ -1,41 +1,28 @@
 'use client';
 
 import Link from 'next/link';
-import { AlertCircle, CreditCard, FileText } from 'lucide-react';
+import { Car, CreditCard } from 'lucide-react';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
 import { workspaceRoutes } from '@/config/routes';
-import {
-  isPayableInvoiceStatus,
-  PAYMENT_REVIEW_INVOICE_STATUSES,
-} from '@/lib/buyer/invoice-flow';
-import { useMyInvoices, useMyPayments } from '@/queries/buyer';
+import { useMyBookings } from '@/queries/bookings';
 
 export function BuyerNextSteps() {
-  const { data: payableInvoices } = useMyInvoices({
-    payableOnly: true,
+  const { data: awaitingPayment } = useMyBookings({
+    status: 'AWAITING_PAYMENT',
     limit: 5,
+    activeOnly: true,
   });
-  const { data: pendingInvoices } = useMyInvoices({
-    pendingPurchase: true,
-    limit: 10,
-  });
-  const { data: payments } = useMyPayments({
+  const { data: underReview } = useMyBookings({
     status: 'UNDER_VERIFICATION',
     limit: 5,
+    activeOnly: true,
   });
 
-  const payableCount = payableInvoices?.meta.total ?? 0;
-  const firstPayable = payableInvoices?.items.find((invoice) =>
-    isPayableInvoiceStatus(invoice.status),
-  );
-  const underReviewInvoices =
-    pendingInvoices?.items.filter((invoice) =>
-      PAYMENT_REVIEW_INVOICE_STATUSES.includes(invoice.status),
-    ) ?? [];
-  const underReviewPayments = payments?.items ?? [];
-  const hasReviewState =
-    underReviewInvoices.length > 0 || underReviewPayments.length > 0;
+  const payableCount = awaitingPayment?.meta.total ?? 0;
+  const firstPayable = awaitingPayment?.items[0];
+  const underReviewBookings = underReview?.items ?? [];
+  const hasReviewState = underReviewBookings.length > 0;
 
   if (payableCount === 0 && !hasReviewState) {
     return null;
@@ -45,26 +32,28 @@ export function BuyerNextSteps() {
     <div className="space-y-3">
       {payableCount > 0 && firstPayable ? (
         <Alert>
-          <FileText className="size-4" />
+          <Car className="size-4" />
           <AlertTitle>
             {payableCount === 1
-              ? 'Invoice awaiting payment'
-              : `${payableCount} invoices awaiting payment`}
+              ? 'Booking awaiting payment'
+              : `${payableCount} bookings awaiting payment`}
           </AlertTitle>
           <AlertDescription className="flex flex-wrap items-center gap-3">
             <span>
-              {firstPayable.invoiceNumber} · {firstPayable.vehicleBrand}{' '}
-              {firstPayable.vehicleModel}
+              {firstPayable.bookingNumber}
+              {firstPayable.listing?.listingTitle
+                ? ` · ${firstPayable.listing.listingTitle}`
+                : ''}
             </span>
             <Button size="sm" asChild>
               <Link
-                href={`${workspaceRoutes.accountPayments}?invoiceId=${firstPayable.id}`}
+                href={`${workspaceRoutes.accountBookings}?bookingId=${firstPayable.id}`}
               >
-                Submit payment
+                Submit booking payment
               </Link>
             </Button>
             <Button size="sm" variant="outline" asChild>
-              <Link href={workspaceRoutes.accountInvoices}>View invoices</Link>
+              <Link href={workspaceRoutes.accountBookings}>View bookings</Link>
             </Button>
           </AlertDescription>
         </Alert>
@@ -73,36 +62,21 @@ export function BuyerNextSteps() {
       {hasReviewState ? (
         <Alert>
           <CreditCard className="size-4" />
-          <AlertTitle>Payment under review</AlertTitle>
+          <AlertTitle>Booking payment under review</AlertTitle>
           <AlertDescription className="flex flex-wrap items-center gap-3">
             <span>
-              We are verifying your payment
-              {underReviewInvoices[0]
-                ? ` for invoice ${underReviewInvoices[0].invoiceNumber}`
+              We are verifying your booking payment
+              {underReviewBookings[0]
+                ? ` for ${underReviewBookings[0].bookingNumber}`
                 : ''}
-              . You will be notified when it is confirmed and your order is
-              created.
+              . You will be notified when it is confirmed.
             </span>
             <Button size="sm" variant="outline" asChild>
-              <Link href={workspaceRoutes.accountPayments}>View payments</Link>
+              <Link href={workspaceRoutes.accountBookings}>View bookings</Link>
             </Button>
           </AlertDescription>
         </Alert>
       ) : null}
-
-      <Alert>
-        <AlertCircle className="size-4" />
-        <AlertDescription className="text-sm">
-          Need financing help?{' '}
-          <Link
-            href={workspaceRoutes.accountFinancing}
-            className="font-medium underline underline-offset-4"
-          >
-            Request financing support
-          </Link>
-          .
-        </AlertDescription>
-      </Alert>
     </div>
   );
 }

@@ -1,10 +1,7 @@
-import { adminRoutes, workspaceRoutes } from '@/config/routes';
+import { workspaceRoutes } from '@/config/routes';
 
 /** Notifications page for the workspace implied by the current path. */
 export function notificationsHrefFromPathname(pathname: string): string {
-  if (pathname.startsWith(adminRoutes.root)) {
-    return adminRoutes.notifications;
-  }
   if (pathname.startsWith(workspaceRoutes.seller)) {
     return workspaceRoutes.sellerNotifications;
   }

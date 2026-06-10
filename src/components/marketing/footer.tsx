@@ -62,7 +62,7 @@ type MarketingFooterProps = {
 
 export function MarketingFooter({ columns }: MarketingFooterProps) {
   return (
-    <footer style={{ backgroundColor: brand.forest }} className="text-white">
+    <footer className="text-white" style={{ backgroundColor: brand.forest }}>
       <div
         className={`mx-auto max-w-[1440px] border-b border-white/20 py-12 sm:py-16 lg:py-20 ${marketingFooterX}`}
       >

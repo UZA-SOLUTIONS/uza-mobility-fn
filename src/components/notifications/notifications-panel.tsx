@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { PaginationBar } from '@/components/admin/shared/pagination-bar';
+import { PaginationBar } from '@/components/shared/pagination-bar';
 import { NotificationList } from '@/components/notifications/notification-list';
 import { PageHeader } from '@/components/shared/page-header';
 import { Button } from '@/components/ui/button';

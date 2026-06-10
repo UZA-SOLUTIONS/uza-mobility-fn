@@ -13,41 +13,35 @@ import { brand } from '@/lib/marketing/colors';
 import { marketingOverlayNav } from '@/lib/marketing/layout-classes';
 
 type MarketingNavbarProps = {
-  /** Transparent glass bar over the hero (homepage). */
+  /**
+   * Light text/logo for dark heroes. When false the bar still floats, but uses
+   * dark text for readability on mint/white page backgrounds.
+   */
   overlay?: boolean;
   navItems: NavItem[];
 };
 
 export function MarketingNavbar({
-  overlay = false,
+  overlay = true,
   navItems,
 }: MarketingNavbarProps) {
   return (
-    <header
-      className={
-        overlay
-          ? `absolute inset-x-0 top-0 z-20 ${marketingOverlayNav}`
-          : 'border-b bg-background'
-      }
-    >
+    <header className={`absolute inset-x-0 top-0 z-20 ${marketingOverlayNav}`}>
       <div
-        className={
-          overlay
-            ? 'mx-auto flex max-w-[1320px] items-center justify-between rounded-lg px-6 py-4 backdrop-blur-[56px]'
-            : 'mx-auto flex h-16 max-w-6xl items-center justify-between px-4'
-        }
-        style={
-          overlay
-            ? {
-                background:
-                  'linear-gradient(135deg, rgba(254, 248, 255, 0.21) 0%, rgba(254, 248, 255, 0) 100%)',
-              }
-            : undefined
-        }
+        className="mx-auto flex max-w-[1320px] items-center justify-between rounded-lg px-6 py-4 backdrop-blur-[56px]"
+        style={{
+          background: overlay
+            ? 'linear-gradient(135deg, rgba(254, 248, 255, 0.21) 0%, rgba(254, 248, 255, 0) 100%)'
+            : 'linear-gradient(135deg, rgba(255, 255, 255, 0.82) 0%, rgba(255, 255, 255, 0.55) 100%)',
+        }}
       >
         <Link href="/" className="relative block h-[53px] w-[118px] shrink-0">
           <Image
-            src="/images/FInal-logo.png"
+            src={
+              overlay
+                ? '/images/FInal-logo.png'
+                : '/images/FInal-logo-dashboard.png'
+            }
             alt="UZA Mobility"
             fill
             className="object-contain object-left"

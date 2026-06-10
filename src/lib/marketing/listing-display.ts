@@ -38,14 +38,6 @@ export function formatListingPrice(listing: PublicListing): string {
   }).format(price);
 }
 
-export function formatDeliveryBadge(listing: PublicListing): string | null {
-  const days = listing.deliveryEstimateDays;
-  if (days == null) return null;
-  if (days <= 2) return '1–2 Day Delivery';
-  if (days <= 7) return `${days} Day Delivery`;
-  return `${days} Days Delivery`;
-}
-
 export function formatDrivetrainLabel(
   drivetrain?: string | null,
 ): string | null {

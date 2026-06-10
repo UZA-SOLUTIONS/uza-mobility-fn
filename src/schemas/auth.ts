@@ -19,9 +19,30 @@ export const registerSchema = z.object({
 export type RegisterInput = z.infer<typeof registerSchema>;
 
 /** Passed to NextAuth `signIn` after the API returns tokens. */
-export const sessionCredentialsSchema = loginSchema.extend({
+export const sessionCredentialsSchema = z.object({
   accessToken: z.string().min(1),
   refreshToken: z.string().min(1),
+  email: z.string().optional(),
+  password: z.string().optional(),
 });
 
 export type SessionCredentialsInput = z.infer<typeof sessionCredentialsSchema>;
+
+export const forgotPasswordSchema = z.object({
+  email: z.email('Enter a valid email address'),
+});
+
+export type ForgotPasswordInput = z.infer<typeof forgotPasswordSchema>;
+
+export const resetPasswordSchema = z.object({
+  token: z.string().min(1, 'Reset token is required'),
+  password: z.string().min(8, 'Password must be at least 8 characters'),
+});
+
+export type ResetPasswordInput = z.infer<typeof resetPasswordSchema>;
+
+export const verifyEmailSchema = z.object({
+  token: z.string().min(1, 'Verification token is required'),
+});
+
+export type VerifyEmailInput = z.infer<typeof verifyEmailSchema>;

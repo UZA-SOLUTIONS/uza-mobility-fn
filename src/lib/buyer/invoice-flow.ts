@@ -1,5 +1,6 @@
-import type { InvoiceStatus } from '@/types/admin/commerce';
+import type { InvoiceStatus } from '@/types/commerce';
 import { workspaceRoutes } from '@/config/routes';
+import { wasSupersededByOtherBuyerText } from '@/lib/buyer/purchase-conflict';
 
 /** Purchase still in progress — vehicle reserved or payment being reviewed. */
 export const PENDING_PURCHASE_INVOICE_STATUSES: InvoiceStatus[] = [
@@ -41,7 +42,13 @@ export function isPendingPurchaseInvoiceStatus(status: InvoiceStatus): boolean {
   return PENDING_PURCHASE_INVOICE_STATUSES.includes(status);
 }
 
-export function invoiceStatusHint(status: InvoiceStatus): string | null {
+export function invoiceStatusHint(
+  status: InvoiceStatus,
+  notes?: string | null,
+): string | null {
+  if (status === 'CANCELLED' && wasSupersededByOtherBuyerText(notes)) {
+    return 'Another buyer completed payment first. This invoice was cancelled.';
+  }
   switch (status) {
     case 'SENT':
     case 'AWAITING_PAYMENT':

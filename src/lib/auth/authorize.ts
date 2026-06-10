@@ -1,5 +1,6 @@
 import { getMe } from '@/lib/api/auth';
 import { normalizeMeUser } from '@/lib/auth/seller-profiles';
+import { isStaffOnlyAccount } from '@/lib/permissions';
 import { sessionCredentialsSchema } from '@/schemas/auth';
 import type { AuthTokens } from '@/types/auth/auth-tokens';
 import type { MeUser } from '@/types/auth/me-user';
@@ -24,7 +25,16 @@ export async function authorizeCredentials(
   const { accessToken, refreshToken } = parsed.data;
 
   try {
-    const me = await getMe(accessToken);
+    const me = normalizeMeUser(await getMe(accessToken));
+
+    if (isStaffOnlyAccount(me)) {
+      return null;
+    }
+
+    if (!me.isEmailVerified) {
+      return null;
+    }
+
     return toAuthUser(me, { accessToken, refreshToken });
   } catch {
     return null;

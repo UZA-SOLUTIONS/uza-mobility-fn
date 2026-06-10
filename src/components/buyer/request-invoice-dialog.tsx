@@ -17,7 +17,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { workspaceRoutes } from '@/config/routes';
-import { formatUsd } from '@/lib/admin/format';
+import { formatUsd } from '@/lib/format';
 import { useSessionUser } from '@/hooks/session-user';
 import { useBuyerProfile, useRequestInvoice } from '@/queries/buyer';
 import {

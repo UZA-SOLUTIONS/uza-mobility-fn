@@ -1,11 +1,8 @@
 import type { QueryClient } from '@tanstack/react-query';
-import { adminKeys } from '@/queries/admin';
 import { authKeys } from '@/queries/auth';
 import { bookingKeys } from '@/queries/bookings';
 import { buyerKeys } from '@/queries/buyer';
-import { commerceKeys } from '@/queries/commerce';
 import { notificationKeys } from '@/queries/notifications';
-import { operationsKeys } from '@/queries/operations';
 import { operatorKeys } from '@/queries/operator';
 import { sellerKeys } from '@/queries/seller';
 
@@ -18,9 +15,6 @@ export function clearUserSessionQueries(queryClient: QueryClient) {
     bookingKeys.all,
     sellerKeys.all,
     operatorKeys.all,
-    adminKeys.all,
-    operationsKeys.all,
-    commerceKeys.all,
   ];
 
   for (const queryKey of scopes) {

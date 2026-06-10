@@ -1,7 +1,7 @@
 'use client';
 
 import { createContext, useContext } from 'react';
-import type { Category } from '@/types/admin/marketplace';
+import type { Category } from '@/types/catalog';
 
 const MarketingCatalogContext = createContext<Category[]>([]);
 

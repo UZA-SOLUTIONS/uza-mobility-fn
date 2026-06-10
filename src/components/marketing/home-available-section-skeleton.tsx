@@ -1,11 +1,14 @@
 import { Skeleton } from '@/components/ui/skeleton';
 import { ListingGridSkeleton } from '@/components/marketing/listing-grid-skeleton';
-import { marketingContainer } from '@/lib/marketing/layout-classes';
+import {
+  marketingContainer,
+  marketingWhiteSurface,
+} from '@/lib/marketing/layout-classes';
 
 export function HomeAvailableSectionSkeleton() {
   return (
     <section
-      className="bg-white py-20"
+      className={`${marketingWhiteSurface} py-20`}
       aria-busy
       aria-label="Loading Kigali stock"
     >

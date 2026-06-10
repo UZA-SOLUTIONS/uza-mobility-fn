@@ -1,6 +1,7 @@
 'use client';
 
 import Link from 'next/link';
+import { useSearchParams } from 'next/navigation';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { AuthFormCard } from '@/components/auth/auth-form-card';
@@ -8,6 +9,7 @@ import { PageHeader } from '@/components/shared/page-header';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { GoogleSignInButton } from '@/components/auth/google-sign-in-button';
 import { loginSchema, type LoginInput } from '@/schemas/auth';
 import { useLogin } from '@/queries/auth';
 import { ApiClientError } from '@/lib/api';
@@ -15,6 +17,8 @@ import { authRoutes } from '@/config/routes';
 
 export function Login() {
   const login = useLogin();
+  const searchParams = useSearchParams();
+  const callbackUrl = searchParams.get('callbackUrl')?.trim() ?? '';
 
   const form = useForm<LoginInput>({
     resolver: zodResolver(loginSchema),
@@ -40,7 +44,7 @@ export function Login() {
     <AuthFormCard>
       <PageHeader
         title="Log in"
-        description="Access your buyer, seller, or admin account."
+        description="Access your buyer or seller account."
       />
       <form onSubmit={onSubmit} className="space-y-4">
         <div className="space-y-2">
@@ -72,14 +76,33 @@ export function Login() {
           ) : null}
         </div>
         {form.formState.errors.root ? (
-          <p className="text-sm text-destructive">
-            {form.formState.errors.root.message}
-          </p>
+          <div className="space-y-2">
+            <p className="text-sm text-destructive">
+              {form.formState.errors.root.message}
+            </p>
+            {form.formState.errors.root.message
+              ?.toLowerCase()
+              .includes('verify your email') ? (
+              <p className="text-sm text-muted-foreground">
+                <Link
+                  href={`${authRoutes.checkEmail}?email=${encodeURIComponent(form.getValues('email'))}`}
+                  className="underline-offset-4 hover:underline"
+                >
+                  Resend verification email
+                </Link>
+              </p>
+            ) : null}
+          </div>
         ) : null}
         <Button type="submit" className="w-full" disabled={login.isPending}>
           {login.isPending ? 'Signing in…' : 'Sign in'}
         </Button>
       </form>
+      <GoogleSignInButton
+        disabled={login.isPending}
+        returnTo={callbackUrl.startsWith('/') ? callbackUrl : undefined}
+        onError={(message) => form.setError('root', { message })}
+      />
       <p className="text-center text-sm text-muted-foreground">
         <Link
           href={authRoutes.forgotPassword}

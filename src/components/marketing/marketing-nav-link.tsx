@@ -37,7 +37,7 @@ export function MarketingNavLink({
               ? 'font-semibold text-[#AAFF47]'
               : 'text-white/90 hover:text-white'
             : active
-              ? 'font-semibold text-[#AAFF47]'
+              ? 'font-semibold text-[#174438]'
               : 'text-[#356769] hover:text-[#174438]',
           className,
         )}

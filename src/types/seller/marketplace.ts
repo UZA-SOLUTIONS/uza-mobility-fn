@@ -1,4 +1,4 @@
-import type { ListingStatus } from '@/types/admin/marketplace';
+import type { ListingStatus } from '@/types/catalog';
 
 export type SellerListingPhoto = {
   id: string;

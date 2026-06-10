@@ -2,7 +2,7 @@ import { workspaceRoutes } from '@/config/routes';
 import type { MeUser } from '@/types/auth/me-user';
 import type { PlatformRole } from '@/types/auth/role';
 
-/** Staff roles that use the /admin workspace (not marketplace sellers or buyers). */
+/** Staff roles that use uza-mobility-admin (not this marketplace app). */
 export const PLATFORM_STAFF_ROLES: PlatformRole[] = [
   'SUPER_ADMIN',
   'MARKETPLACE_ADMIN',
@@ -142,11 +142,28 @@ const BUYER_WORKSPACE_PERMISSIONS = [
   'financing:submit',
 ] as const;
 
+/** Buyer, marketplace seller, or charging-operator workspaces on this app. */
+export function hasMarketplaceWorkspace(me: MeUser): boolean {
+  return (
+    hasBuyerWorkspace(me.permissions, me.roles) ||
+    hasSellerWorkspace(me.permissions, me.seller, me.sellers) ||
+    hasOperatorWorkspace(me.permissions, me.roles) ||
+    hasOperatorApplication(me.operator)
+  );
+}
+
+/** Platform staff without a marketplace workspace must use uza-mobility-admin. */
+export function isStaffOnlyAccount(me: MeUser): boolean {
+  return (
+    hasAdminAccess(me.permissions, me.roles) && !hasMarketplaceWorkspace(me)
+  );
+}
+
 export function hasBuyerWorkspace(
   permissions: string[],
   roles?: readonly string[] | null,
 ): boolean {
-  // Platform staff (incl. super admin with `*`) use /admin, not the buyer workspace.
+  // Platform staff use uza-mobility-admin, not the buyer workspace on this app.
   if (hasAdminAccess(permissions, roles)) {
     return false;
   }

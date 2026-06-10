@@ -17,7 +17,7 @@ import {
   type VehiclesSearchParams,
 } from '@/lib/marketing/vehicles-browse';
 import { vehiclesHref } from '@/lib/marketing/vehicles-url';
-import type { CategoryType } from '@/types/admin/marketplace';
+import type { CategoryType } from '@/types/catalog';
 
 const VEHICLE_CATEGORY_TYPES: CategoryType[] = [
   'PASSENGER_EV',

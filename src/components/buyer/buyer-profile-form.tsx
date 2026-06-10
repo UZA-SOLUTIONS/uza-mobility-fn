@@ -221,8 +221,8 @@ export function BuyerProfileForm() {
       >
         <h2 className="text-lg font-semibold">Complete buyer profile</h2>
         <p className="text-sm text-muted-foreground">
-          Required before requesting invoices. Fields marked optional can be
-          left blank; empty values are not sent to the server.
+          Required before booking a vehicle. Fields marked optional can be left
+          blank; empty values are not sent to the server.
         </p>
 
         <div className="space-y-1.5">

@@ -1,4 +1,4 @@
-import type { Category, CategoryType } from '@/types/admin/marketplace';
+import type { Category, CategoryType } from '@/types/catalog';
 
 export const VEHICLES_PAGE_SIZE = 9;
 

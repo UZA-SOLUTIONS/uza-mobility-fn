@@ -1,4 +1,4 @@
-import { adminRoutes, workspaceRoutes } from '@/config/routes';
+import { workspaceRoutes } from '@/config/routes';
 import { ElementType } from 'react';
 import {
   Home,
@@ -8,9 +8,6 @@ import {
   Tag,
   Wrench,
   ShoppingCart,
-  CreditCard,
-  FileText,
-  DollarSign,
   Truck,
   Zap,
   MapPin,
@@ -64,16 +61,10 @@ export const marketingFooterNav: NavItem[] = [
 export const accountNav: NavItem[] = [
   { label: 'Overview', href: workspaceRoutes.account, icon: Home },
   { label: 'Orders', href: workspaceRoutes.accountOrders, icon: ShoppingCart },
-  { label: 'Invoices', href: workspaceRoutes.accountInvoices, icon: FileText },
   {
-    label: 'Payments',
-    href: workspaceRoutes.accountPayments,
-    icon: CreditCard,
-  },
-  {
-    label: 'Financing',
-    href: workspaceRoutes.accountFinancing,
-    icon: DollarSign,
+    label: 'Bookings',
+    href: workspaceRoutes.accountBookings,
+    icon: Car,
   },
   { label: 'Profile', href: workspaceRoutes.accountProfile, icon: User },
   {
@@ -96,24 +87,14 @@ export const buyerNavGroups: NavGroup[] = [
         icon: ShoppingCart,
       },
       {
-        label: 'Invoices',
-        href: workspaceRoutes.accountInvoices,
-        icon: FileText,
-      },
-      {
         label: 'Bookings',
         href: workspaceRoutes.accountBookings,
         icon: Car,
       },
       {
-        label: 'Payments',
-        href: workspaceRoutes.accountPayments,
-        icon: CreditCard,
-      },
-      {
-        label: 'Financing',
-        href: workspaceRoutes.accountFinancing,
-        icon: DollarSign,
+        label: 'Wishlist',
+        href: workspaceRoutes.accountWishlist,
+        icon: Tag,
       },
     ],
   },
@@ -207,169 +188,6 @@ export const operatorNavGroups: NavGroup[] = [
       {
         label: 'Notifications',
         href: workspaceRoutes.operatorNotifications,
-        icon: Bell,
-      },
-    ],
-  },
-];
-
-/** Full admin sidebar; filter with `useAdminNav()`. */
-export const adminNavGroups: NavGroup[] = [
-  {
-    items: [
-      {
-        label: 'Overview',
-        href: adminRoutes.root,
-        icon: Home,
-        superAdminOnly: true,
-      },
-    ],
-  },
-  {
-    label: 'Marketplace',
-    items: [
-      {
-        label: 'Listings',
-        href: adminRoutes.listings,
-        icon: List,
-        permissions: [
-          'listings:approve',
-          'listings:reject',
-          'listings:delete',
-          'listings:create',
-          'listings:feature',
-        ],
-      },
-      {
-        label: 'Sellers',
-        href: adminRoutes.sellers,
-        icon: Users,
-        permissions: ['sellers:verify', 'sellers:suspend'],
-      },
-      {
-        label: 'Categories',
-        href: adminRoutes.categories,
-        icon: Tag,
-        permissions: ['listings:approve', 'listings:create', 'parts:manage'],
-      },
-      {
-        label: 'Parts',
-        href: adminRoutes.parts,
-        icon: Wrench,
-        permissions: ['parts:manage'],
-      },
-    ],
-  },
-  {
-    label: 'Commerce',
-    items: [
-      {
-        label: 'Orders',
-        href: adminRoutes.orders,
-        icon: ShoppingCart,
-        permissions: ['orders:read', 'orders:update-status'],
-      },
-      {
-        label: 'Payments',
-        href: adminRoutes.payments,
-        icon: CreditCard,
-        permissions: ['payments:verify', 'payments:reject', 'payments:refund'],
-      },
-      {
-        label: 'Bookings',
-        href: adminRoutes.bookings,
-        icon: Car,
-        permissions: ['bookings:manage', 'bookings:verify', 'bookings:reject'],
-      },
-      {
-        label: 'Invoices',
-        href: adminRoutes.invoices,
-        icon: FileText,
-        permissions: ['invoices:read', 'invoices:send', 'invoices:cancel'],
-      },
-      {
-        label: 'Financing',
-        href: adminRoutes.financing,
-        icon: DollarSign,
-        permissions: ['financing:read', 'financing:send-to-bank'],
-      },
-    ],
-  },
-  {
-    label: 'Operations',
-    items: [
-      {
-        label: 'Fleet',
-        href: adminRoutes.fleet,
-        icon: Truck,
-        permissions: ['fleet:read', 'fleet:update-status'],
-      },
-      {
-        label: 'Energy',
-        href: adminRoutes.energy,
-        icon: Zap,
-        permissions: ['parts:manage', 'fleet:read', 'fleet:update-status'],
-      },
-      {
-        label: 'Stations',
-        href: adminRoutes.stations,
-        icon: MapPin,
-        permissions: [
-          'stations:read-all',
-          'stations:approve',
-          'stations:reject',
-          'stations:suspend',
-        ],
-      },
-      {
-        label: 'Promotions',
-        href: adminRoutes.promotions,
-        icon: Megaphone,
-        permissions: ['promotions:create', 'promotions:manage'],
-      },
-      {
-        label: 'Sustainability',
-        href: adminRoutes.sustainability,
-        icon: Leaf,
-        permissions: ['sustainability:read', 'sustainability:manage'],
-      },
-    ],
-  },
-  {
-    label: 'Platform',
-    items: [
-      {
-        label: 'Users',
-        href: adminRoutes.users,
-        icon: Users,
-        superAdminOnly: true,
-      },
-      {
-        label: 'Activity logs',
-        href: adminRoutes.activityLogs,
-        icon: Activity,
-        superAdminOnly: true,
-      },
-      {
-        label: 'Pricing rules',
-        href: adminRoutes.pricingRules,
-        icon: Percent,
-        superAdminOnly: true,
-      },
-      {
-        label: 'Platform settings',
-        href: adminRoutes.platformSettings,
-        icon: Settings,
-        permissions: ['platform-settings:manage'],
-      },
-      {
-        label: 'Profile',
-        href: adminRoutes.settings,
-        icon: User,
-      },
-      {
-        label: 'Notifications',
-        href: adminRoutes.notifications,
         icon: Bell,
       },
     ],

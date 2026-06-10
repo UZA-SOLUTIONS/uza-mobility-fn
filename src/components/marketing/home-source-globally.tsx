@@ -1,11 +1,14 @@
 import Image from 'next/image';
 import Link from 'next/link';
 import { brand } from '@/lib/marketing/colors';
-import { marketingContainer } from '@/lib/marketing/layout-classes';
+import {
+  marketingContainer,
+  marketingWhiteSurface,
+} from '@/lib/marketing/layout-classes';
 
 export function HomeSourceGlobally() {
   return (
-    <section className="bg-white pt-4 pb-12 sm:pb-20">
+    <section className={`${marketingWhiteSurface} pt-4 pb-12 sm:pb-20`}>
       <div className={marketingContainer}>
         <div className="relative min-h-[360px] overflow-hidden rounded-2xl px-4 py-8 sm:min-h-[440px] sm:rounded-3xl sm:px-6 sm:py-10 md:min-h-[500px] lg:min-h-[550px] lg:rounded-[32px] lg:px-10 lg:py-0">
           <div className="absolute inset-0" aria-hidden>
@@ -27,13 +30,14 @@ export function HomeSourceGlobally() {
             <div className="space-y-6 pt-4 sm:space-y-8 sm:pt-8">
               <div className="space-y-3 sm:space-y-4">
                 <h2 className="text-3xl leading-[1.05] font-semibold text-white sm:text-4xl md:text-5xl lg:text-[56px]">
-                  Source Globally.
+                  Customize your dream
                   <br />
-                  Maximize Your Budget.
+                  Vehicle.
                 </h2>
-                <p className="text-base leading-[1.45] text-white">
+                <p className="line-clamp-3 text-base text-white md:text-xl">
                   Tell us what you need. We secure factory-direct EVs with 100%
-                  transparent, landed pricing straight to Kigali.
+                  <br />
+                  transparent, landed pricing straight to desired destination.
                 </p>
               </div>
               <Link
@@ -41,7 +45,7 @@ export function HomeSourceGlobally() {
                 className="inline-flex h-12 w-[180px] items-center justify-center rounded-full text-sm font-semibold"
                 style={{ backgroundColor: brand.lime, color: brand.forest }}
               >
-                Start Sourcing
+                Customize now
               </Link>
             </div>
           </div>

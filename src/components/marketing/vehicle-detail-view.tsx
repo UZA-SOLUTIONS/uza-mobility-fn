@@ -1,9 +1,9 @@
 import Image from 'next/image';
 import Link from 'next/link';
-import { Car, MapPin } from 'lucide-react';
+import { Car, Download, MapPin } from 'lucide-react';
+import { WishlistButton } from '@/components/marketing/wishlist-button';
 import { VehicleDetailGallery } from '@/components/marketing/vehicle-detail-gallery';
 import { VehicleDetailBookingAction } from '@/components/marketing/vehicle-detail-booking-action';
-import { VehicleDetailReserveAction } from '@/components/marketing/vehicle-detail-reserve-action';
 import { VehicleDetailSidebarSpecs } from '@/components/marketing/vehicle-detail-sidebar-specs';
 import { VehicleDetailSpecs } from '@/components/marketing/vehicle-detail-specs';
 import {
@@ -16,7 +16,10 @@ import {
 } from '@/lib/marketing/listing-detail';
 import { formatListingPrice } from '@/lib/marketing/listing-display';
 import { brand } from '@/lib/marketing/colors';
-import { marketingContainer } from '@/lib/marketing/layout-classes';
+import {
+  marketingContainer,
+  marketingWhiteSurface,
+} from '@/lib/marketing/layout-classes';
 import type { PublicListing } from '@/types/marketplace/public-listing';
 
 type VehicleDetailViewProps = {
@@ -29,7 +32,7 @@ export function VehicleDetailView({ listing }: VehicleDetailViewProps) {
   const extendedSpecGroups = buildVehicleExtendedSpecGroups(listing);
 
   return (
-    <div className="bg-white py-8 sm:py-14">
+    <div className={`${marketingWhiteSurface} py-8 sm:py-14`}>
       <div className={marketingContainer}>
         <div className="grid gap-8 xl:grid-cols-[minmax(0,1fr)_429px]">
           <div className="space-y-5">
@@ -50,6 +53,30 @@ export function VehicleDetailView({ listing }: VehicleDetailViewProps) {
               </div>
             ) : null}
 
+            {listing.brochureUrl ? (
+              <div className="rounded-2xl border border-[#E9E9E9] p-4 sm:p-8">
+                <h2 className="mb-3 text-lg font-semibold text-[#151515]">
+                  Vehicle brochure
+                </h2>
+                <p className="mb-4 text-sm text-[#356769]">
+                  Download the full specification sheet for this vehicle.
+                </p>
+                <a
+                  href={listing.brochureUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex h-10 items-center gap-2 rounded-full px-5 text-sm font-semibold"
+                  style={{
+                    backgroundColor: brand.lime,
+                    color: brand.forest,
+                  }}
+                >
+                  <Download className="size-4" />
+                  Download brochure
+                </a>
+              </div>
+            ) : null}
+
             {extendedSpecGroups.length > 0 ? (
               <VehicleDetailSpecs groups={extendedSpecGroups} />
             ) : null}
@@ -63,6 +90,21 @@ export function VehicleDetailView({ listing }: VehicleDetailViewProps) {
               <p className="mt-2 text-3xl font-semibold text-[#151515]">
                 {formatListingPrice(listing)}
               </p>
+
+              <div className="mt-4 flex flex-wrap items-center gap-2">
+                {listing.isFullOption ? (
+                  <span
+                    className="rounded-full px-3 py-1 text-xs font-semibold"
+                    style={{
+                      backgroundColor: `${brand.lime}33`,
+                      color: brand.forest,
+                    }}
+                  >
+                    Full option
+                  </span>
+                ) : null}
+                <WishlistButton listingId={listing.id} />
+              </div>
 
               <div className="mt-6 space-y-4 text-sm text-[#151515]">
                 <div className="flex gap-2">
@@ -92,9 +134,6 @@ export function VehicleDetailView({ listing }: VehicleDetailViewProps) {
               </div>
 
               <VehicleDetailBookingAction listing={listing} />
-              {!listing.isBooked ? (
-                <VehicleDetailReserveAction listing={listing} />
-              ) : null}
             </div>
 
             <VehicleDetailSidebarSpecs rows={sidebarSpecs} />

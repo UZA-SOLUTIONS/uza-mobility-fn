@@ -1,6 +1,8 @@
 'use client';
 
 import Link from 'next/link';
+import { useSearchParams } from 'next/navigation';
+import { useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { AuthFormCard } from '@/components/auth/auth-form-card';
@@ -15,6 +17,8 @@ import { authRoutes } from '@/config/routes';
 
 export function Register() {
   const register = useRegister();
+  const searchParams = useSearchParams();
+  const prefilledEmail = searchParams.get('email')?.trim() ?? '';
 
   const form = useForm<RegisterInput>({
     resolver: zodResolver(registerSchema),
@@ -27,6 +31,12 @@ export function Register() {
       preferredLanguage: 'en',
     },
   });
+
+  useEffect(() => {
+    if (prefilledEmail) {
+      form.setValue('email', prefilledEmail);
+    }
+  }, [prefilledEmail, form]);
 
   const onSubmit = form.handleSubmit((values) => {
     register.mutate(values, {
@@ -44,7 +54,7 @@ export function Register() {
     <AuthFormCard>
       <PageHeader
         title="Create account"
-        description="Register as a buyer. Seller onboarding is available after sign-up."
+        description="Register as a buyer. You must verify your email before you can sign in."
       />
       <form onSubmit={onSubmit} className="space-y-4">
         <div className="grid gap-4 sm:grid-cols-2">

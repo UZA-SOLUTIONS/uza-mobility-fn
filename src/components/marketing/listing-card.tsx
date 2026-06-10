@@ -1,8 +1,11 @@
+'use client';
+
 import Image from 'next/image';
 import Link from 'next/link';
+import { usePathname } from 'next/navigation';
 import { ArrowUpRight, Battery, Gauge } from 'lucide-react';
+import { WishlistButton } from '@/components/marketing/wishlist-button';
 import {
-  formatDeliveryBadge,
   formatDrivetrainLabel,
   formatListingPrice,
   getListingPrimaryPhoto,
@@ -17,8 +20,9 @@ type ListingCardProps = {
 };
 
 export function ListingCard({ listing }: ListingCardProps) {
+  const pathname = usePathname();
   const imageUrl = getListingPrimaryPhoto(listing);
-  const deliveryBadge = formatDeliveryBadge(listing);
+  const detailHref = listingDetailHref(listing.slug);
   const rangeKm = listing.evSpecs?.rangeKm;
   const batteryKwh = listing.evSpecs?.batteryCapacityKwh;
   const transmission = formatDrivetrainLabel(listing.drivetrain);
@@ -39,18 +43,17 @@ export function ListingCard({ listing }: ListingCardProps) {
             No photo
           </div>
         )}
-        <div className="pointer-events-none absolute inset-0 p-3 sm:p-4">
-          {deliveryBadge ? (
-            <span
-              className="absolute top-3 right-3 max-w-[55%] rounded-full px-3 py-1.5 text-right text-xs leading-tight font-medium text-white sm:top-4 sm:right-4"
-              style={{ backgroundColor: brand.tealCard }}
-            >
-              {deliveryBadge}
-            </span>
-          ) : null}
+        <div className="absolute inset-0 p-3 sm:p-4">
+          <div className="pointer-events-auto absolute top-3 left-3 sm:top-4 sm:left-4">
+            <WishlistButton
+              listingId={listing.id}
+              iconOnly
+              callbackUrl={pathname || detailHref}
+            />
+          </div>
           {listing.displayBadge ? (
             <span
-              className="absolute bottom-3 left-3 max-w-[calc(100%-1.5rem)] rounded-full px-3 py-1.5 text-xs font-semibold sm:bottom-4 sm:left-4"
+              className="pointer-events-none absolute bottom-3 left-3 max-w-[calc(100%-1.5rem)] rounded-full px-3 py-1.5 text-xs font-semibold sm:bottom-4 sm:left-4"
               style={{ backgroundColor: brand.lime, color: brand.forest }}
             >
               {listing.displayBadge}
@@ -93,7 +96,7 @@ export function ListingCard({ listing }: ListingCardProps) {
             {formatListingPrice(listing)}
           </p>
           <Link
-            href={listingDetailHref(listing.slug)}
+            href={detailHref}
             className="inline-flex items-center gap-1 text-sm font-medium"
             style={{ color: brand.forest }}
           >

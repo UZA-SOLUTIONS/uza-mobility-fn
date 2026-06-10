@@ -55,7 +55,7 @@ import {
   type SellerListingFormInput,
 } from '@/schemas/seller';
 import type { SellerListing } from '@/types/seller/marketplace';
-import type { Category } from '@/types/admin/marketplace';
+import type { Category } from '@/types/catalog';
 
 function vehicleCategories(categories: Category[] | undefined) {
   return (

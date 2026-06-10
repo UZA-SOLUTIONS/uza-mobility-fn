@@ -3,8 +3,8 @@
 import { useEffect, useState } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { SubmitPaymentDialog } from '@/components/buyer/submit-payment-dialog';
-import { StatusBadge } from '@/components/admin/shared/status-badge';
-import { PaginationBar } from '@/components/admin/shared/pagination-bar';
+import { StatusBadge } from '@/components/shared/status-badge';
+import { PaginationBar } from '@/components/shared/pagination-bar';
 import { PageHeader } from '@/components/shared/page-header';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -16,7 +16,7 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
-import { formatDate, formatUsd } from '@/lib/admin/format';
+import { formatDate, formatUsd } from '@/lib/format';
 import { useMyPayments } from '@/queries/buyer';
 import type { BuyerPaymentsFilters } from '@/types/buyer/commerce';
 

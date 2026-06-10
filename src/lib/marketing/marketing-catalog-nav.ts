@@ -1,6 +1,6 @@
 import type { MarketingFooterColumn, NavItem } from '@/config/navigation';
 import { vehiclesHref } from '@/lib/marketing/vehicles-url';
-import type { Category, CategoryType } from '@/types/admin/marketplace';
+import type { Category, CategoryType } from '@/types/catalog';
 
 const VEHICLE_CATEGORY_TYPES: CategoryType[] = [
   'PASSENGER_EV',

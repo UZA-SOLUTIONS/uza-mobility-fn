@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { toast } from 'sonner';
-import { formatDate, formatUsd } from '@/lib/admin/format';
+import { formatDate, formatUsd } from '@/lib/format';
 import { downloadInvoiceDocument } from '@/lib/api/buyer';
 import { invoiceStatusHint } from '@/lib/buyer/invoice-flow';
 import { Button } from '@/components/ui/button';
@@ -32,7 +32,7 @@ export function InvoiceBankDetailsDialog({
 
   if (!invoice) return null;
 
-  const hint = invoiceStatusHint(invoice.status);
+  const hint = invoiceStatusHint(invoice.status, invoice.notes);
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>

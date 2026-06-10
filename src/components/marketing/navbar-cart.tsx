@@ -5,7 +5,7 @@ import { ShoppingCart } from 'lucide-react';
 import { useSession } from 'next-auth/react';
 import { workspaceRoutes } from '@/config/routes';
 import { brand } from '@/lib/marketing/colors';
-import { useMyInvoices } from '@/queries/buyer';
+import { useMyBookings } from '@/queries/bookings';
 import { isMeUser } from '@/types/auth/me-user';
 
 type NavbarCartProps = {
@@ -13,15 +13,15 @@ type NavbarCartProps = {
 };
 
 /**
- * Show cart when the buyer has an active purchase in progress.
+ * Show cart when the buyer has an active booking awaiting payment.
  */
 export function NavbarCart({ overlay = false }: NavbarCartProps) {
   const { data: session } = useSession();
   const me = isMeUser(session?.user) ? session.user : null;
   const isBuyer = Boolean(me?.roles.includes('BUYER'));
 
-  const pending = useMyInvoices(
-    { pendingPurchase: true, page: 1, limit: 1 },
+  const pending = useMyBookings(
+    { status: 'AWAITING_PAYMENT', page: 1, limit: 1, activeOnly: true },
     isBuyer,
   );
   const pendingCount = pending.data?.meta.total ?? 0;
@@ -30,11 +30,11 @@ export function NavbarCart({ overlay = false }: NavbarCartProps) {
 
   return (
     <Link
-      href={workspaceRoutes.accountInvoices}
+      href={workspaceRoutes.accountBookings}
       className={`flex items-center justify-center px-5 py-3 ${
         overlay ? 'text-white' : 'text-primary'
       }`}
-      aria-label="Open pending purchases"
+      aria-label="Open pending bookings"
     >
       <span className="relative">
         <ShoppingCart className="size-6" />

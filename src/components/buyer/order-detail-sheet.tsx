@@ -1,6 +1,6 @@
 'use client';
 
-import { StatusBadge } from '@/components/admin/shared/status-badge';
+import { StatusBadge } from '@/components/shared/status-badge';
 import { Skeleton } from '@/components/ui/skeleton';
 import {
   Sheet,
@@ -9,7 +9,7 @@ import {
   SheetHeader,
   SheetTitle,
 } from '@/components/ui/sheet';
-import { formatDateTime, formatUsd } from '@/lib/admin/format';
+import { formatDateTime, formatUsd } from '@/lib/format';
 import { formatSellerChannel } from '@/lib/auth/seller-profiles';
 import { useOrderTracking } from '@/queries/buyer';
 import type { BuyerOrder } from '@/types/buyer/commerce';

@@ -11,7 +11,15 @@ import { NextResponse } from 'next/server';
 const legacyRedirects: Record<string, string> = {
   '/dashboard': workspaceRoutes.account,
   '/settings': workspaceRoutes.accountSettings,
-  '/billing': workspaceRoutes.accountBilling,
+  '/billing': workspaceRoutes.accountBookings,
+  '/account': workspaceRoutes.account,
+  '/account/orders': workspaceRoutes.accountOrders,
+  '/account/invoices': workspaceRoutes.accountBookings,
+  '/account/bookings': workspaceRoutes.accountBookings,
+  '/account/payments': workspaceRoutes.accountBookings,
+  '/account/financing': workspaceRoutes.account,
+  '/account/profile': workspaceRoutes.accountProfile,
+  '/account/notifications': workspaceRoutes.accountNotifications,
 };
 
 export default auth((req) => {
@@ -21,6 +29,11 @@ export default auth((req) => {
     return NextResponse.redirect(
       new URL(legacyRedirects[pathname], req.nextUrl.origin),
     );
+  }
+
+  if (pathname === '/account' || pathname.startsWith('/account/')) {
+    const suffix = pathname.slice('/account'.length);
+    return NextResponse.redirect(new URL(`/my${suffix}`, req.nextUrl.origin));
   }
 
   const isAuthPage = publicOnlyAuthPaths.some(
@@ -59,13 +72,16 @@ export default auth((req) => {
 
 export const config = {
   matcher: [
+    '/my',
+    '/my/:path*',
     '/account/:path*',
     '/seller/:path*',
     '/operator/:path*',
-    '/admin/:path*',
     '/login',
     '/register',
     '/forgot-password',
+    '/check-email',
+    '/auth/google/callback',
     '/dashboard/:path*',
     '/settings/:path*',
     '/billing/:path*',
