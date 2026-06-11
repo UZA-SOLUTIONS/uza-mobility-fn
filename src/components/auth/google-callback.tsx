@@ -4,7 +4,8 @@ import { useEffect, useRef, useState } from 'react';
 import { useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import { AuthFormCard } from '@/components/auth/auth-form-card';
-import { PageHeader } from '@/components/shared/page-header';
+import { AuthFormMessage } from '@/components/auth/auth-form-message';
+import { AuthPageHeader } from '@/components/auth/auth-page-header';
 import { Spinner } from '@/components/ui/spinner';
 import { authRoutes } from '@/config/routes';
 import { ApiClientError } from '@/lib/api';
@@ -75,13 +76,16 @@ export function GoogleCallback() {
   if (error) {
     return (
       <AuthFormCard>
-        <PageHeader title="Google sign-in failed" description={error} />
-        <Link
-          href={authRoutes.login}
-          className="text-sm font-medium underline-offset-4 hover:underline"
-        >
-          Back to login
-        </Link>
+        <div className="space-y-6">
+          <AuthPageHeader title="Google sign-in failed" />
+          <AuthFormMessage variant="error" message={error} />
+          <Link
+            href={authRoutes.login}
+            className="block text-center text-sm font-medium text-[#046A38] hover:underline"
+          >
+            Back to Sign in
+          </Link>
+        </div>
       </AuthFormCard>
     );
   }
@@ -90,9 +94,7 @@ export function GoogleCallback() {
     <AuthFormCard>
       <div className="flex flex-col items-center gap-3 py-8">
         <Spinner className="size-6" />
-        <p className="text-sm text-muted-foreground">
-          Completing Google sign-in…
-        </p>
+        <p className="text-sm text-[#5D6772]">Completing Google sign-in…</p>
       </div>
     </AuthFormCard>
   );

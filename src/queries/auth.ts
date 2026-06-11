@@ -114,15 +114,9 @@ export function useForgotPassword() {
 }
 
 export function useResetPassword() {
-  const router = useAppRouter();
-
   return useMutation({
     mutationFn: (input: ResetPasswordInput) =>
       resetPassword({ token: input.token, password: input.password }),
-    onSuccess: () => {
-      router.replace(authRoutes.login);
-      router.refresh();
-    },
   });
 }
 

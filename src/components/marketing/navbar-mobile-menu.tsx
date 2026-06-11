@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { Menu } from 'lucide-react';
 import type { NavItem } from '@/config/navigation';
 import { MarketingNavLink } from '@/components/marketing/marketing-nav-link';
+import { NavbarMobileAuth } from '@/components/marketing/navbar-mobile-auth';
 import { Button } from '@/components/ui/button';
 import {
   Sheet,
@@ -65,6 +66,7 @@ export function NavbarMobileMenu({
               <MarketingNavLink item={item} variant="mobile" />
             </SheetClose>
           ))}
+          <NavbarMobileAuth />
         </nav>
 
         <p className="border-t border-white/15 px-5 py-4 text-xs text-[#AAFF47]/80">

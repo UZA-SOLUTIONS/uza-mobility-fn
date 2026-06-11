@@ -52,7 +52,10 @@ function PromoCard({
 
 export function HomePromoGrid() {
   return (
-    <section className={`py-12 sm:py-20 ${marketingForestSurface}`}>
+    <section
+      className="py-12 sm:py-20"
+      style={{ backgroundColor: brand.forest }}
+    >
       <div
         className={`${marketingContainer} flex flex-col gap-6 md:flex-row md:gap-10`}
       >

@@ -102,15 +102,18 @@
   --border: oklch(0.922 0 0);
   --input: oklch(0.922 0 0);
   --ring: #174438;
+  --destructive: oklch(0.577 0.245 27.325);
   color: var(--foreground);
 }
 
-.auth-surface [data-slot='input'] {
+.auth-surface [data-slot='input'],
+.auth-surface .auth-input {
   background-color: oklch(1 0 0);
   color: var(--foreground);
 }
 
-.dark .auth-surface [data-slot='input'] {
+.dark .auth-surface [data-slot='input'],
+.dark .auth-surface .auth-input {
   background-color: oklch(1 0 0);
   color: var(--foreground);
 }

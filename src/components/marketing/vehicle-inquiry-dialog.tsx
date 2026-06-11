@@ -87,9 +87,13 @@ export function VehicleInquiryDialog({
     submit.mutate(values, {
       onSuccess: (result) => {
         onOpenChange(false);
-        router.push(
-          `/inquiry/success?email=${encodeURIComponent(result.email)}&quote=${encodeURIComponent(result.quoteNumber)}`,
-        );
+        const params = new URLSearchParams({
+          email: result.email,
+          quote: result.quoteNumber,
+          name: values.name,
+          phone: values.phone,
+        });
+        router.push(`/inquiry/success?${params.toString()}`);
       },
     });
   });

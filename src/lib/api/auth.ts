@@ -1,3 +1,4 @@
+import { normalizeAuthEmail } from '@/lib/auth/normalize-auth-email';
 import { apiFetch } from './api';
 import type { AuthTokens } from '@/types/auth/auth-tokens';
 import type { MeUser } from '@/types/auth/me-user';
@@ -7,7 +8,10 @@ import type { RegisterInput } from '@/schemas/auth';
 export function login(input: LoginInput) {
   return apiFetch<AuthTokens>('/auth/login', {
     method: 'POST',
-    body: JSON.stringify(input),
+    body: JSON.stringify({
+      ...input,
+      email: normalizeAuthEmail(input.email),
+    }),
   });
 }
 
@@ -26,6 +30,7 @@ export type RegisterResponse = {
 export function register(input: RegisterInput) {
   const payload = {
     ...input,
+    email: normalizeAuthEmail(input.email),
     phone: input.phone?.trim() ? input.phone.trim() : undefined,
   };
 
@@ -57,7 +62,7 @@ export function getMe(accessToken: string) {
 export function forgotPassword(email: string) {
   return apiFetch<{ message: string }>('/auth/forgot-password', {
     method: 'POST',
-    body: JSON.stringify({ email }),
+    body: JSON.stringify({ email: normalizeAuthEmail(email) }),
   });
 }
 
@@ -78,7 +83,7 @@ export function verifyEmail(token: string) {
 export function resendVerificationByEmail(email: string) {
   return apiFetch<{ message: string }>('/auth/resend-verification', {
     method: 'POST',
-    body: JSON.stringify({ email }),
+    body: JSON.stringify({ email: normalizeAuthEmail(email) }),
   });
 }
 

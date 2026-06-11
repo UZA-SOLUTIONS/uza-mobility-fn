@@ -5,6 +5,10 @@ import { Spinner } from '@/components/ui/spinner';
 import { AuthFormCard } from '@/components/auth/auth-form-card';
 import { InquirySuccessActions } from '@/components/marketing/inquiry-success-actions';
 import { authRoutes, workspaceRoutes } from '@/config/routes';
+import {
+  buildRegisterHref,
+  parseRegisterPrefill,
+} from '@/lib/auth/register-prefill';
 import { brand } from '@/lib/marketing/colors';
 import {
   marketingContainer,
@@ -12,7 +16,12 @@ import {
 } from '@/lib/marketing/layout-classes';
 
 type InquirySuccessPageProps = {
-  searchParams: Promise<{ email?: string; quote?: string }>;
+  searchParams: Promise<{
+    email?: string;
+    quote?: string;
+    name?: string;
+    phone?: string;
+  }>;
 };
 
 export default async function InquirySuccessPage({
@@ -21,9 +30,16 @@ export default async function InquirySuccessPage({
   const params = await searchParams;
   const email = params.email?.trim() ?? '';
   const quote = params.quote?.trim() ?? '';
-  const registerHref = email
-    ? `${authRoutes.register}?email=${encodeURIComponent(email)}`
-    : authRoutes.register;
+  const prefill = parseRegisterPrefill({
+    get: (key) => {
+      const value = params[key as keyof typeof params];
+      return typeof value === 'string' ? value : null;
+    },
+  });
+  const registerHref = buildRegisterHref(prefill);
+  const loginHref = email
+    ? `${authRoutes.login}?email=${encodeURIComponent(email)}`
+    : authRoutes.login;
 
   const benefits = [
     'Track your inquiry status',
@@ -85,6 +101,7 @@ export default async function InquirySuccessPage({
                 <InquirySuccessActions
                   email={email}
                   registerHref={registerHref}
+                  loginHref={loginHref}
                 />
               </Suspense>
 

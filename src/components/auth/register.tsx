@@ -2,144 +2,212 @@
 
 import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
-import { useEffect } from 'react';
-import { useForm } from 'react-hook-form';
+import { useEffect, useMemo, useRef } from 'react';
+import { useForm, useFormState } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
+import { AuthFieldError } from '@/components/auth/auth-field-error';
 import { AuthFormCard } from '@/components/auth/auth-form-card';
-import { PageHeader } from '@/components/shared/page-header';
-import { Button } from '@/components/ui/button';
+import { AuthFormMessage } from '@/components/auth/auth-form-message';
+import { AuthPageHeader } from '@/components/auth/auth-page-header';
+import { AuthPasswordInput } from '@/components/auth/auth-password-input';
+import { AuthPrimaryButton } from '@/components/auth/auth-primary-button';
+import {
+  authAccentLinkClassName,
+  authFieldClassName,
+  authFooterLinkClassName,
+  authInputClassName,
+  authLabelClassName,
+} from '@/components/auth/auth-styles';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { registerSchema, type RegisterInput } from '@/schemas/auth';
 import { useRegister } from '@/queries/auth';
-import { ApiClientError } from '@/lib/api';
+import { getAuthErrorMessage } from '@/lib/auth/auth-error-message';
+import { getRegisterDefaultValues } from '@/lib/auth/register-default-values';
+import {
+  useAuthQueryReset,
+  useClearAuthFeedbackOnChange,
+} from '@/hooks/use-auth-form-lifecycle';
 import { authRoutes } from '@/config/routes';
 
 export function Register() {
-  const register = useRegister();
+  const registerMutation = useRegister();
   const searchParams = useSearchParams();
-  const prefilledEmail = searchParams.get('email')?.trim() ?? '';
+  const queryKey = searchParams.toString();
+  const errorRef = useRef<HTMLDivElement>(null);
+
+  const defaultValues = useMemo(
+    () => getRegisterDefaultValues(searchParams),
+    [queryKey, searchParams],
+  );
 
   const form = useForm<RegisterInput>({
     resolver: zodResolver(registerSchema),
-    defaultValues: {
-      email: '',
-      password: '',
-      firstName: '',
-      lastName: '',
-      phone: '',
-      preferredLanguage: 'en',
-    },
+    defaultValues,
   });
+  const { errors } = useFormState({ control: form.control });
+
+  useAuthQueryReset(form, registerMutation, queryKey, defaultValues);
+  useClearAuthFeedbackOnChange(form, registerMutation, [
+    'email',
+    'password',
+    'firstName',
+    'lastName',
+    'phone',
+  ]);
+
+  const rootMessage =
+    errors.root?.message ??
+    (registerMutation.isError
+      ? getAuthErrorMessage(
+          registerMutation.error,
+          'Unable to create account. Please try again.',
+        )
+      : null);
 
   useEffect(() => {
-    if (prefilledEmail) {
-      form.setValue('email', prefilledEmail);
+    if (rootMessage) {
+      errorRef.current?.scrollIntoView({
+        block: 'nearest',
+        behavior: 'smooth',
+      });
     }
-  }, [prefilledEmail, form]);
+  }, [rootMessage]);
 
   const onSubmit = form.handleSubmit((values) => {
-    register.mutate(values, {
+    form.clearErrors('root');
+    registerMutation.reset();
+    registerMutation.mutate(values, {
       onError: (error) => {
-        const message =
-          error instanceof ApiClientError
-            ? error.message
-            : 'Unable to create account. Please try again.';
-        form.setError('root', { message });
+        form.setError('root', {
+          message: getAuthErrorMessage(
+            error,
+            'Unable to create account. Please try again.',
+          ),
+        });
       },
     });
   });
 
+  const emailInUse = rootMessage?.toLowerCase().includes('email already');
+
   return (
     <AuthFormCard>
-      <PageHeader
-        title="Create account"
-        description="Register as a buyer. You must verify your email before you can sign in."
-      />
-      <form onSubmit={onSubmit} className="space-y-4">
-        <div className="grid gap-4 sm:grid-cols-2">
-          <div className="space-y-2">
-            <Label htmlFor="firstName">First name</Label>
-            <Input
-              id="firstName"
-              autoComplete="given-name"
-              {...form.register('firstName')}
-            />
-            {form.formState.errors.firstName ? (
-              <p className="text-sm text-destructive">
-                {form.formState.errors.firstName.message}
-              </p>
-            ) : null}
+      <div className="space-y-4">
+        <AuthPageHeader
+          title="Create your account"
+          description="Track inquiries and save vehicles."
+        />
+
+        <form onSubmit={onSubmit} className="space-y-2.5">
+          <div className="grid grid-cols-2 gap-2">
+            <div className={authFieldClassName}>
+              <Label htmlFor="firstName" className={authLabelClassName}>
+                First name
+              </Label>
+              <Input
+                id="firstName"
+                autoComplete="given-name"
+                className={authInputClassName}
+                aria-invalid={Boolean(errors.firstName)}
+                {...form.register('firstName')}
+              />
+              <AuthFieldError message={errors.firstName?.message} />
+            </div>
+            <div className={authFieldClassName}>
+              <Label htmlFor="lastName" className={authLabelClassName}>
+                Last name
+              </Label>
+              <Input
+                id="lastName"
+                autoComplete="family-name"
+                className={authInputClassName}
+                aria-invalid={Boolean(errors.lastName)}
+                {...form.register('lastName')}
+              />
+              <AuthFieldError message={errors.lastName?.message} />
+            </div>
           </div>
-          <div className="space-y-2">
-            <Label htmlFor="lastName">Last name</Label>
+
+          <div className={authFieldClassName}>
+            <Label htmlFor="email" className={authLabelClassName}>
+              Email Address
+            </Label>
             <Input
-              id="lastName"
-              autoComplete="family-name"
-              {...form.register('lastName')}
+              id="email"
+              type="email"
+              autoComplete="email"
+              placeholder="name@company.com"
+              className={authInputClassName}
+              aria-invalid={Boolean(errors.email)}
+              {...form.register('email')}
             />
-            {form.formState.errors.lastName ? (
-              <p className="text-sm text-destructive">
-                {form.formState.errors.lastName.message}
-              </p>
-            ) : null}
+            <AuthFieldError message={errors.email?.message} />
           </div>
-        </div>
-        <div className="space-y-2">
-          <Label htmlFor="email">Email</Label>
-          <Input
-            id="email"
-            type="email"
-            autoComplete="email"
-            {...form.register('email')}
-          />
-          {form.formState.errors.email ? (
-            <p className="text-sm text-destructive">
-              {form.formState.errors.email.message}
-            </p>
+
+          <div className={authFieldClassName}>
+            <Label htmlFor="phone" className={authLabelClassName}>
+              Phone (optional)
+            </Label>
+            <Input
+              id="phone"
+              type="tel"
+              autoComplete="tel"
+              className={authInputClassName}
+              aria-invalid={Boolean(errors.phone)}
+              {...form.register('phone')}
+            />
+            <AuthFieldError message={errors.phone?.message} />
+          </div>
+
+          <div className={authFieldClassName}>
+            <Label htmlFor="password" className={authLabelClassName}>
+              Password
+            </Label>
+            <AuthPasswordInput
+              id="password"
+              autoComplete="new-password"
+              placeholder="Enter password"
+              aria-invalid={Boolean(errors.password)}
+              {...form.register('password')}
+            />
+            <AuthFieldError message={errors.password?.message} />
+          </div>
+
+          {rootMessage ? (
+            <div ref={errorRef}>
+              <AuthFormMessage variant="error" message={rootMessage}>
+                {emailInUse ? (
+                  <p className="text-sm text-red-800/90">
+                    <Link
+                      href={`${authRoutes.login}?email=${encodeURIComponent(form.getValues('email'))}`}
+                      className="font-medium underline underline-offset-2"
+                    >
+                      Sign in with this email
+                    </Link>
+                  </p>
+                ) : null}
+              </AuthFormMessage>
+            </div>
           ) : null}
-        </div>
-        <div className="space-y-2">
-          <Label htmlFor="phone">Phone (optional)</Label>
-          <Input
-            id="phone"
-            type="tel"
-            autoComplete="tel"
-            {...form.register('phone')}
-          />
-        </div>
-        <div className="space-y-2">
-          <Label htmlFor="password">Password</Label>
-          <Input
-            id="password"
-            type="password"
-            autoComplete="new-password"
-            {...form.register('password')}
-          />
-          {form.formState.errors.password ? (
-            <p className="text-sm text-destructive">
-              {form.formState.errors.password.message}
-            </p>
-          ) : null}
-        </div>
-        {form.formState.errors.root ? (
-          <p className="text-sm text-destructive">
-            {form.formState.errors.root.message}
-          </p>
-        ) : null}
-        <Button type="submit" className="w-full" disabled={register.isPending}>
-          {register.isPending ? 'Creating account…' : 'Create account'}
-        </Button>
-      </form>
-      <p className="text-center text-sm text-muted-foreground">
-        Already have an account?{' '}
-        <Link
-          href={authRoutes.login}
-          className="underline-offset-4 hover:underline"
-        >
-          Log in
-        </Link>
-      </p>
+
+          <AuthPrimaryButton
+            type="submit"
+            disabled={registerMutation.isPending}
+          >
+            {registerMutation.isPending
+              ? 'Creating account…'
+              : 'Create account'}
+          </AuthPrimaryButton>
+        </form>
+
+        <p className={authFooterLinkClassName}>
+          Already have an account?{' '}
+          <Link href={authRoutes.login} className={authAccentLinkClassName}>
+            Sign in
+          </Link>
+        </p>
+      </div>
     </AuthFormCard>
   );
 }

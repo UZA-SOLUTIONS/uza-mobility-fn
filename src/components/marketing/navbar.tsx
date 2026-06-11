@@ -4,12 +4,10 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { Search } from 'lucide-react';
 import type { NavItem } from '@/config/navigation';
-import { authRoutes } from '@/config/routes';
 import { MarketingNavLink } from '@/components/marketing/marketing-nav-link';
 import { NavbarCart } from '@/components/marketing/navbar-cart';
 import { NavbarAuth } from '@/components/marketing/navbar-auth';
 import { NavbarMobileMenu } from '@/components/marketing/navbar-mobile-menu';
-import { brand } from '@/lib/marketing/colors';
 import { marketingOverlayNav } from '@/lib/marketing/layout-classes';
 
 type MarketingNavbarProps = {
@@ -75,18 +73,7 @@ export function MarketingNavbar({
           >
             <Search className="size-5" />
           </Link>
-          <div className="hidden sm:block">
-            <NavbarAuth overlay={overlay} />
-          </div>
-          <div className="sm:hidden">
-            <Link
-              href={authRoutes.login}
-              className="px-3 py-2 text-sm font-medium"
-              style={{ color: overlay ? brand.lime : brand.forest }}
-            >
-              Sign in
-            </Link>
-          </div>
+          <NavbarAuth overlay={overlay} />
         </div>
       </div>
     </header>

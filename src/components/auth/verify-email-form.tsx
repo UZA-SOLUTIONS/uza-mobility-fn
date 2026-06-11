@@ -3,10 +3,12 @@
 import Link from 'next/link';
 import { useEffect, useRef } from 'react';
 import { AuthFormCard } from '@/components/auth/auth-form-card';
-import { PageHeader } from '@/components/shared/page-header';
-import { Button } from '@/components/ui/button';
+import { AuthFormMessage } from '@/components/auth/auth-form-message';
+import { AuthPageHeader } from '@/components/auth/auth-page-header';
+import { AuthPrimaryButton } from '@/components/auth/auth-primary-button';
 import { Spinner } from '@/components/ui/spinner';
 import { useVerifyEmail } from '@/queries/auth';
+import { getAuthErrorMessage } from '@/lib/auth/auth-error-message';
 import { authRoutes } from '@/config/routes';
 
 type VerifyEmailFormProps = {
@@ -29,18 +31,20 @@ export function VerifyEmailForm({ token }: VerifyEmailFormProps) {
   if (!token.trim()) {
     return (
       <AuthFormCard>
-        <PageHeader
-          title="Verify email"
-          description="This verification link is invalid. Sign in and request a new verification email from your account."
-        />
-        <p className="text-center text-sm text-muted-foreground">
-          <Link
-            href={authRoutes.login}
-            className="underline-offset-4 hover:underline"
-          >
-            Go to log in
-          </Link>
-        </p>
+        <div className="space-y-8">
+          <AuthPageHeader
+            title="Verify email"
+            description="This verification link is invalid. Sign in and request a new verification email from your account."
+          />
+          <p className="text-center text-base text-[#5D6772]">
+            <Link
+              href={authRoutes.login}
+              className="font-medium text-[#046A38] hover:underline"
+            >
+              Go to Sign in
+            </Link>
+          </p>
+        </div>
       </AuthFormCard>
     );
   }
@@ -50,7 +54,7 @@ export function VerifyEmailForm({ token }: VerifyEmailFormProps) {
       <AuthFormCard>
         <div className="flex flex-col items-center gap-3 py-6">
           <Spinner className="size-6" />
-          <p className="text-sm text-muted-foreground">Verifying your email…</p>
+          <p className="text-sm text-[#5D6772]">Verifying your email…</p>
         </div>
       </AuthFormCard>
     );
@@ -59,37 +63,41 @@ export function VerifyEmailForm({ token }: VerifyEmailFormProps) {
   if (verify.isError) {
     return (
       <AuthFormCard>
-        <PageHeader
-          title="Verification failed"
-          description={
-            verify.error instanceof Error
-              ? verify.error.message
-              : 'This verification link is invalid or has expired.'
-          }
-        />
-        <p className="text-center text-sm text-muted-foreground">
-          <Link
-            href={authRoutes.login}
-            className="underline-offset-4 hover:underline"
-          >
-            Log in
-          </Link>
-        </p>
+        <div className="space-y-8">
+          <AuthPageHeader title="Verification failed" />
+          <AuthFormMessage
+            variant="error"
+            message={getAuthErrorMessage(
+              verify.error,
+              'This verification link is invalid or has expired.',
+            )}
+          />
+          <p className="text-center text-base text-[#5D6772]">
+            <Link
+              href={authRoutes.login}
+              className="font-medium text-[#046A38] hover:underline"
+            >
+              Sign in
+            </Link>
+          </p>
+        </div>
       </AuthFormCard>
     );
   }
 
   return (
     <AuthFormCard>
-      <PageHeader
-        title="Email verified"
-        description={
-          verify.data?.message ?? 'Your email address has been verified.'
-        }
-      />
-      <Button asChild className="w-full">
-        <Link href={authRoutes.login}>Sign in to your account</Link>
-      </Button>
+      <div className="space-y-8">
+        <AuthPageHeader
+          title="Email verified"
+          description={
+            verify.data?.message ?? 'Your email address has been verified.'
+          }
+        />
+        <AuthPrimaryButton asChild>
+          <Link href={authRoutes.login}>Sign in to your account</Link>
+        </AuthPrimaryButton>
+      </div>
     </AuthFormCard>
   );
 }

@@ -9,11 +9,13 @@ import { brand } from '@/lib/marketing/colors';
 type InquirySuccessActionsProps = {
   email: string;
   registerHref: string;
+  loginHref?: string;
 };
 
 export function InquirySuccessActions({
   email,
   registerHref,
+  loginHref = authRoutes.login,
 }: InquirySuccessActionsProps) {
   return (
     <div className="space-y-4">
@@ -30,7 +32,7 @@ export function InquirySuccessActions({
           </Link>
         </Button>
         <Button asChild variant="outline" className="h-10 rounded-full">
-          <Link href={authRoutes.login}>Sign in with email</Link>
+          <Link href={loginHref}>Sign in with email</Link>
         </Button>
       </div>
     </div>

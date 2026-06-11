@@ -12,6 +12,7 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { Skeleton } from '@/components/ui/skeleton';
+import { buyerNavbarAccountLinks } from '@/components/marketing/navbar-account-links';
 import { authRoutes, workspaceRoutes } from '@/config/routes';
 import { hasBuyerWorkspace, hasMarketplaceWorkspace } from '@/lib/permissions';
 import { brand } from '@/lib/marketing/colors';
@@ -27,7 +28,7 @@ export function NavbarAuth({ overlay = false }: NavbarAuthProps) {
   const logout = useLogout();
 
   if (status === 'loading') {
-    return <Skeleton className="mx-5 h-4 w-28" />;
+    return <Skeleton className="h-8 w-20 sm:mx-2 sm:w-28" />;
   }
 
   if (isMeUser(session?.user) && hasMarketplaceWorkspace(session.user)) {
@@ -38,7 +39,7 @@ export function NavbarAuth({ overlay = false }: NavbarAuthProps) {
     const notificationsHref = workspaceRoutes.accountNotifications;
 
     return (
-      <div className="flex items-center gap-2 px-3">
+      <div className="flex items-center gap-1 px-1 sm:gap-2 sm:px-3">
         <NotificationBell
           viewAllHref={notificationsHref}
           triggerClassName={
@@ -53,28 +54,19 @@ export function NavbarAuth({ overlay = false }: NavbarAuthProps) {
             <DropdownMenuTrigger asChild>
               <Button
                 size="sm"
-                className="border-0 hover:opacity-90"
+                className="h-8 border-0 px-2.5 text-xs hover:opacity-90 sm:h-8 sm:px-3 sm:text-sm"
                 style={{ backgroundColor: brand.lime, color: brand.forest }}
               >
-                My account
+                <span className="sm:hidden">Account</span>
+                <span className="hidden sm:inline">My account</span>
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end" className="w-52">
-              <DropdownMenuItem asChild>
-                <Link href={workspaceRoutes.account}>Purchases overview</Link>
-              </DropdownMenuItem>
-              <DropdownMenuItem asChild>
-                <Link href={workspaceRoutes.accountWishlist}>Wishlist</Link>
-              </DropdownMenuItem>
-              <DropdownMenuItem asChild>
-                <Link href={workspaceRoutes.accountOrders}>Orders</Link>
-              </DropdownMenuItem>
-              <DropdownMenuItem asChild>
-                <Link href={workspaceRoutes.accountBookings}>Bookings</Link>
-              </DropdownMenuItem>
-              <DropdownMenuItem asChild>
-                <Link href={workspaceRoutes.accountProfile}>Profile</Link>
-              </DropdownMenuItem>
+              {buyerNavbarAccountLinks.map((link) => (
+                <DropdownMenuItem key={link.href} asChild>
+                  <Link href={link.href}>{link.label}</Link>
+                </DropdownMenuItem>
+              ))}
               <DropdownMenuSeparator />
               <DropdownMenuItem
                 onClick={() => logout.mutate()}
@@ -101,10 +93,11 @@ export function NavbarAuth({ overlay = false }: NavbarAuthProps) {
   return (
     <Link
       href={authRoutes.login}
-      className="px-5 py-3 text-sm font-medium"
+      className="px-2 py-2 text-xs font-medium sm:px-5 sm:py-3 sm:text-sm"
       style={{ color: overlay ? brand.lime : brand.forest }}
     >
-      Sign in / Register
+      <span className="sm:hidden">Sign in</span>
+      <span className="hidden sm:inline">Sign in / Register</span>
     </Link>
   );
 }
