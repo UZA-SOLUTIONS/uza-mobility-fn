@@ -9,6 +9,8 @@ export type PublicPart = {
   name: string;
   slug: string;
   categorySlug: string;
+  compatibleBrands: string[];
+  compatibleModels: string[];
   condition: string;
   priceUsd: number;
   stockQuantity: number;

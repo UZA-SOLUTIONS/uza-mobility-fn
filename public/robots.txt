@@ -1,0 +1,15 @@
+User-agent: *
+Allow: /
+
+Disallow: /my/
+Disallow: /seller/
+Disallow: /operator/
+Disallow: /api/
+Disallow: /login
+Disallow: /register
+Disallow: /forgot-password
+Disallow: /check-email
+Disallow: /auth/
+Disallow: /inquiry/
+
+Sitemap: https://uzamobility.com/sitemap.xml

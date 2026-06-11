@@ -57,19 +57,18 @@ export function buildMarketingFooterColumns(
 
   return [
     { title: 'Vehicles', links: vehicleLinks },
-    { title: 'Spare parts', links: partsLinks },
     {
-      title: 'Company',
+      title: 'For Business',
       links: [
-        { label: 'For Business', href: '/for-business' },
+        { label: 'Fleet solutions', href: '/for-business' },
         { label: 'About UZA Mobility', href: '/about' },
-        { label: 'Blog', href: '/blog' },
       ],
     },
+    { title: 'Spare parts', links: partsLinks },
     {
       title: 'Support',
       links: [
-        { label: 'Contact Us', href: '/about' },
+        { label: 'Contact us', href: '/about' },
         { label: 'User Manuals', href: '/blog' },
         { label: 'Privacy & Policy', href: '/about' },
       ],

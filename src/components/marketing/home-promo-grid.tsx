@@ -65,7 +65,7 @@ export function HomePromoGrid() {
           imageAlt="Business vehicles"
         />
         <PromoCard
-          title="Keep It Moving"
+          title="Accessories & Spare parts"
           description="Drive with confidence. We supply verified replacement parts, batteries, and charging stations for every vehicle we sell."
           cta="Find Accessories"
           href="/vehicles"

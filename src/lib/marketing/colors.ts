@@ -4,4 +4,5 @@ export const brand = {
   lime: '#AAFF47',
   teal: '#356769',
   tealCard: '#356769',
+  white: '#FFFFFF',
 } as const;

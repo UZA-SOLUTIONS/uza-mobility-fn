@@ -24,7 +24,7 @@ export function SellerAccess({ children }: SellerAccessProps) {
             Complete seller onboarding to use this workspace.
           </p>
           <Button asChild variant="outline">
-            <Link href="/account">Back to account</Link>
+            <Link href="/my">Back to account</Link>
           </Button>
         </div>
       </div>

@@ -1,17 +1,31 @@
 import { Skeleton } from '@/components/ui/skeleton';
 import {
   marketingContainer,
+  marketingForestSurface,
   marketingWhiteSurface,
 } from '@/lib/marketing/layout-classes';
 
 export function VehicleDetailHeroSkeleton() {
-  return <Skeleton className="h-[min(650px,85vh)] w-full rounded-none" />;
+  return (
+    <section
+      className={`relative h-[min(650px,85vh)] w-full overflow-hidden ${marketingForestSurface}`}
+      aria-hidden
+    >
+      <Skeleton className="absolute inset-0 bg-white/10" />
+      <div className="relative z-10 flex h-full items-end justify-center px-4 pt-24 pb-10 sm:pt-28 sm:pb-16">
+        <div className="w-full max-w-3xl space-y-3 text-center">
+          <Skeleton className="mx-auto h-10 w-3/4 max-w-lg bg-white/20" />
+          <Skeleton className="mx-auto h-6 w-1/2 max-w-xs bg-white/15" />
+        </div>
+      </div>
+    </section>
+  );
 }
 
 export function VehicleDetailContentSkeleton() {
   return (
     <div
-      className={`${marketingWhiteSurface} py-14`}
+      className={`${marketingWhiteSurface} py-8 sm:py-14`}
       aria-busy
       aria-label="Loading vehicle details"
     >

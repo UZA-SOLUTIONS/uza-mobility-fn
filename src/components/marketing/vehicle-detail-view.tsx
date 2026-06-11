@@ -42,40 +42,36 @@ export function VehicleDetailView({ listing }: VehicleDetailViewProps) {
               videoUrl={resolveListingVideoUrl(listing)}
             />
 
-            {listing.description?.trim() ? (
-              <div className="rounded-2xl border border-[#E9E9E9] p-4 sm:p-8">
-                <h2 className="mb-4 text-lg font-semibold text-[#151515]">
-                  Description
-                </h2>
-                <p className="text-sm leading-relaxed whitespace-pre-wrap text-[#356769]">
-                  {listing.description}
-                </p>
-              </div>
-            ) : null}
+            <div className="rounded-2xl border border-[#E9E9E9] p-4 sm:p-8">
+              {listing.description?.trim() ? (
+                <div>
+                  <h2 className="mb-4 text-lg font-semibold text-[#151515]">
+                    Description
+                  </h2>
+                  <p className="text-sm leading-relaxed whitespace-pre-wrap text-[#356769]">
+                    {listing.description}
+                  </p>
+                </div>
+              ) : null}
 
-            {listing.brochureUrl ? (
-              <div className="rounded-2xl border border-[#E9E9E9] p-4 sm:p-8">
-                <h2 className="mb-3 text-lg font-semibold text-[#151515]">
-                  Vehicle brochure
-                </h2>
-                <p className="mb-4 text-sm text-[#356769]">
-                  Download the full specification sheet for this vehicle.
-                </p>
-                <a
-                  href={listing.brochureUrl}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="inline-flex h-10 items-center gap-2 rounded-full px-5 text-sm font-semibold"
-                  style={{
-                    backgroundColor: brand.lime,
-                    color: brand.forest,
-                  }}
-                >
-                  <Download className="size-4" />
-                  Download brochure
-                </a>
-              </div>
-            ) : null}
+              {listing.brochureUrl ? (
+                <div className="mt-4">
+                  <a
+                    href={listing.brochureUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex h-10 items-center gap-2 rounded-full px-5 text-sm font-semibold"
+                    style={{
+                      backgroundColor: brand.teal,
+                      color: brand.white,
+                    }}
+                  >
+                    <Download className="size-4" />
+                    Download brochure
+                  </a>
+                </div>
+              ) : null}
+            </div>
 
             {extendedSpecGroups.length > 0 ? (
               <VehicleDetailSpecs groups={extendedSpecGroups} />
@@ -151,8 +147,8 @@ export function VehicleDetailView({ listing }: VehicleDetailViewProps) {
               <div className="absolute inset-0 bg-[#17443866]" aria-hidden />
               <div className="relative z-10 flex min-h-[196px] items-end">
                 <div className="space-y-6">
-                  <h2 className="text-2xl font-semibold text-white">
-                    Keep It Moving
+                  <h2 className="text-2xl font-semibold text-white md:text-4xl">
+                    Accessories & Spare parts
                   </h2>
                   <Link
                     href="/spare-parts"

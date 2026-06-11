@@ -19,9 +19,9 @@ export const workspaceRoutes = {
   accountNotifications: '/my/notifications',
   accountWishlist: '/my/wishlist',
   /** @deprecated Use accountProfile */
-  accountSettings: '/account/profile',
-  /** @deprecated Use accountInvoices */
-  accountBilling: '/account/invoices',
+  accountSettings: '/my/profile',
+  /** @deprecated Use accountBookings */
+  accountBilling: '/my/bookings',
   seller: '/seller',
   sellerListings: '/seller/listings',
   sellerParts: '/seller/parts',
