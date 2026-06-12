@@ -23,7 +23,9 @@ import {
 import { workspaceRoutes } from '@/config/routes';
 import { formatUsd } from '@/lib/format';
 import {
-  invoiceStatusHint,
+  invoiceLastRejectionReason,
+  invoicePaymentWasRejected,
+  invoiceStatusHintFor,
   isCancellableByBuyerInvoiceStatus,
   isPayableInvoiceStatus,
   publicListingToSummary,
@@ -157,7 +159,9 @@ export function BuyerInvoicesPanel() {
               </TableRow>
             ) : null}
             {data?.items.map((invoice) => {
-              const hint = invoiceStatusHint(invoice.status, invoice.notes);
+              const hint = invoiceStatusHintFor(invoice);
+              const rejectionReason = invoiceLastRejectionReason(invoice);
+              const needsResubmit = invoicePaymentWasRejected(invoice);
               const payable = isPayableInvoiceStatus(invoice.status);
               const cancellable = isCancellableByBuyerInvoiceStatus(
                 invoice.status,
@@ -176,6 +180,11 @@ export function BuyerInvoicesPanel() {
                       {hint ? (
                         <p className="mt-1 text-xs text-muted-foreground">
                           {hint}
+                        </p>
+                      ) : null}
+                      {rejectionReason ? (
+                        <p className="mt-1 text-xs text-destructive">
+                          {rejectionReason}
                         </p>
                       ) : null}
                     </div>
@@ -222,7 +231,7 @@ export function BuyerInvoicesPanel() {
                           size="sm"
                           onClick={() => onSubmitPayment(invoice.id)}
                         >
-                          Pay
+                          {needsResubmit ? 'Resubmit payment' : 'Pay'}
                         </Button>
                       ) : null}
                       {cancellable ? (

@@ -1,4 +1,4 @@
-import type { InvoiceStatus } from '@/types/commerce';
+import type { AdminPayment, InvoiceStatus } from '@/types/commerce';
 import type { BuyerInvoice } from '@/types/buyer/commerce';
 import { workspaceRoutes } from '@/config/routes';
 import { wasSupersededByOtherBuyerText } from '@/lib/buyer/purchase-conflict';
@@ -53,9 +53,32 @@ export function findActiveBuyerInvoice(
   );
 }
 
+export function latestInvoicePayment(
+  invoice: Pick<BuyerInvoice, 'payments'>,
+): AdminPayment | undefined {
+  return invoice.payments?.[0];
+}
+
+export function invoicePaymentWasRejected(
+  invoice: Pick<BuyerInvoice, 'status' | 'payments'>,
+): boolean {
+  const latest = latestInvoicePayment(invoice);
+  return (
+    latest?.status === 'REJECTED' && isPayableInvoiceStatus(invoice.status)
+  );
+}
+
+export function invoiceLastRejectionReason(
+  invoice: Pick<BuyerInvoice, 'status' | 'payments'>,
+): string | null {
+  if (!invoicePaymentWasRejected(invoice)) return null;
+  return latestInvoicePayment(invoice)?.rejectionReason ?? null;
+}
+
 export function invoiceStatusHint(
   status: InvoiceStatus,
   notes?: string | null,
+  paymentRejected = false,
 ): string | null {
   if (status === 'CANCELLED' && wasSupersededByOtherBuyerText(notes)) {
     return 'Another buyer completed payment first. This invoice was cancelled.';
@@ -63,6 +86,9 @@ export function invoiceStatusHint(
   switch (status) {
     case 'SENT':
     case 'AWAITING_PAYMENT':
+      if (paymentRejected) {
+        return 'Payment rejected — review the reason and submit again.';
+      }
       return 'Submit your payment proof to continue.';
     case 'PARTIALLY_PAID':
       return 'Partial payment received — submit the remaining balance.';
@@ -80,6 +106,16 @@ export function invoiceStatusHint(
     default:
       return null;
   }
+}
+
+export function invoiceStatusHintFor(
+  invoice: Pick<BuyerInvoice, 'status' | 'notes' | 'payments'>,
+): string | null {
+  return invoiceStatusHint(
+    invoice.status,
+    invoice.notes,
+    invoicePaymentWasRejected(invoice),
+  );
 }
 
 export function buyerInvoiceRequestHref(

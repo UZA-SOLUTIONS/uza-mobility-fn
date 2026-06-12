@@ -5,7 +5,12 @@ import { Car, CreditCard, FileText } from 'lucide-react';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
 import { workspaceRoutes } from '@/config/routes';
-import { isPayableInvoiceStatus } from '@/lib/buyer/invoice-flow';
+import { bookingPaymentWasRejected } from '@/lib/buyer/booking-flow';
+import {
+  invoiceLastRejectionReason,
+  invoicePaymentWasRejected,
+  isPayableInvoiceStatus,
+} from '@/lib/buyer/invoice-flow';
 import { useMyInvoices } from '@/queries/buyer';
 import { useMyBookings } from '@/queries/bookings';
 
@@ -40,8 +45,21 @@ export function BuyerNextSteps() {
         invoice.status === 'UNDER_VERIFICATION',
     ) ?? [];
 
+  const rejectedInvoices = invoicePayable.filter((invoice) =>
+    invoicePaymentWasRejected(invoice),
+  );
+  const firstRejectedInvoice = rejectedInvoices[0];
   const firstPayableInvoice = invoicePayable[0];
+  const featuredInvoice = firstRejectedInvoice ?? firstPayableInvoice;
+  const featuredRejectionReason = featuredInvoice
+    ? invoiceLastRejectionReason(featuredInvoice)
+    : null;
   const firstPayableBooking = awaitingPayment?.items[0];
+  const rejectedBookings =
+    awaitingPayment?.items.filter((booking) =>
+      bookingPaymentWasRejected(booking),
+    ) ?? [];
+  const firstRejectedBooking = rejectedBookings[0];
   const hasBookingReview = (underReviewBookings?.items.length ?? 0) > 0;
   const hasInvoiceReview = invoicesUnderReview.length > 0;
 
@@ -56,26 +74,31 @@ export function BuyerNextSteps() {
 
   return (
     <div className="space-y-3">
-      {invoicePayable.length > 0 && firstPayableInvoice ? (
-        <Alert>
+      {invoicePayable.length > 0 && featuredInvoice ? (
+        <Alert variant={firstRejectedInvoice ? 'destructive' : 'default'}>
           <FileText className="size-4" />
           <AlertTitle>
-            {invoicePayable.length === 1
-              ? 'Invoice awaiting payment'
-              : `${invoicePayable.length} invoices awaiting payment`}
+            {firstRejectedInvoice
+              ? rejectedInvoices.length === 1
+                ? 'Invoice payment needs resubmission'
+                : `${rejectedInvoices.length} invoices need payment resubmission`
+              : invoicePayable.length === 1
+                ? 'Invoice awaiting payment'
+                : `${invoicePayable.length} invoices awaiting payment`}
           </AlertTitle>
           <AlertDescription className="flex flex-wrap items-center gap-3">
             <span>
-              {firstPayableInvoice.invoiceNumber}
-              {firstPayableInvoice.vehicleBrand
-                ? ` · ${firstPayableInvoice.vehicleBrand} ${firstPayableInvoice.vehicleModel}`
+              {featuredInvoice.invoiceNumber}
+              {featuredInvoice.vehicleBrand
+                ? ` · ${featuredInvoice.vehicleBrand} ${featuredInvoice.vehicleModel}`
                 : ''}
+              {featuredRejectionReason ? ` — ${featuredRejectionReason}` : ''}
             </span>
             <Button size="sm" asChild>
               <Link
-                href={`${workspaceRoutes.accountInvoices}?highlight=${firstPayableInvoice.id}&payment=${firstPayableInvoice.id}`}
+                href={`${workspaceRoutes.accountInvoices}?highlight=${featuredInvoice.id}&payment=${featuredInvoice.id}`}
               >
-                Submit payment
+                {firstRejectedInvoice ? 'Resubmit payment' : 'Submit payment'}
               </Link>
             </Button>
             <Button size="sm" variant="outline" asChild>
@@ -105,25 +128,35 @@ export function BuyerNextSteps() {
       ) : null}
 
       {(awaitingPayment?.meta.total ?? 0) > 0 && firstPayableBooking ? (
-        <Alert>
+        <Alert variant={firstRejectedBooking ? 'destructive' : 'default'}>
           <Car className="size-4" />
           <AlertTitle>
-            {awaitingPayment?.meta.total === 1
-              ? 'Booking awaiting payment'
-              : `${awaitingPayment?.meta.total} bookings awaiting payment`}
+            {firstRejectedBooking
+              ? rejectedBookings.length === 1
+                ? 'Booking payment needs resubmission'
+                : `${rejectedBookings.length} bookings need payment resubmission`
+              : awaitingPayment?.meta.total === 1
+                ? 'Booking awaiting payment'
+                : `${awaitingPayment?.meta.total} bookings awaiting payment`}
           </AlertTitle>
           <AlertDescription className="flex flex-wrap items-center gap-3">
             <span>
-              {firstPayableBooking.bookingNumber}
-              {firstPayableBooking.listing?.listingTitle
-                ? ` · ${firstPayableBooking.listing.listingTitle}`
+              {(firstRejectedBooking ?? firstPayableBooking).bookingNumber}
+              {(firstRejectedBooking ?? firstPayableBooking).listing
+                ?.listingTitle
+                ? ` · ${(firstRejectedBooking ?? firstPayableBooking).listing?.listingTitle}`
+                : ''}
+              {firstRejectedBooking?.rejectionReason
+                ? ` — ${firstRejectedBooking.rejectionReason}`
                 : ''}
             </span>
             <Button size="sm" asChild>
               <Link
-                href={`${workspaceRoutes.accountBookings}?bookingId=${firstPayableBooking.id}`}
+                href={`${workspaceRoutes.accountBookings}?bookingId=${(firstRejectedBooking ?? firstPayableBooking).id}`}
               >
-                Submit booking payment
+                {firstRejectedBooking
+                  ? 'Resubmit booking payment'
+                  : 'Submit booking payment'}
               </Link>
             </Button>
             <Button size="sm" variant="outline" asChild>

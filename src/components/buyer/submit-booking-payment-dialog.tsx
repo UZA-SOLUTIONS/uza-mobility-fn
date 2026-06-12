@@ -10,6 +10,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog';
+import { bookingPaymentWasRejected } from '@/lib/buyer/booking-flow';
 import { formatUsd } from '@/lib/format';
 import { useSubmitBookingPayment } from '@/queries/bookings';
 import type { VehicleBooking } from '@/types/buyer/bookings';
@@ -66,11 +67,21 @@ export function SubmitBookingPaymentDialog({
         }}
       >
         <DialogHeader>
-          <DialogTitle>Submit booking payment</DialogTitle>
+          <DialogTitle>
+            {booking && bookingPaymentWasRejected(booking)
+              ? 'Resubmit booking payment'
+              : 'Submit booking payment'}
+          </DialogTitle>
         </DialogHeader>
 
         {booking ? (
           <div className="space-y-4">
+            {booking.rejectionReason ? (
+              <div className="rounded-md border border-destructive/30 bg-destructive/5 p-3 text-sm text-destructive">
+                <p className="font-medium">Previous payment not verified</p>
+                <p className="mt-1">{booking.rejectionReason}</p>
+              </div>
+            ) : null}
             <div className="rounded-md border bg-muted/30 p-3 text-sm">
               <p className="font-medium">
                 {booking.listing?.listingTitle ?? booking.bookingNumber}
@@ -111,7 +122,11 @@ export function SubmitBookingPaymentDialog({
             disabled={submit.isPending || !booking || proofs.length === 0}
             onClick={onSubmit}
           >
-            {submit.isPending ? 'Submitting…' : 'Submit payment'}
+            {submit.isPending
+              ? 'Submitting…'
+              : booking && bookingPaymentWasRejected(booking)
+                ? 'Resubmit payment'
+                : 'Submit payment'}
           </Button>
         </DialogFooter>
       </DialogContent>

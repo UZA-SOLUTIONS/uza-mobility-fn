@@ -12,12 +12,18 @@ import { workspaceRoutes } from '@/config/routes';
 import { brand } from '@/lib/marketing/colors';
 import { formatUsd } from '@/lib/format';
 import {
+  bookingPaymentWasRejected,
+  bookingStatusHint,
   findActiveBuyerBooking,
+  isBookingPaymentSubmittable,
   isCancellableBuyerBooking,
 } from '@/lib/buyer/booking-flow';
 import {
   buyerInvoiceRequestHref,
   findActiveBuyerInvoice,
+  invoiceLastRejectionReason,
+  invoicePaymentWasRejected,
+  invoiceStatusHintFor,
   isPayableInvoiceStatus,
 } from '@/lib/buyer/invoice-flow';
 import { findSupersededBooking } from '@/lib/buyer/purchase-conflict';
@@ -182,6 +188,9 @@ export function VehicleDetailBookingAction({
   }
 
   if (activeBooking) {
+    const bookingHint = bookingStatusHint(activeBooking);
+    const needsResubmit = bookingPaymentWasRejected(activeBooking);
+
     return (
       <>
         <div className="mt-8 space-y-3">
@@ -192,11 +201,19 @@ export function VehicleDetailBookingAction({
             <p className="mt-1 text-[#356769] capitalize">
               {activeBooking.status.replaceAll('_', ' ').toLowerCase()}
             </p>
+            {bookingHint ? (
+              <p className="mt-1 text-[#356769]">{bookingHint}</p>
+            ) : null}
+            {activeBooking.rejectionReason ? (
+              <p className="mt-1 text-destructive">
+                {activeBooking.rejectionReason}
+              </p>
+            ) : null}
             <p className="mt-2 text-[#356769]">
               Booking fee: {formatUsd(activeBooking.bookingFeeUsd)}
             </p>
           </div>
-          {isCancellableBuyerBooking(activeBooking.status) ? (
+          {isBookingPaymentSubmittable(activeBooking) ? (
             <>
               <Button
                 asChild
@@ -206,18 +223,22 @@ export function VehicleDetailBookingAction({
                 <Link
                   href={`${workspaceRoutes.accountBookings}?bookingId=${activeBooking.id}`}
                 >
-                  Submit booking payment
+                  {needsResubmit
+                    ? 'Resubmit booking payment'
+                    : 'Submit booking payment'}
                 </Link>
               </Button>
-              <Button
-                type="button"
-                variant="outline"
-                className="h-10 w-full rounded-full text-destructive hover:text-destructive"
-                disabled={cancelBooking.isPending}
-                onClick={() => setCancelTarget(activeBooking)}
-              >
-                Cancel booking
-              </Button>
+              {isCancellableBuyerBooking(activeBooking.status) ? (
+                <Button
+                  type="button"
+                  variant="outline"
+                  className="h-10 w-full rounded-full text-destructive hover:text-destructive"
+                  disabled={cancelBooking.isPending}
+                  onClick={() => setCancelTarget(activeBooking)}
+                >
+                  Cancel booking
+                </Button>
+              ) : null}
             </>
           ) : (
             <Button
@@ -254,6 +275,8 @@ export function VehicleDetailBookingAction({
 
   if (activeInvoice) {
     const payable = isPayableInvoiceStatus(activeInvoice.status);
+    const needsResubmit = invoicePaymentWasRejected(activeInvoice);
+    const invoiceHint = invoiceStatusHintFor(activeInvoice);
 
     return (
       <div className="mt-8 space-y-3">
@@ -264,6 +287,14 @@ export function VehicleDetailBookingAction({
           <p className="mt-1 text-[#356769] capitalize">
             {activeInvoice.status.replaceAll('_', ' ').toLowerCase()}
           </p>
+          {invoiceHint ? (
+            <p className="mt-1 text-[#356769]">{invoiceHint}</p>
+          ) : null}
+          {invoiceLastRejectionReason(activeInvoice) ? (
+            <p className="mt-1 text-destructive">
+              {invoiceLastRejectionReason(activeInvoice)}
+            </p>
+          ) : null}
           <p className="mt-2 text-[#356769]">
             Amount: {formatUsd(activeInvoice.totalAmountUsd)}
           </p>
@@ -276,7 +307,11 @@ export function VehicleDetailBookingAction({
           <Link
             href={`${workspaceRoutes.accountInvoices}?highlight=${activeInvoice.id}${payable ? `&payment=${activeInvoice.id}` : ''}`}
           >
-            {payable ? 'Submit payment' : 'View my invoice'}
+            {payable
+              ? needsResubmit
+                ? 'Resubmit payment'
+                : 'Submit payment'
+              : 'View my invoice'}
           </Link>
         </Button>
       </div>

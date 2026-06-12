@@ -45,5 +45,46 @@ export function filterActiveBuyerBookings(
 export function findActiveBuyerBooking(
   bookings: VehicleBooking[] | undefined,
 ): VehicleBooking | null {
-  return filterActiveBuyerBookings(bookings)[0] ?? null;
+  const active = filterActiveBuyerBookings(bookings)[0];
+  if (active) return active;
+  return bookings?.find((row) => bookingPaymentWasRejected(row)) ?? null;
+}
+
+export function bookingPaymentWasRejected(
+  booking: Pick<VehicleBooking, 'status' | 'rejectionReason'>,
+): boolean {
+  if (!booking.rejectionReason) return false;
+  return booking.status === 'AWAITING_PAYMENT' || booking.status === 'REJECTED';
+}
+
+export function isBookingPaymentSubmittable(
+  booking: Pick<VehicleBooking, 'status' | 'rejectionReason'>,
+): boolean {
+  return (
+    booking.status === 'AWAITING_PAYMENT' || bookingPaymentWasRejected(booking)
+  );
+}
+
+export function bookingStatusHint(
+  booking: Pick<VehicleBooking, 'status' | 'rejectionReason'>,
+): string | null {
+  if (bookingPaymentWasRejected(booking)) {
+    return 'Payment rejected — review the reason and submit again.';
+  }
+  switch (booking.status) {
+    case 'AWAITING_PAYMENT':
+      return 'Submit your booking fee payment proof to continue.';
+    case 'PAYMENT_SUBMITTED':
+    case 'UNDER_VERIFICATION':
+      return 'Payment under review — we will notify you when confirmed.';
+    case 'CONFIRMED':
+      return 'Booking confirmed — we will follow up on your import.';
+    case 'REJECTED':
+      return 'This booking is no longer active.';
+    case 'CANCELLED':
+    case 'EXPIRED':
+      return 'This booking is no longer active.';
+    default:
+      return null;
+  }
 }

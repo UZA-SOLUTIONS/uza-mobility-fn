@@ -25,6 +25,10 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
+import {
+  invoiceLastRejectionReason,
+  invoicePaymentWasRejected,
+} from '@/lib/buyer/invoice-flow';
 import { formatUsd } from '@/lib/format';
 import { useMyInvoices, useSubmitPayment } from '@/queries/buyer';
 import { submitPaymentSchema, type SubmitPaymentInput } from '@/schemas/buyer';
@@ -60,6 +64,12 @@ export function SubmitPaymentDialog({
   const selectedInvoice = invoices?.items.find(
     (invoice) => invoice.id === selectedInvoiceId,
   );
+  const needsResubmit = selectedInvoice
+    ? invoicePaymentWasRejected(selectedInvoice)
+    : false;
+  const rejectionReason = selectedInvoice
+    ? invoiceLastRejectionReason(selectedInvoice)
+    : null;
 
   useEffect(() => {
     if (!open) return;
@@ -103,9 +113,17 @@ export function SubmitPaymentDialog({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-h-[90vh] overflow-y-auto sm:max-w-lg">
         <DialogHeader>
-          <DialogTitle>Submit payment proof</DialogTitle>
+          <DialogTitle>
+            {needsResubmit ? 'Resubmit payment proof' : 'Submit payment proof'}
+          </DialogTitle>
         </DialogHeader>
         <form onSubmit={onSubmit} className="space-y-4">
+          {rejectionReason ? (
+            <div className="rounded-md border border-destructive/30 bg-destructive/5 p-3 text-sm text-destructive">
+              <p className="font-medium">Previous payment not verified</p>
+              <p className="mt-1">{rejectionReason}</p>
+            </div>
+          ) : null}
           <div className="space-y-1.5">
             <Label>Invoice</Label>
             <Select
@@ -188,7 +206,11 @@ export function SubmitPaymentDialog({
               type="submit"
               disabled={submit.isPending || (invoices?.items.length ?? 0) === 0}
             >
-              {submit.isPending ? 'Submitting…' : 'Submit payment'}
+              {submit.isPending
+                ? 'Submitting…'
+                : needsResubmit
+                  ? 'Resubmit payment'
+                  : 'Submit payment'}
             </Button>
           </DialogFooter>
         </form>

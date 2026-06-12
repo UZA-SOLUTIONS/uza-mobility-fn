@@ -60,7 +60,7 @@ export function BuyerPaymentsPanel() {
       <div className="flex flex-wrap items-start justify-between gap-4">
         <PageHeader
           title="My payments"
-          description="Payment proofs you submitted for invoice settlement."
+          description="Your latest payment submission per invoice. Older rejected attempts are hidden after you resubmit."
         />
         <Button
           onClick={() => {
@@ -86,13 +86,14 @@ export function BuyerPaymentsPanel() {
               <TableHead>Amount</TableHead>
               <TableHead>Status</TableHead>
               <TableHead>Submitted</TableHead>
+              <TableHead className="text-right">Actions</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
             {isLoading
               ? Array.from({ length: 4 }).map((_, i) => (
                   <TableRow key={i}>
-                    <TableCell colSpan={4}>
+                    <TableCell colSpan={5}>
                       <Skeleton className="h-8 w-full" />
                     </TableCell>
                   </TableRow>
@@ -101,7 +102,7 @@ export function BuyerPaymentsPanel() {
             {!isLoading && (data?.items.length ?? 0) === 0 ? (
               <TableRow>
                 <TableCell
-                  colSpan={4}
+                  colSpan={5}
                   className="py-8 text-center text-muted-foreground"
                 >
                   No payment submissions yet. Submit proof after paying an
@@ -135,6 +136,19 @@ export function BuyerPaymentsPanel() {
                     <StatusBadge status={payment.status} />
                   </TableCell>
                   <TableCell>{formatDate(payment.createdAt)}</TableCell>
+                  <TableCell className="text-right">
+                    {payment.status === 'REJECTED' ? (
+                      <Button
+                        size="sm"
+                        onClick={() => {
+                          setDefaultInvoiceId(payment.invoiceId);
+                          setSubmitOpen(true);
+                        }}
+                      >
+                        Resubmit payment
+                      </Button>
+                    ) : null}
+                  </TableCell>
                 </TableRow>
               );
             })}
