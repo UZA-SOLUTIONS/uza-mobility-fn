@@ -88,6 +88,17 @@ export function VehicleDetailView({ listing }: VehicleDetailViewProps) {
               </p>
 
               <div className="mt-4 flex flex-wrap items-center gap-2">
+                {listing.displayBadge ? (
+                  <span
+                    className="rounded-full px-3 py-1 text-xs font-semibold"
+                    style={{
+                      backgroundColor: brand.lime,
+                      color: brand.forest,
+                    }}
+                  >
+                    {listing.displayBadge}
+                  </span>
+                ) : null}
                 {listing.isFullOption ? (
                   <span
                     className="rounded-full px-3 py-1 text-xs font-semibold"

@@ -1,6 +1,5 @@
-import { redirect } from 'next/navigation';
-import { workspaceRoutes } from '@/config/routes';
+import { BuyerPaymentsPanel } from '@/components/buyer/payments-panel';
 
 export default function MyPaymentsPage() {
-  redirect(workspaceRoutes.accountBookings);
+  return <BuyerPaymentsPanel />;
 }

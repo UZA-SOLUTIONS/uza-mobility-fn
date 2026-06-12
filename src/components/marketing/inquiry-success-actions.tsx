@@ -10,16 +10,18 @@ type InquirySuccessActionsProps = {
   email: string;
   registerHref: string;
   loginHref?: string;
+  returnTo?: string;
 };
 
 export function InquirySuccessActions({
   email,
   registerHref,
   loginHref = authRoutes.login,
+  returnTo = workspaceRoutes.account,
 }: InquirySuccessActionsProps) {
   return (
     <div className="space-y-4">
-      <GoogleSignInButton returnTo={workspaceRoutes.account} />
+      <GoogleSignInButton returnTo={returnTo} />
 
       <div className="flex flex-col gap-2 pt-2">
         <Button

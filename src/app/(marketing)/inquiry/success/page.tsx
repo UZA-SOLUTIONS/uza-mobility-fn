@@ -5,6 +5,7 @@ import { Spinner } from '@/components/ui/spinner';
 import { AuthFormCard } from '@/components/auth/auth-form-card';
 import { InquirySuccessActions } from '@/components/marketing/inquiry-success-actions';
 import { authRoutes, workspaceRoutes } from '@/config/routes';
+import { buyerInvoiceRequestHref } from '@/lib/buyer/invoice-flow';
 import {
   buildRegisterHref,
   parseRegisterPrefill,
@@ -21,6 +22,9 @@ type InquirySuccessPageProps = {
     quote?: string;
     name?: string;
     phone?: string;
+    intent?: string;
+    listingId?: string;
+    slug?: string;
   }>;
 };
 
@@ -30,25 +34,52 @@ export default async function InquirySuccessPage({
   const params = await searchParams;
   const email = params.email?.trim() ?? '';
   const quote = params.quote?.trim() ?? '';
+  const isBuy = params.intent?.toLowerCase() === 'buy';
+  const listingId = params.listingId?.trim() ?? '';
+  const slug = params.slug?.trim() ?? '';
+  const postAuthHref = (() => {
+    if (isBuy && listingId && slug) {
+      return buyerInvoiceRequestHref({ id: listingId, slug });
+    }
+    if (!isBuy && slug) {
+      return `/vehicles/${slug}`;
+    }
+    return workspaceRoutes.account;
+  })();
+
   const prefill = parseRegisterPrefill({
     get: (key) => {
       const value = params[key as keyof typeof params];
       return typeof value === 'string' ? value : null;
     },
   });
-  const registerHref = buildRegisterHref(prefill);
-  const loginHref = email
-    ? `${authRoutes.login}?email=${encodeURIComponent(email)}`
-    : authRoutes.login;
+  const registerHref = buildRegisterHref(prefill, postAuthHref);
+  const loginHref = (() => {
+    const loginParams = new URLSearchParams();
+    if (email) loginParams.set('email', email);
+    if (postAuthHref.startsWith('/')) {
+      loginParams.set('callbackUrl', postAuthHref);
+    }
+    const query = loginParams.toString();
+    return query ? `${authRoutes.login}?${query}` : authRoutes.login;
+  })();
 
-  const benefits = [
-    'Track your inquiry status',
-    'Save vehicles to your wishlist',
-    'Book vehicles faster when you are ready to buy',
-  ];
+  const benefits = isBuy
+    ? [
+        'Request your proforma invoice in My invoices',
+        'Upload payment proof for finance review',
+        'Track purchase status until the vehicle is confirmed',
+      ]
+    : [
+        'Track your booking inquiry',
+        'Save vehicles to your wishlist',
+        'Submit booking payments faster from your account',
+      ];
 
   return (
-    <div className={`${marketingMintSurface} py-12 sm:py-20`}>
+    <div
+      className={`${marketingMintSurface} flex flex-1 flex-col py-12 sm:py-20`}
+    >
       <div className={marketingContainer}>
         <div className="mx-auto max-w-xl space-y-8">
           <div className="space-y-3 text-center">
@@ -57,10 +88,12 @@ export default async function InquirySuccessPage({
               style={{ color: brand.forest }}
             />
             <h1 className="text-3xl font-semibold text-[#151515]">
-              Inquiry received
+              {isBuy ? 'Purchase request received' : 'Booking request received'}
             </h1>
             <p className="text-[#356769]">
-              Your inquiry has been received. Check your email for your quote.
+              {isBuy
+                ? 'Check your email for the vehicle price and payment instructions.'
+                : 'Check your email for the vehicle price and booking fee to confirm your reservation.'}
               {quote ? (
                 <>
                   {' '}
@@ -74,11 +107,14 @@ export default async function InquirySuccessPage({
             <div className="space-y-4">
               <div>
                 <h2 className="text-xl font-semibold text-[#151515]">
-                  Track your inquiry and get updates
+                  {isBuy
+                    ? 'Create an account to submit payment'
+                    : 'Track your booking and get updates'}
                 </h2>
                 <p className="mt-1 text-sm text-[#356769]">
-                  Create a free buyer account to follow this vehicle and move
-                  faster when you are ready to purchase.
+                  {isBuy
+                    ? 'A free buyer account lets you request your invoice, upload payment proof, and follow verification until your purchase is confirmed.'
+                    : 'Create a free buyer account to follow this vehicle and complete your booking payment when you are ready.'}
                 </p>
               </div>
 
@@ -102,6 +138,7 @@ export default async function InquirySuccessPage({
                   email={email}
                   registerHref={registerHref}
                   loginHref={loginHref}
+                  returnTo={postAuthHref}
                 />
               </Suspense>
 
@@ -119,11 +156,11 @@ export default async function InquirySuccessPage({
           <p className="text-center text-xs text-[#356769]">
             Already have an account?{' '}
             <Link
-              href={workspaceRoutes.account}
+              href={loginHref}
               className="font-medium"
               style={{ color: brand.forest }}
             >
-              Go to My account
+              Sign in to continue
             </Link>
           </p>
         </div>

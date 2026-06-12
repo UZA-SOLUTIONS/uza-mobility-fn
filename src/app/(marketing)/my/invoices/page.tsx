@@ -1,6 +1,5 @@
-import { redirect } from 'next/navigation';
-import { workspaceRoutes } from '@/config/routes';
+import { BuyerInvoicesPanel } from '@/components/buyer/invoices-panel';
 
 export default function MyInvoicesPage() {
-  redirect(workspaceRoutes.accountBookings);
+  return <BuyerInvoicesPanel />;
 }

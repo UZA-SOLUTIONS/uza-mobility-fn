@@ -53,13 +53,19 @@ export function parseRegisterPrefill(
   };
 }
 
-export function buildRegisterHref(prefill: RegisterPrefill): string {
+export function buildRegisterHref(
+  prefill: RegisterPrefill,
+  callbackUrl?: string,
+): string {
   const params = new URLSearchParams();
 
   if (prefill.email) params.set('email', prefill.email);
   if (prefill.firstName) params.set('firstName', prefill.firstName);
   if (prefill.lastName) params.set('lastName', prefill.lastName);
   if (prefill.phone) params.set('phone', prefill.phone);
+  if (callbackUrl?.startsWith('/')) {
+    params.set('callbackUrl', callbackUrl);
+  }
 
   const query = params.toString();
   return query ? `${authRoutes.register}?${query}` : authRoutes.register;

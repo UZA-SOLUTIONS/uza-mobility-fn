@@ -1,24 +1,49 @@
-import { MarketingPageHero } from '@/components/marketing/marketing-page-hero';
-import {
-  marketingProseSection,
-  marketingWhiteSurface,
-} from '@/lib/marketing/layout-classes';
+import { ForBusinessAdvantageSection } from '@/components/marketing/for-business/for-business-advantage-section';
+import { ForBusinessContactSection } from '@/components/marketing/for-business/for-business-contact-section';
+import { ForBusinessHero } from '@/components/marketing/for-business/for-business-hero';
+import { ForBusinessIndustrySection } from '@/components/marketing/for-business/for-business-industry-section';
+import { browseListings } from '@/lib/api/marketplace';
+import { getPublicCategories } from '@/lib/api/catalog';
+import { FOR_BUSINESS_INDUSTRY_CARDS } from '@/lib/marketing/for-business';
+import type { PublicListing } from '@/types/marketplace/public-listing';
 
-export default function ForBusinessPage() {
+async function loadIndustryListingImages() {
+  const listingByCategorySlug: Record<string, PublicListing | undefined> = {};
+
+  await Promise.all(
+    FOR_BUSINESS_INDUSTRY_CARDS.map(async (card) => {
+      if (listingByCategorySlug[card.categorySlug]) return;
+
+      try {
+        const result = await browseListings({
+          category: card.categorySlug,
+          limit: 1,
+          page: 1,
+        });
+        listingByCategorySlug[card.categorySlug] = result.items[0];
+      } catch {
+        listingByCategorySlug[card.categorySlug] = undefined;
+      }
+    }),
+  );
+
+  return listingByCategorySlug;
+}
+
+export default async function ForBusinessPage() {
+  const [categories, listingByCategorySlug] = await Promise.all([
+    getPublicCategories().catch(() => []),
+    loadIndustryListingImages(),
+  ]);
+
   return (
     <>
-      <MarketingPageHero
-        title="For Business"
-        description="Programs for buyers, sellers, and fleet partners."
+      <ForBusinessHero />
+      <ForBusinessAdvantageSection />
+      <ForBusinessIndustrySection
+        listingByCategorySlug={listingByCategorySlug}
       />
-      <div className={marketingWhiteSurface}>
-        <div className={`${marketingProseSection} text-[#356769]`}>
-          <p className="text-base leading-relaxed">
-            Contact us for fleet quotes, seller onboarding, and financing
-            facilitation. Detailed pricing will be published here soon.
-          </p>
-        </div>
-      </div>
+      <ForBusinessContactSection categories={categories} />
     </>
   );
 }

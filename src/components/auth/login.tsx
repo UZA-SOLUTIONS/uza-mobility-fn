@@ -160,7 +160,14 @@ export function Login() {
 
         <p className={authFooterLinkClassName}>
           Don&apos;t have an account?{' '}
-          <Link href={authRoutes.register} className={authAccentLinkClassName}>
+          <Link
+            href={
+              callbackUrl.startsWith('/')
+                ? `${authRoutes.register}?callbackUrl=${encodeURIComponent(callbackUrl)}`
+                : authRoutes.register
+            }
+            className={authAccentLinkClassName}
+          >
             Register here
           </Link>
         </p>

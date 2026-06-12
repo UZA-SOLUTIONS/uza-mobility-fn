@@ -18,10 +18,7 @@ export function canAccessWorkspacePath(me: MeUser, path: string): boolean {
   if (isStaffOnlyAccount(me)) {
     return false;
   }
-  if (
-    pathStartsWith(path, workspaceRoutes.account) ||
-    pathStartsWith(path, '/account')
-  ) {
+  if (pathStartsWith(path, workspaceRoutes.account)) {
     return hasBuyerWorkspace(me.permissions, me.roles);
   }
   if (pathStartsWith(path, workspaceRoutes.seller)) {

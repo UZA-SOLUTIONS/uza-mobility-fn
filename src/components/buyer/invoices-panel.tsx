@@ -48,6 +48,7 @@ export function BuyerInvoicesPanel() {
   const slugParam = searchParams.get('slug');
   const shouldOpenRequest = searchParams.get('request') === '1';
   const highlightId = searchParams.get('highlight');
+  const paymentParam = searchParams.get('payment');
 
   const [filters, setFilters] = useState<BuyerInvoicesFilters>({
     page: 1,
@@ -68,6 +69,12 @@ export function BuyerInvoicesPanel() {
   const downloadDoc = useDownloadInvoiceDocument();
   const cancelReservation = useCancelMyInvoice();
   const { data, isLoading, isError, error } = useMyInvoices(filters);
+
+  useEffect(() => {
+    if (!paymentParam) return;
+    setPaymentInvoiceId(paymentParam);
+    setPaymentOpen(true);
+  }, [paymentParam]);
 
   useEffect(() => {
     if (!shouldOpenRequest || !listingIdParam) return;

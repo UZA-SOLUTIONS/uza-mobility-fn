@@ -15,6 +15,11 @@ import {
   findActiveBuyerBooking,
   isCancellableBuyerBooking,
 } from '@/lib/buyer/booking-flow';
+import {
+  buyerInvoiceRequestHref,
+  findActiveBuyerInvoice,
+  isPayableInvoiceStatus,
+} from '@/lib/buyer/invoice-flow';
 import { findSupersededBooking } from '@/lib/buyer/purchase-conflict';
 import { VehiclePurchaseUnavailable } from '@/components/marketing/vehicle-purchase-unavailable';
 import { useAppRouter } from '@/lib/navigation/use-app-router';
@@ -24,10 +29,17 @@ import {
   useMyBookings,
   useRequestVehicleBooking,
 } from '@/queries/bookings';
-import { useBuyerProfile } from '@/queries/buyer';
+import {
+  useBuyerProfile,
+  useMyInvoices,
+  useRequestInvoice,
+} from '@/queries/buyer';
 import { isMeUser } from '@/types/auth/me-user';
 import type { PublicListing } from '@/types/marketplace/public-listing';
 import type { VehicleBooking } from '@/types/buyer/bookings';
+import type { InquiryInput } from '@/schemas/inquiry';
+
+type GuestInquiryVariant = InquiryInput['intent'] | null;
 
 type VehicleDetailBookingActionProps = {
   listing: PublicListing;
@@ -43,13 +55,17 @@ export function VehicleDetailBookingAction({
     status === 'authenticated' && Boolean(me?.roles.includes('BUYER'));
 
   const { data: feeQuote } = useBookingFeeQuote();
-  const request = useRequestVehicleBooking();
+  const requestBooking = useRequestVehicleBooking();
+  const requestInvoice = useRequestInvoice();
   const cancelBooking = useCancelBooking();
   const [cancelTarget, setCancelTarget] = useState<VehicleBooking | null>(null);
-  const [inquiryOpen, setInquiryOpen] = useState(false);
+  const [inquiryVariant, setInquiryVariant] =
+    useState<GuestInquiryVariant>(null);
 
-  const bookingReturnHref = `/vehicles/${listing.slug}`;
-  const profileHref = `${workspaceRoutes.accountProfile}?returnTo=${encodeURIComponent(bookingReturnHref)}`;
+  const vehicleHref = `/vehicles/${listing.slug}`;
+  const buyReturnHref = buyerInvoiceRequestHref(listing);
+  const profileHrefForBuy = `${workspaceRoutes.accountProfile}?returnTo=${encodeURIComponent(buyReturnHref)}`;
+  const profileHrefForBook = `${workspaceRoutes.accountProfile}?returnTo=${encodeURIComponent(vehicleHref)}`;
 
   const {
     data: myBookings,
@@ -65,14 +81,29 @@ export function VehicleDetailBookingAction({
     isAuthenticatedBuyer,
   );
 
+  const {
+    data: myInvoices,
+    isLoading: invoicesLoading,
+    isFetched: invoicesFetched,
+  } = useMyInvoices(
+    { listingId: listing.id, pendingPurchase: true, limit: 5 },
+    isAuthenticatedBuyer,
+  );
+
   const { data: buyerProfile, isLoading: profileLoading } =
     useBuyerProfile(isAuthenticatedBuyer);
 
   const buyerDataReady =
-    !isAuthenticatedBuyer || !bookingsLoading || bookingsFetched;
+    !isAuthenticatedBuyer ||
+    ((!bookingsLoading || bookingsFetched) &&
+      (!invoicesLoading || invoicesFetched));
 
   const activeBooking = isAuthenticatedBuyer
     ? findActiveBuyerBooking(myBookings?.items)
+    : null;
+
+  const activeInvoice = isAuthenticatedBuyer
+    ? findActiveBuyerInvoice(myInvoices?.items)
     : null;
 
   const supersededBooking = isAuthenticatedBuyer
@@ -110,47 +141,42 @@ export function VehicleDetailBookingAction({
         <div className="mt-8 space-y-2">
           <Button
             type="button"
-            onClick={() => setInquiryOpen(true)}
+            onClick={() => setInquiryVariant('BUY')}
             className="h-10 w-full rounded-full text-sm font-semibold text-white"
             style={{ backgroundColor: brand.forest }}
+          >
+            Buy This Vehicle
+          </Button>
+          <Button
+            type="button"
+            variant="outline"
+            onClick={() => setInquiryVariant('BOOK')}
+            className="h-10 w-full rounded-full border text-sm font-semibold"
+            style={{ borderColor: brand.forest, color: brand.forest }}
           >
             Book This Vehicle
           </Button>
           <p className="text-center text-xs text-[#356769]">
-            Share your details to receive a quote and next steps for this
-            vehicle.
+            Share your details by email. Create a free account afterward to
+            submit payment and track your purchase or booking.
           </p>
         </div>
         <VehicleInquiryDialog
           listing={listing}
-          open={inquiryOpen}
-          onOpenChange={setInquiryOpen}
-          variant="book"
+          open={inquiryVariant !== null}
+          onOpenChange={(open) => {
+            if (!open) setInquiryVariant(null);
+          }}
+          variant={inquiryVariant ?? 'BOOK'}
         />
       </>
     );
   }
 
-  if (supersededBooking) {
+  if (supersededBooking && !activeInvoice) {
     return (
       <div className="mt-8">
         <VehiclePurchaseUnavailable variant="superseded" />
-      </div>
-    );
-  }
-
-  if (listing.isBooked && !activeBooking) {
-    return (
-      <div className="mt-8">
-        <VehiclePurchaseUnavailable variant="booked" />
-      </div>
-    );
-  }
-
-  if (listing.status === 'SOLD' && !activeBooking) {
-    return (
-      <div className="mt-8">
-        <VehiclePurchaseUnavailable variant="sold" />
       </div>
     );
   }
@@ -226,6 +252,53 @@ export function VehicleDetailBookingAction({
     );
   }
 
+  if (activeInvoice) {
+    const payable = isPayableInvoiceStatus(activeInvoice.status);
+
+    return (
+      <div className="mt-8 space-y-3">
+        <div className="rounded-xl border border-[#E9E9E9] bg-[#f8faf9] p-4 text-sm">
+          <p className="font-medium text-[#151515]">
+            Invoice {activeInvoice.invoiceNumber}
+          </p>
+          <p className="mt-1 text-[#356769] capitalize">
+            {activeInvoice.status.replaceAll('_', ' ').toLowerCase()}
+          </p>
+          <p className="mt-2 text-[#356769]">
+            Amount: {formatUsd(activeInvoice.totalAmountUsd)}
+          </p>
+        </div>
+        <Button
+          asChild
+          className="h-10 w-full rounded-full"
+          style={{ backgroundColor: brand.forest }}
+        >
+          <Link
+            href={`${workspaceRoutes.accountInvoices}?highlight=${activeInvoice.id}${payable ? `&payment=${activeInvoice.id}` : ''}`}
+          >
+            {payable ? 'Submit payment' : 'View my invoice'}
+          </Link>
+        </Button>
+      </div>
+    );
+  }
+
+  if (listing.isBooked) {
+    return (
+      <div className="mt-8">
+        <VehiclePurchaseUnavailable variant="booked" />
+      </div>
+    );
+  }
+
+  if (listing.status === 'SOLD') {
+    return (
+      <div className="mt-8">
+        <VehiclePurchaseUnavailable variant="sold" />
+      </div>
+    );
+  }
+
   if (profileLoading) {
     return (
       <div className="mt-8 flex h-10 w-full items-center justify-center">
@@ -241,20 +314,42 @@ export function VehicleDetailBookingAction({
       <div className="mt-8 space-y-2">
         <Button
           asChild
-          className="h-10 w-full rounded-full"
+          className="h-10 w-full rounded-full text-sm font-semibold text-white"
           style={{ backgroundColor: brand.forest }}
         >
-          <Link href={profileHref}>Complete buyer profile to book</Link>
+          <Link href={profileHrefForBuy}>Complete profile to buy</Link>
+        </Button>
+        <Button
+          asChild
+          variant="outline"
+          className="h-10 w-full rounded-full border text-sm font-semibold"
+          style={{ borderColor: brand.forest, color: brand.forest }}
+        >
+          <Link href={profileHrefForBook}>Complete profile to book</Link>
         </Button>
         <p className="text-center text-xs text-[#356769]">
-          Complete your buyer profile before booking this vehicle.
+          Complete your buyer profile before purchasing or booking this vehicle.
         </p>
       </div>
     );
   }
 
+  const handleBuy = () => {
+    requestInvoice.mutate(
+      { listingId: listing.id },
+      {
+        onSuccess: (invoice) => {
+          toast.success('Invoice requested — submit your payment next');
+          router.push(
+            `${workspaceRoutes.accountInvoices}?highlight=${invoice.id}&payment=${invoice.id}`,
+          );
+        },
+      },
+    );
+  };
+
   const handleBook = () => {
-    request.mutate(
+    requestBooking.mutate(
       { listingId: listing.id },
       {
         onSuccess: (booking) => {
@@ -267,21 +362,37 @@ export function VehicleDetailBookingAction({
     );
   };
 
+  const priceLabel =
+    listing.listingPricing?.finalPriceUsd != null
+      ? formatUsd(listing.listingPricing.finalPriceUsd)
+      : 'the quoted price';
+
   return (
     <div className="mt-8 space-y-2">
       <Button
         type="button"
-        disabled={request.isPending}
-        onClick={handleBook}
+        disabled={requestInvoice.isPending}
+        onClick={handleBuy}
         className="h-10 w-full rounded-full text-sm font-semibold text-white"
         style={{ backgroundColor: brand.forest }}
       >
-        {request.isPending ? 'Creating booking…' : 'Book This Vehicle'}
+        {requestInvoice.isPending ? 'Requesting invoice…' : 'Buy This Vehicle'}
+      </Button>
+      <Button
+        type="button"
+        variant="outline"
+        disabled={requestBooking.isPending}
+        onClick={handleBook}
+        className="h-10 w-full rounded-full border text-sm font-semibold"
+        style={{ borderColor: brand.forest, color: brand.forest }}
+      >
+        {requestBooking.isPending ? 'Creating booking…' : 'Book This Vehicle'}
       </Button>
       <p className="text-center text-xs text-[#356769]">
-        Secure this vehicle with a{' '}
+        Buy requests a proforma invoice for {priceLabel} and lets you upload
+        payment proof. Book secures the vehicle with a{' '}
         {feeQuote ? formatUsd(feeQuote.bookingFeeUsd) : 'small USD'} booking
-        fee. Payment is verified by our finance team.
+        fee.
       </p>
     </div>
   );

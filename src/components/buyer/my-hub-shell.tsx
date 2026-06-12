@@ -20,7 +20,9 @@ export function MyHubShell({ children }: MyHubShellProps) {
   const navItems = buyerNavGroups.flatMap((group) => group.items);
 
   return (
-    <div className={`${marketingMintSurface} py-8 sm:py-12`}>
+    <div
+      className={`${marketingMintSurface} flex flex-1 flex-col py-8 sm:py-12`}
+    >
       <div className={marketingContainer}>
         <div className="mb-8 space-y-2">
           <p className="text-sm font-medium" style={{ color: brand.teal }}>

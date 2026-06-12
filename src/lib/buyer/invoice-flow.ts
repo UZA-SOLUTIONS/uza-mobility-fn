@@ -1,4 +1,5 @@
 import type { InvoiceStatus } from '@/types/commerce';
+import type { BuyerInvoice } from '@/types/buyer/commerce';
 import { workspaceRoutes } from '@/config/routes';
 import { wasSupersededByOtherBuyerText } from '@/lib/buyer/purchase-conflict';
 
@@ -40,6 +41,16 @@ export function isCancellableByBuyerInvoiceStatus(
 
 export function isPendingPurchaseInvoiceStatus(status: InvoiceStatus): boolean {
   return PENDING_PURCHASE_INVOICE_STATUSES.includes(status);
+}
+
+export function findActiveBuyerInvoice(
+  invoices: BuyerInvoice[] | undefined,
+): BuyerInvoice | null {
+  return (
+    invoices?.find((invoice) =>
+      isPendingPurchaseInvoiceStatus(invoice.status),
+    ) ?? null
+  );
 }
 
 export function invoiceStatusHint(

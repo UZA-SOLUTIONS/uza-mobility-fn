@@ -7,9 +7,9 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
 import { workspaceRoutes } from '@/config/routes';
-import { useMyOrders } from '@/queries/buyer';
+import { useMyInvoices, useMyOrders } from '@/queries/buyer';
 import { useMyBookings } from '@/queries/bookings';
-import { Car, List, ShoppingCart } from 'lucide-react';
+import { Car, FileText, List, ShoppingCart } from 'lucide-react';
 
 export function BuyerOverviewPanel() {
   const { data: orders, isLoading: ordersLoading } = useMyOrders({
@@ -19,17 +19,27 @@ export function BuyerOverviewPanel() {
     limit: 1,
     activeOnly: true,
   });
+  const { data: invoices, isLoading: invoicesLoading } = useMyInvoices({
+    pendingPurchase: true,
+    limit: 1,
+  });
 
   return (
     <div className="space-y-8">
       <PageHeader
         title="Buyer overview"
-        description="Track orders and bookings for your EV purchases."
+        description="Track invoices, payments, orders, and bookings for your EV purchases."
       />
 
       <BuyerNextSteps />
 
-      <div className="grid gap-4 sm:grid-cols-2">
+      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+        <StatCard
+          title="Active purchases"
+          value={invoices?.meta.total}
+          loading={invoicesLoading}
+          icon={FileText}
+        />
         <StatCard
           title="Orders"
           value={orders?.meta.total}
@@ -50,6 +60,15 @@ export function BuyerOverviewPanel() {
         </CardHeader>
         <CardContent className="flex flex-wrap gap-2">
           <Button asChild>
+            <Link
+              href={workspaceRoutes.accountInvoices}
+              className="flex items-center"
+            >
+              <FileText className="size-4" />
+              View invoices
+            </Link>
+          </Button>
+          <Button variant="outline" asChild>
             <Link
               href={workspaceRoutes.accountBookings}
               className="flex items-center"

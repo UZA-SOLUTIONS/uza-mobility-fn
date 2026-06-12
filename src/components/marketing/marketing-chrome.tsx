@@ -29,10 +29,10 @@ export function MarketingChrome({
 
   return (
     <MarketingCatalogProvider categories={categories}>
-      <div className="flex min-h-full flex-col overflow-x-hidden">
-        <div className="relative">
+      <div className="flex min-h-dvh flex-col overflow-x-hidden">
+        <div className="relative flex flex-1 flex-col">
           <MarketingNavbar overlay={overlay} navItems={navItems} />
-          <main className="flex-1">{children}</main>
+          <main className="flex flex-1 flex-col">{children}</main>
         </div>
         <MarketingFooter columns={footerColumns} />
       </div>

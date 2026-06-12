@@ -6,6 +6,7 @@ export type InquirySubmitResponse = {
   quoteNumber: string;
   email: string;
   listingSlug: string;
+  intent: 'BUY' | 'BOOK';
   message: string;
 };
 
@@ -13,6 +14,7 @@ export type BuyerInquiry = {
   id: string;
   quoteNumber: string;
   listingId: string | null;
+  intent?: 'BUY' | 'BOOK';
   name: string;
   phone: string;
   email: string;

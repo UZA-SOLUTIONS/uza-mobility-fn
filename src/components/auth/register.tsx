@@ -34,7 +34,12 @@ export function Register() {
   const registerMutation = useRegister();
   const searchParams = useSearchParams();
   const queryKey = searchParams.toString();
+  const callbackUrl = searchParams.get('callbackUrl')?.trim() ?? '';
   const errorRef = useRef<HTMLDivElement>(null);
+  const loginHref =
+    callbackUrl.startsWith('/') && callbackUrl
+      ? `${authRoutes.login}?callbackUrl=${encodeURIComponent(callbackUrl)}`
+      : authRoutes.login;
 
   const defaultValues = useMemo(
     () => getRegisterDefaultValues(searchParams),
@@ -203,7 +208,7 @@ export function Register() {
 
         <p className={authFooterLinkClassName}>
           Already have an account?{' '}
-          <Link href={authRoutes.login} className={authAccentLinkClassName}>
+          <Link href={loginHref} className={authAccentLinkClassName}>
             Sign in
           </Link>
         </p>

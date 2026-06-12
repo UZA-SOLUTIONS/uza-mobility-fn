@@ -12,9 +12,17 @@ import { authRoutes } from '@/config/routes';
 
 type CheckEmailFormProps = {
   email: string;
+  callbackUrl?: string;
 };
 
-export function CheckEmailForm({ email }: CheckEmailFormProps) {
+export function CheckEmailForm({ email, callbackUrl }: CheckEmailFormProps) {
+  const loginHref = (() => {
+    const params = new URLSearchParams();
+    if (email) params.set('email', email);
+    if (callbackUrl) params.set('callbackUrl', callbackUrl);
+    const query = params.toString();
+    return query ? `${authRoutes.login}?${query}` : authRoutes.login;
+  })();
   const resend = useMutation({
     mutationFn: () => resendVerificationByEmail(email),
   });
@@ -57,7 +65,7 @@ export function CheckEmailForm({ email }: CheckEmailFormProps) {
         <p className="text-center text-base text-[#5D6772]">
           Back to{' '}
           <Link
-            href={authRoutes.login}
+            href={loginHref}
             className="font-medium text-[#046A38] hover:underline"
           >
             Sign in

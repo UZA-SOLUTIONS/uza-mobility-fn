@@ -33,9 +33,9 @@ export default function RootLayout({
     <html
       lang="en"
       suppressHydrationWarning
-      className={`${syne.variable} h-full font-sans antialiased`}
+      className={`${syne.variable} min-h-dvh font-sans antialiased`}
     >
-      <body className="flex min-h-full flex-col">
+      <body className="flex min-h-dvh flex-col">
         <Providers>{children}</Providers>
       </body>
     </html>

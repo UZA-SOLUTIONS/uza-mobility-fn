@@ -44,16 +44,16 @@ type VehicleInquiryDialogProps = {
   listing: PublicListing;
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  variant?: 'quote' | 'book';
+  variant: InquiryInput['intent'];
 };
 
 export function VehicleInquiryDialog({
   listing,
   open,
   onOpenChange,
-  variant = 'quote',
+  variant,
 }: VehicleInquiryDialogProps) {
-  const isBook = variant === 'book';
+  const isBuy = variant === 'BUY';
   const router = useRouter();
   const submit = useSubmitInquiry();
 
@@ -61,6 +61,7 @@ export function VehicleInquiryDialog({
     resolver: zodResolver(inquirySchema),
     defaultValues: {
       listingId: listing.id,
+      intent: variant,
       name: '',
       phone: '',
       email: '',
@@ -71,9 +72,10 @@ export function VehicleInquiryDialog({
   });
 
   useEffect(() => {
-    const message = `Inquiry for ${listing.listingTitle} (ref ${listing.id.slice(-8).toUpperCase()})`;
+    const message = `${isBuy ? 'Purchase' : 'Booking'} inquiry for ${listing.listingTitle} (ref ${listing.id.slice(-8).toUpperCase()})`;
     form.reset({
       listingId: listing.id,
+      intent: variant,
       name: '',
       phone: '',
       email: '',
@@ -81,7 +83,7 @@ export function VehicleInquiryDialog({
       buyerType: 'INDIVIDUAL',
       message,
     });
-  }, [listing.id, listing.listingTitle, form]);
+  }, [listing.id, listing.listingTitle, variant, isBuy, form]);
 
   const onSubmit = form.handleSubmit((values) => {
     submit.mutate(values, {
@@ -92,6 +94,9 @@ export function VehicleInquiryDialog({
           quote: result.quoteNumber,
           name: values.name,
           phone: values.phone,
+          intent: result.intent.toLowerCase(),
+          listingId: listing.id,
+          slug: listing.slug,
         });
         router.push(`/inquiry/success?${params.toString()}`);
       },
@@ -103,16 +108,19 @@ export function VehicleInquiryDialog({
       <DialogContent className="max-h-[90vh] overflow-y-auto sm:max-w-lg">
         <DialogHeader>
           <DialogTitle>
-            {isBook ? 'Book this vehicle' : 'Get a vehicle quote'}
+            {isBuy ? 'Buy this vehicle' : 'Book this vehicle'}
           </DialogTitle>
           <DialogDescription>
-            {isBook
-              ? `Tell us how to reach you and we will email your quote for ${listing.listingTitle}.`
-              : `We will email your quote for ${listing.listingTitle}.`}
+            {isBuy
+              ? `Share your details and we will email the vehicle price and payment instructions for ${listing.listingTitle}.`
+              : `Share your details and we will email the vehicle price and booking fee for ${listing.listingTitle}.`}
           </DialogDescription>
         </DialogHeader>
 
         <form onSubmit={onSubmit} className="space-y-4">
+          <input type="hidden" {...form.register('intent')} />
+          <input type="hidden" {...form.register('listingId')} />
+
           <div className="space-y-2">
             <Label htmlFor="inquiry-name">Full name</Label>
             <Input id="inquiry-name" {...form.register('name')} />
@@ -210,9 +218,9 @@ export function VehicleInquiryDialog({
           >
             {submit.isPending
               ? 'Sending…'
-              : isBook
-                ? 'Submit & get quote'
-                : 'Send inquiry & get quote'}
+              : isBuy
+                ? 'Submit & get purchase details'
+                : 'Submit & get booking details'}
           </Button>
         </form>
       </DialogContent>

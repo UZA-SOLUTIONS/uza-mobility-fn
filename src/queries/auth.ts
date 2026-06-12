@@ -78,6 +78,13 @@ export function useRegister() {
     mutationFn: (input: RegisterInput) => register(input),
     onSuccess: (response) => {
       const params = new URLSearchParams({ email: response.email });
+      const callbackUrl =
+        typeof window !== 'undefined'
+          ? new URLSearchParams(window.location.search).get('callbackUrl')
+          : null;
+      if (callbackUrl?.startsWith('/')) {
+        params.set('callbackUrl', callbackUrl);
+      }
       router.replace(`${authRoutes.checkEmail}?${params.toString()}`);
       router.refresh();
     },

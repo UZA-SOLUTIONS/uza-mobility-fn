@@ -18,6 +18,8 @@ import {
   Percent,
   Bell,
   Settings,
+  FileText,
+  CreditCard,
 } from 'lucide-react';
 
 export type NavItem = {
@@ -62,9 +64,24 @@ export const accountNav: NavItem[] = [
   { label: 'Overview', href: workspaceRoutes.account, icon: Home },
   { label: 'Orders', href: workspaceRoutes.accountOrders, icon: ShoppingCart },
   {
+    label: 'Invoices',
+    href: workspaceRoutes.accountInvoices,
+    icon: FileText,
+  },
+  {
+    label: 'Payments',
+    href: workspaceRoutes.accountPayments,
+    icon: CreditCard,
+  },
+  {
     label: 'Bookings',
     href: workspaceRoutes.accountBookings,
     icon: Car,
+  },
+  {
+    label: 'Financing',
+    href: workspaceRoutes.accountFinancing,
+    icon: Percent,
   },
   { label: 'Profile', href: workspaceRoutes.accountProfile, icon: User },
   {
@@ -87,9 +104,24 @@ export const buyerNavGroups: NavGroup[] = [
         icon: ShoppingCart,
       },
       {
+        label: 'Invoices',
+        href: workspaceRoutes.accountInvoices,
+        icon: FileText,
+      },
+      {
+        label: 'Payments',
+        href: workspaceRoutes.accountPayments,
+        icon: CreditCard,
+      },
+      {
         label: 'Bookings',
         href: workspaceRoutes.accountBookings,
         icon: Car,
+      },
+      {
+        label: 'Financing',
+        href: workspaceRoutes.accountFinancing,
+        icon: Percent,
       },
       {
         label: 'Wishlist',
