@@ -6,6 +6,7 @@ import { Car, Download, MapPin } from 'lucide-react';
 import { WishlistButton } from '@/components/marketing/wishlist-button';
 import { ListingPrice } from '@/components/marketing/listing-price';
 import { BuyerListingInteractionChip } from '@/components/marketing/buyer-listing-interaction-chip';
+import { SoldChip } from '@/components/marketing/sold-chip';
 import { VehicleDetailGallery } from '@/components/marketing/vehicle-detail-gallery';
 import { VehicleDetailBookingAction } from '@/components/marketing/vehicle-detail-booking-action';
 import { VehicleDetailSidebarSpecs } from '@/components/marketing/vehicle-detail-sidebar-specs';
@@ -98,6 +99,7 @@ export function VehicleDetailView({ listing }: VehicleDetailViewProps) {
               </p>
 
               <div className="mt-4 flex flex-wrap items-center gap-2">
+                {listing.status === 'SOLD' ? <SoldChip /> : null}
                 {buyerInteraction ? (
                   <BuyerListingInteractionChip interaction={buyerInteraction} />
                 ) : null}

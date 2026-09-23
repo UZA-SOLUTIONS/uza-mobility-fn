@@ -6,6 +6,7 @@ import { usePathname } from 'next/navigation';
 import { useState } from 'react';
 import { ArrowUpRight, Battery, Gauge } from 'lucide-react';
 import { BuyerListingInteractionChip } from '@/components/marketing/buyer-listing-interaction-chip';
+import { SoldChip } from '@/components/marketing/sold-chip';
 import { WishlistButton } from '@/components/marketing/wishlist-button';
 import { Skeleton } from '@/components/ui/skeleton';
 import {
@@ -72,6 +73,11 @@ export function ListingCard({ listing }: ListingCardProps) {
               callbackUrl={pathname || detailHref}
             />
           </div>
+          {listing.status === 'SOLD' ? (
+            <div className="pointer-events-none absolute top-3 right-3 sm:top-4 sm:right-4">
+              <SoldChip overlay />
+            </div>
+          ) : null}
           {buyerInteraction ? (
             <div className="absolute bottom-3 left-3 flex max-w-[calc(100%-1.5rem)] flex-wrap items-center gap-2 sm:bottom-4 sm:left-4">
               <BuyerListingInteractionChip

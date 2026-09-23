@@ -54,6 +54,20 @@ type VehicleDetailBookingActionProps = {
 export function VehicleDetailBookingAction({
   listing,
 }: VehicleDetailBookingActionProps) {
+  if (listing.status === 'SOLD') {
+    return (
+      <div className="mt-8">
+        <VehiclePurchaseUnavailable variant="sold" />
+      </div>
+    );
+  }
+
+  return <VehicleDetailAvailableBookingAction listing={listing} />;
+}
+
+function VehicleDetailAvailableBookingAction({
+  listing,
+}: VehicleDetailBookingActionProps) {
   const router = useAppRouter();
   const { data: session, status } = useSession();
   const me = isMeUser(session?.user) ? session.user : null;
