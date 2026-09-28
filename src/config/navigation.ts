@@ -48,14 +48,11 @@ export type MarketingFooterColumn = {
 /** @deprecated Use buildMarketingNav() with categories from GET /categories */
 export const marketingNav: NavItem[] = [
   { label: 'Vehicles', href: '/vehicles' },
-  { label: 'Spare Parts', href: '/spare-parts' },
   { label: 'For Business', href: '/for-business' },
-  { label: 'About UZA Mobility', href: '/about' },
 ];
 
 /** @deprecated Use buildMarketingFooterColumns() with categories from GET /categories */
 export const marketingFooterNav: NavItem[] = [
-  { label: 'About', href: '/about' },
   { label: 'Blog', href: '/blog' },
   { label: 'Pricing', href: '/for-business' },
 ];

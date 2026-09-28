@@ -26,9 +26,7 @@ function categoryNavLinks(categories: Category[]): NavItem[] {
 export function buildMarketingNav(_categories: Category[]): NavItem[] {
   return [
     { label: 'Vehicles', href: vehiclesHref() },
-    { label: 'Spare Parts', href: '/spare-parts' },
     { label: 'For Business', href: '/for-business' },
-    { label: 'About', href: '/about' },
   ];
 }
 
@@ -41,37 +39,21 @@ export function buildMarketingFooterColumns(
   const vehicleCategories = active.filter((c) =>
     VEHICLE_CATEGORY_TYPES.includes(c.type),
   );
-  const partsCategories = active.filter(
-    (c) => c.type === 'EV_PARTS_ACCESSORIES',
-  );
 
   const vehicleLinks: NavItem[] = [
     { label: 'All vehicles', href: vehiclesHref() },
     ...categoryNavLinks(vehicleCategories),
   ];
 
-  const partsLinks: NavItem[] = [
-    { label: 'All spare parts', href: '/spare-parts' },
-    ...categoryNavLinks(partsCategories),
-  ];
-
   return [
     { title: 'Vehicles', links: vehicleLinks },
     {
       title: 'For Business',
-      links: [
-        { label: 'Fleet solutions', href: '/for-business' },
-        { label: 'About UZA Mobility', href: '/about' },
-      ],
+      links: [{ label: 'Fleet solutions', href: '/for-business' }],
     },
-    { title: 'Spare parts', links: partsLinks },
     {
       title: 'Support',
-      links: [
-        { label: 'Contact us', href: '/about' },
-        { label: 'User Manuals', href: '/blog' },
-        { label: 'Privacy & Policy', href: '/about' },
-      ],
+      links: [{ label: 'User Manuals', href: '/blog' }],
     },
   ];
 }
