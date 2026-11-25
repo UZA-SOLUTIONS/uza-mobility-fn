@@ -49,11 +49,11 @@ export function SparePartsBrowseToolbar({
     <form
       key={`${filters.brand ?? ''}-${filters.model ?? ''}`}
       onSubmit={onSearchSubmit}
-      className="mb-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-4"
+      className="mb-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-3"
     >
       <VehiclesFilterSelect
         label="Make"
-        placeholder="Select Make"
+        placeholder="Any make"
         value={brandValue}
         options={brandOptions}
         onChange={(nextBrand) => {
@@ -65,19 +65,11 @@ export function SparePartsBrowseToolbar({
       />
       <VehiclesFilterSelect
         label="Model"
-        placeholder="Select Model"
+        placeholder="Any model"
         value={modelValue}
         options={modelOptions}
         onChange={setModelValue}
         disabled={!brandValue}
-      />
-      <VehiclesFilterSelect
-        label="Year"
-        placeholder="Select Year"
-        value={undefined}
-        options={[]}
-        onChange={() => undefined}
-        disabled
       />
       <div className="flex items-end">
         <Button

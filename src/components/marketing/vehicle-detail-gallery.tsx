@@ -3,7 +3,6 @@
 import { useState } from 'react';
 import Image from 'next/image';
 import { ChevronLeft, ChevronRight, Play } from 'lucide-react';
-import { Skeleton } from '@/components/ui/skeleton';
 import { resolveMediaUrl } from '@/lib/marketing/listing-display';
 import { brand } from '@/lib/marketing/colors';
 import type { PublicListingPhoto } from '@/types/marketplace/public-listing';
@@ -26,12 +25,8 @@ export function VehicleDetailGallery({
     );
 
   const [index, setIndex] = useState(0);
-  const [loadedUrls, setLoadedUrls] = useState<Record<string, boolean>>({});
   const current = resolved[index];
   const hasMultiple = resolved.length > 1;
-  const currentLoaded = current
-    ? Boolean(loadedUrls[current.resolvedUrl])
-    : false;
 
   const prev = () => {
     if (resolved.length === 0) return;
@@ -47,29 +42,16 @@ export function VehicleDetailGallery({
     <div className="relative overflow-hidden rounded-2xl border border-[#E9E9E9] bg-[#f4f4f4]">
       <div className="relative aspect-[859/528] w-full">
         {current?.resolvedUrl ? (
-          <>
-            {!currentLoaded ? (
-              <Skeleton className="absolute inset-0 rounded-none" aria-hidden />
-            ) : null}
-            <Image
-              key={current.resolvedUrl}
-              src={current.resolvedUrl}
-              alt={current.altText ?? title}
-              fill
-              className={`object-cover transition-opacity duration-300 ${
-                currentLoaded ? 'opacity-100' : 'opacity-0'
-              }`}
-              sizes="(max-width: 1024px) 100vw, 859px"
-              priority={index === 0}
-              loading={index === 0 ? 'eager' : 'lazy'}
-              onLoad={() =>
-                setLoadedUrls((prevUrls) => ({
-                  ...prevUrls,
-                  [current.resolvedUrl]: true,
-                }))
-              }
-            />
-          </>
+          <Image
+            key={current.resolvedUrl}
+            src={current.resolvedUrl}
+            alt={current.altText ?? title}
+            fill
+            className="object-cover"
+            sizes="(max-width: 1024px) 100vw, 859px"
+            priority={index === 0}
+            loading={index === 0 ? 'eager' : 'lazy'}
+          />
         ) : (
           <div className="flex h-full items-center justify-center text-[#356769]">
             No photos yet

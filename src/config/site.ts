@@ -3,6 +3,11 @@ export const siteConfig = {
   description: 'Electric vehicle marketplace and mobility platform for Rwanda.',
   url: process.env.NEXT_PUBLIC_APP_URL ?? 'http://localhost:3000',
   apiUrl: process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:7000',
+  contact: {
+    phoneDisplay: '+250 788 371 081',
+    phoneTel: '+250788371081',
+    address: 'Kigali, Rwanda, UNIFY House',
+  },
 } as const;
 
 /** Canonical site origin for sitemaps, metadata, and OG URLs (no trailing slash). */

@@ -38,7 +38,7 @@ export function VehiclesFilterSelect({
         }
         disabled={disabled}
       >
-        <SelectTrigger className="h-11 w-full">
+        <SelectTrigger className="h-11 w-full border-[#E9E9E9] bg-white data-placeholder:text-[#356769]/80">
           <SelectValue placeholder={placeholder} />
         </SelectTrigger>
         <SelectContent>

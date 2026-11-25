@@ -2,22 +2,21 @@ import { ListingCard } from '@/components/marketing/listing-card';
 import { VehiclesBrowseToolbar } from '@/components/marketing/vehicles-browse-toolbar';
 import { VehiclesFiltersSidebar } from '@/components/marketing/vehicles-filters-sidebar';
 import { VehiclesHero } from '@/components/marketing/vehicles-hero';
-import { VehiclesPagination } from '@/components/marketing/vehicles-pagination';
 import {
-  browseListings,
+  browseAllListings,
   getBrowseFilterOptions,
-  getLocalStockListings,
 } from '@/lib/api/marketplace';
 import {
   parseVehiclesSearchParams,
-  VEHICLES_PAGE_SIZE,
   type BrowseFilterOptions,
 } from '@/lib/marketing/vehicles-browse';
+import { vehiclesHref } from '@/lib/marketing/vehicles-url';
 import {
   marketingContainer,
   marketingWhiteSurface,
 } from '@/lib/marketing/layout-classes';
 import type { PublicListing } from '@/types/marketplace/public-listing';
+import Link from 'next/link';
 
 type VehiclesPageAsyncProps = {
   rawSearchParams: Record<string, string | string[] | undefined>;
@@ -37,59 +36,68 @@ const emptyFilterOptions: BrowseFilterOptions = {
   priceRange: null,
 };
 
+const browseFilterFields = (
+  filters: ReturnType<typeof parseVehiclesSearchParams>,
+) => ({
+  q: filters.q,
+  category: filters.category,
+  useCase: filters.useCase,
+  sort: filters.sort,
+  brand: filters.brand,
+  model: filters.model,
+  condition: filters.condition,
+  drivetrain: filters.drivetrain,
+  color: filters.color,
+  city: filters.city,
+  country: filters.country,
+  batteryCapacityKwh: filters.batteryCapacityKwh,
+  yearMin: filters.yearMin,
+  yearMax: filters.yearMax,
+  mileageMin: filters.mileageMin,
+  mileageMax: filters.mileageMax,
+  priceMin: filters.priceMin,
+  priceMax: filters.priceMax,
+});
+
 export async function VehiclesPageAsync({
   rawSearchParams,
 }: VehiclesPageAsyncProps) {
   const filters = parseVehiclesSearchParams(rawSearchParams);
   const isLocalStock = filters.stock === 'local';
-  const page = filters.page ?? 1;
 
   let listings: PublicListing[] = [];
-  let totalPages = 1;
   let filterOptions = emptyFilterOptions;
+  let loadError: string | null = null;
 
   try {
     if (isLocalStock) {
-      listings = await getLocalStockListings();
-      totalPages = 1;
+      listings = await browseAllListings({
+        sellerType: 'UZA_RWANDA_STOCK',
+        ...browseFilterFields(filters),
+      });
     } else {
-      const [result, options] = await Promise.all([
-        browseListings({
-          page,
-          limit: VEHICLES_PAGE_SIZE,
-          q: filters.q,
-          category: filters.category,
-          useCase: filters.useCase,
-          sort: filters.sort,
-          brand: filters.brand,
-          model: filters.model,
-          condition: filters.condition,
-          drivetrain: filters.drivetrain,
-          color: filters.color,
-          city: filters.city,
-          country: filters.country,
-          batteryCapacityKwh: filters.batteryCapacityKwh,
-          yearMin: filters.yearMin,
-          yearMax: filters.yearMax,
-          mileageMin: filters.mileageMin,
-          mileageMax: filters.mileageMax,
-          priceMin: filters.priceMin,
-          priceMax: filters.priceMax,
-        }),
+      const [items, options] = await Promise.all([
+        browseAllListings(browseFilterFields(filters)),
         getBrowseFilterOptions({
           category: filters.category,
           brand: filters.brand,
         }),
       ]);
-      listings = result.items;
-      totalPages = Math.max(1, result.meta.totalPages);
+      listings = items;
       filterOptions = options;
     }
-  } catch {
+  } catch (error) {
+    loadError =
+      error instanceof Error
+        ? error.message
+        : 'Unable to load vehicles right now.';
     listings = [];
   }
 
   const heroTitle = isLocalStock ? 'Available Now.' : 'Vehicles.';
+  const clearFiltersHref = vehiclesHref(
+    isLocalStock ? { stock: 'local' } : undefined,
+  );
 
   return (
     <>
@@ -100,7 +108,7 @@ export async function VehiclesPageAsync({
             <VehiclesBrowseToolbar filters={filters} />
           ) : null}
 
-          <div className="flex flex-col gap-8 max-lg:flex-col-reverse lg:flex-row lg:items-start lg:gap-8">
+          <div className="flex flex-col gap-8 lg:flex-row lg:items-start lg:gap-8">
             {!isLocalStock ? (
               <VehiclesFiltersSidebar
                 filters={filters}
@@ -109,25 +117,41 @@ export async function VehiclesPageAsync({
             ) : null}
 
             <div className="min-w-0 flex-1">
-              {listings.length > 0 ? (
+              {loadError ? (
+                <div className="rounded-2xl border border-dashed border-red-200 bg-red-50/50 px-6 py-16 text-center">
+                  <p className="font-medium text-[#151515]">
+                    Couldn’t load vehicles.
+                  </p>
+                  <p className="mt-2 text-sm text-[#356769]">{loadError}</p>
+                  <Link
+                    href={clearFiltersHref}
+                    className="mt-4 inline-block text-sm font-medium text-[#174438] underline-offset-4 hover:underline"
+                  >
+                    Try again
+                  </Link>
+                </div>
+              ) : listings.length > 0 ? (
                 <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
                   {listings.map((listing) => (
                     <ListingCard key={listing.id} listing={listing} />
                   ))}
                 </div>
               ) : (
-                <p className="rounded-lg border border-dashed border-[#E9E9E9] px-6 py-16 text-center text-[#356769]">
-                  No vehicles match your filters.
-                </p>
+                <div className="rounded-2xl border border-dashed border-[#E9E9E9] px-6 py-16 text-center">
+                  <p className="font-medium text-[#151515]">
+                    No vehicles match your filters.
+                  </p>
+                  <p className="mt-2 text-sm text-[#356769]">
+                    Try clearing filters or browse the full catalog.
+                  </p>
+                  <Link
+                    href={clearFiltersHref}
+                    className="mt-4 inline-block text-sm font-medium text-[#174438] underline-offset-4 hover:underline"
+                  >
+                    Clear filters
+                  </Link>
+                </div>
               )}
-
-              {!isLocalStock ? (
-                <VehiclesPagination
-                  filters={filters}
-                  currentPage={page}
-                  totalPages={totalPages}
-                />
-              ) : null}
             </div>
           </div>
         </div>

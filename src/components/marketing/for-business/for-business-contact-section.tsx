@@ -2,6 +2,7 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { MapPin, Phone } from 'lucide-react';
 import { FleetRequestForm } from '@/components/marketing/for-business/fleet-request-form';
+import { siteConfig } from '@/config/site';
 import { brand } from '@/lib/marketing/colors';
 import { marketingContainer } from '@/lib/marketing/layout-classes';
 import type { Category } from '@/types/catalog';
@@ -79,8 +80,8 @@ export function ForBusinessContactSection({
                     <ContactRow
                       icon={Phone}
                       title="Call Corporate Sales:"
-                      value="+250 788 888 888"
-                      href="tel:+250788888888"
+                      value={siteConfig.contact.phoneDisplay}
+                      href={`tel:${siteConfig.contact.phoneTel}`}
                     />
                     <div
                       className="mx-2.5 border-t"
@@ -89,7 +90,7 @@ export function ForBusinessContactSection({
                     <ContactRow
                       icon={MapPin}
                       title="Visit us at:"
-                      value="Kigali, Rwanda, UNIFY House"
+                      value={siteConfig.contact.address}
                     />
                   </div>
                 </div>

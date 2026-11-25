@@ -1,4 +1,5 @@
 import type { MarketingFooterColumn, NavItem } from '@/config/navigation';
+import { siteConfig } from '@/config/site';
 import { vehiclesHref } from '@/lib/marketing/vehicles-url';
 import type { Category, CategoryType } from '@/types/catalog';
 
@@ -53,7 +54,17 @@ export function buildMarketingFooterColumns(
     },
     {
       title: 'Support',
-      links: [{ label: 'User Manuals', href: '/blog' }],
+      contacts: [
+        {
+          label: 'Call Corporate Sales',
+          value: siteConfig.contact.phoneDisplay,
+          href: `tel:${siteConfig.contact.phoneTel}`,
+        },
+        {
+          label: 'Visit us at',
+          value: siteConfig.contact.address,
+        },
+      ],
     },
   ];
 }

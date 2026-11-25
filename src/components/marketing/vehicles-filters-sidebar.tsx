@@ -3,6 +3,7 @@
 import Link from 'next/link';
 import { useAppRouter } from '@/lib/navigation/use-app-router';
 import { useCallback, useTransition } from 'react';
+import { ChevronDown } from 'lucide-react';
 import { useMarketingCategories } from '@/components/marketing/marketing-catalog-context';
 import { VehiclesFilterSelect } from '@/components/marketing/vehicles-filter-select';
 import { Input } from '@/components/ui/input';
@@ -75,7 +76,7 @@ export function VehiclesFiltersSidebar({
                   category: undefined,
                 }),
               )}
-              className={`rounded-full border px-3 py-1.5 text-xs transition-colors ${
+              className={`rounded-full border px-3.5 py-2 text-sm transition-colors ${
                 !filters.category
                   ? 'border-transparent font-medium text-white'
                   : 'border-[#E9E9E9] text-[#356769] hover:border-[#174438]/30'
@@ -98,7 +99,7 @@ export function VehiclesFiltersSidebar({
                       category: cat.slug,
                     }),
                   )}
-                  className={`rounded-full border px-3 py-1.5 text-xs transition-colors ${
+                  className={`rounded-full border px-3.5 py-2 text-sm transition-colors ${
                     active
                       ? 'border-transparent font-medium text-white'
                       : 'border-[#E9E9E9] text-[#356769] hover:border-[#174438]/30'
@@ -147,16 +148,18 @@ export function VehiclesFiltersSidebar({
         <Label className="text-sm font-medium text-[#151515]">
           Price (Rwf)
         </Label>
+        {filterOptions.priceRange ? (
+          <p className="text-xs text-[#356769]">
+            Suggested range {filterOptions.priceRange.min.toLocaleString()}–
+            {filterOptions.priceRange.max.toLocaleString()}
+          </p>
+        ) : null}
         <div className="grid grid-cols-2 gap-2">
           <Input
             type="number"
             inputMode="numeric"
             disabled={disabled}
-            placeholder={
-              filterOptions.priceRange
-                ? String(filterOptions.priceRange.min)
-                : 'Min'
-            }
+            placeholder="Min"
             value={filters.priceMin ?? ''}
             onChange={(e) => {
               const v = e.target.value;
@@ -169,17 +172,13 @@ export function VehiclesFiltersSidebar({
                       : undefined,
               });
             }}
-            className="h-11"
+            className="h-11 border-[#E9E9E9] bg-white placeholder:text-[#356769]/80"
           />
           <Input
             type="number"
             inputMode="numeric"
             disabled={disabled}
-            placeholder={
-              filterOptions.priceRange
-                ? String(filterOptions.priceRange.max)
-                : 'Max'
-            }
+            placeholder="Max"
             value={filters.priceMax ?? ''}
             onChange={(e) => {
               const v = e.target.value;
@@ -192,7 +191,7 @@ export function VehiclesFiltersSidebar({
                       : undefined,
               });
             }}
-            className="h-11"
+            className="h-11 border-[#E9E9E9] bg-white placeholder:text-[#356769]/80"
           />
         </div>
       </div>
@@ -215,12 +214,23 @@ export function VehiclesFiltersSidebar({
 
   return (
     <div className="w-full shrink-0 self-start lg:w-72">
-      <details className="overflow-hidden rounded-lg border border-[#E9E9E9] bg-white lg:hidden">
-        <summary className="flex cursor-pointer list-none items-center justify-between p-4 text-sm font-medium text-[#151515] [&::-webkit-details-marker]:hidden">
-          <span>Filters</span>
-          {hasActiveFilters ? (
-            <span className="text-xs font-normal text-[#356769]">Active</span>
-          ) : null}
+      <details className="group overflow-hidden rounded-lg border border-[#E9E9E9] bg-white lg:hidden">
+        <summary className="flex cursor-pointer list-none items-center justify-between gap-3 p-4 text-sm font-medium text-[#151515] [&::-webkit-details-marker]:hidden">
+          <span className="flex items-center gap-2">
+            Filters
+            {hasActiveFilters ? (
+              <span
+                className="rounded-full px-2 py-0.5 text-xs font-normal text-white"
+                style={{ backgroundColor: brand.forest }}
+              >
+                Active
+              </span>
+            ) : null}
+          </span>
+          <ChevronDown
+            className="size-4 shrink-0 text-[#356769] transition-transform group-open:rotate-180"
+            aria-hidden
+          />
         </summary>
         <div className="border-t border-[#E9E9E9] p-4 pt-3">{filterFields}</div>
       </details>

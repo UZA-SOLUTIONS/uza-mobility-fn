@@ -4,7 +4,7 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useState } from 'react';
-import { ArrowUpRight, Battery, Gauge } from 'lucide-react';
+import { ArrowUpRight, Battery, Cog, Gauge } from 'lucide-react';
 import { BuyerListingInteractionChip } from '@/components/marketing/buyer-listing-interaction-chip';
 import { SoldChip } from '@/components/marketing/sold-chip';
 import { WishlistButton } from '@/components/marketing/wishlist-button';
@@ -111,9 +111,7 @@ export function ListingCard({ listing }: ListingCardProps) {
             <span>{batteryKwh != null ? `${batteryKwh} kWh` : '—'}</span>
           </div>
           <div className="flex flex-col items-center gap-2">
-            <span className="text-base leading-none" aria-hidden>
-              ⚙
-            </span>
+            <Cog className="size-[18px]" aria-hidden />
             <span>{transmission ?? '—'}</span>
           </div>
         </div>

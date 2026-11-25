@@ -85,18 +85,44 @@ export function MarketingFooter({ columns }: MarketingFooterProps) {
                 <h3 className="text-sm font-medium text-white">
                   {column.title}
                 </h3>
-                <ul className="space-y-0">
-                  {column.links.map((link) => (
-                    <li key={`${column.title}-${link.label}`}>
-                      <Link
-                        href={link.href}
-                        className="block py-1 text-sm text-white/50 transition-colors hover:text-white"
-                      >
-                        {link.label}
-                      </Link>
-                    </li>
-                  ))}
-                </ul>
+                {column.contacts?.length ? (
+                  <ul className="space-y-3">
+                    {column.contacts.map((contact) => {
+                      const valueClassName =
+                        'block text-sm text-white/70 transition-colors hover:text-white';
+                      return (
+                        <li key={`${column.title}-${contact.label}`}>
+                          <p className="text-sm text-white/50">
+                            {contact.label}
+                          </p>
+                          {contact.href ? (
+                            <a href={contact.href} className={valueClassName}>
+                              {contact.value}
+                            </a>
+                          ) : (
+                            <p className="text-sm text-white/70">
+                              {contact.value}
+                            </p>
+                          )}
+                        </li>
+                      );
+                    })}
+                  </ul>
+                ) : null}
+                {column.links?.length ? (
+                  <ul className="space-y-0">
+                    {column.links.map((link) => (
+                      <li key={`${column.title}-${link.label}`}>
+                        <Link
+                          href={link.href}
+                          className="block py-1 text-sm text-white/50 transition-colors hover:text-white"
+                        >
+                          {link.label}
+                        </Link>
+                      </li>
+                    ))}
+                  </ul>
+                ) : null}
               </div>
             ))}
           </nav>

@@ -1,5 +1,6 @@
 import { apiFetch, apiFetchPaginated } from '@/lib/api/api';
 import type { BrowseFilterOptions } from '@/lib/marketing/vehicles-browse';
+import type { SellerType } from '@/types/catalog';
 import type { PublicListing } from '@/types/marketplace/public-listing';
 
 export type BrowseListingsFilters = {
@@ -8,6 +9,8 @@ export type BrowseListingsFilters = {
   useCase?: string;
   limit?: number;
   page?: number;
+  /** When true, API returns the full filtered set (ignores page/limit). */
+  all?: boolean;
   sort?: string;
   brand?: string;
   model?: string;
@@ -23,21 +26,23 @@ export type BrowseListingsFilters = {
   mileageMax?: number;
   priceMin?: number;
   priceMax?: number;
+  sellerType?: SellerType;
 };
 
-const publicListingCache = { next: { revalidate: 60 } } as const;
+/** Guest catalog reads stay fresh after admin updates (no Next Data Cache TTL). */
+const publicListingFetch = { cache: 'no-store' as const };
 
 export function getLocalStockListings() {
-  return apiFetch<PublicListing[]>('/listings/local-stock', publicListingCache);
+  return apiFetch<PublicListing[]>('/listings/local-stock', publicListingFetch);
 }
 
 export function getFeaturedListings() {
-  return apiFetch<PublicListing[]>('/listings/featured', publicListingCache);
+  return apiFetch<PublicListing[]>('/listings/featured', publicListingFetch);
 }
 
 export function getListingBySlug(slug: string) {
   return apiFetch<PublicListing>(`/listings/${encodeURIComponent(slug)}`, {
-    ...publicListingCache,
+    ...publicListingFetch,
   });
 }
 
@@ -64,10 +69,13 @@ export function removeFromWishlist(listingId: string, token: string) {
 }
 
 export function browseListings(filters: BrowseListingsFilters = {}) {
-  const params = new URLSearchParams({
-    limit: String(filters.limit ?? 24),
-    page: String(filters.page ?? 1),
-  });
+  const params = new URLSearchParams();
+  if (filters.all) {
+    params.set('all', 'true');
+  } else {
+    params.set('limit', String(filters.limit ?? 24));
+    params.set('page', String(filters.page ?? 1));
+  }
   if (filters.q?.trim()) params.set('q', filters.q.trim());
   if (filters.category) params.set('category', filters.category);
   if (filters.useCase) params.set('useCase', filters.useCase);
@@ -79,6 +87,7 @@ export function browseListings(filters: BrowseListingsFilters = {}) {
   if (filters.color) params.set('color', filters.color);
   if (filters.city) params.set('city', filters.city);
   if (filters.country) params.set('country', filters.country);
+  if (filters.sellerType) params.set('sellerType', filters.sellerType);
   if (filters.batteryCapacityKwh != null) {
     params.set('batteryCapacityKwh', String(filters.batteryCapacityKwh));
   }
@@ -97,8 +106,16 @@ export function browseListings(filters: BrowseListingsFilters = {}) {
 
   return apiFetchPaginated<PublicListing>('/listings', {
     searchParams: params,
-    ...publicListingCache,
+    ...publicListingFetch,
   });
+}
+
+/** Guest View All — one request for the full filtered catalog (`all=true`). */
+export async function browseAllListings(
+  filters: Omit<BrowseListingsFilters, 'page' | 'limit' | 'all'> = {},
+): Promise<PublicListing[]> {
+  const result = await browseListings({ ...filters, all: true });
+  return result.items;
 }
 
 export function getBrowseFilterOptions(options?: {
@@ -112,5 +129,5 @@ export function getBrowseFilterOptions(options?: {
   const path = qs
     ? `/listings/browse-filters?${qs}`
     : '/listings/browse-filters';
-  return apiFetch<BrowseFilterOptions>(path, publicListingCache);
+  return apiFetch<BrowseFilterOptions>(path, publicListingFetch);
 }

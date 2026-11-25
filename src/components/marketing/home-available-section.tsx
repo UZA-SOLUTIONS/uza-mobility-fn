@@ -45,9 +45,20 @@ export function HomeAvailableSection({ listings }: HomeAvailableSectionProps) {
             ))}
           </div>
         ) : (
-          <p className="rounded-2xl border border-dashed border-[#E9E9E9] px-6 py-12 text-center text-[#356769]">
-            New vehicles arriving soon. Check back for Kigali stock.
-          </p>
+          <div className="rounded-2xl border border-dashed border-[#E9E9E9] px-6 py-16 text-center">
+            <p className="font-medium text-[#151515]">
+              New vehicles arriving soon.
+            </p>
+            <p className="mt-2 text-sm text-[#356769]">
+              Check back for Kigali stock, or browse the full catalog.
+            </p>
+            <Link
+              href="/vehicles"
+              className="mt-4 inline-block text-sm font-medium text-[#174438] underline-offset-4 hover:underline"
+            >
+              Browse all vehicles
+            </Link>
+          </div>
         )}
       </div>
     </section>

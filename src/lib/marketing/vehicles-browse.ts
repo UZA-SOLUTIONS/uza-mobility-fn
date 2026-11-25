@@ -1,10 +1,9 @@
-export const VEHICLES_PAGE_SIZE = 9;
-
 export type VehiclesSearchParams = {
   stock?: string;
   category?: string;
   useCase?: string;
   q?: string;
+  /** Ignored for fetching; kept so old `?page=` links still parse cleanly. */
   page?: number;
   sort?: string;
   brand?: string;

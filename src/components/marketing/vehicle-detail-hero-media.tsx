@@ -10,6 +10,8 @@ type VehicleDetailHeroMediaProps = {
 
 /**
  * Shows the primary listing photo immediately, then loads and fades in the hero video.
+ * Poster stays visible until video is ready (same pattern as home hero) so cached
+ * reloads never leave an invisible image waiting on a missed `onLoad`.
  */
 export function VehicleDetailHeroMedia({
   posterUrl,
@@ -19,9 +21,10 @@ export function VehicleDetailHeroMedia({
   const videoRef = useRef<HTMLVideoElement>(null);
   const [loadVideo, setLoadVideo] = useState(false);
   const [videoReady, setVideoReady] = useState(false);
-  const [posterReady, setPosterReady] = useState(false);
 
   useEffect(() => {
+    setVideoReady(false);
+    setLoadVideo(false);
     if (!videoUrl) return;
     const frame = requestAnimationFrame(() => setLoadVideo(true));
     return () => cancelAnimationFrame(frame);
@@ -60,9 +63,8 @@ export function VehicleDetailHeroMedia({
           alt=""
           loading="eager"
           decoding="async"
-          onLoad={() => setPosterReady(true)}
           className={`${mediaClassName} transition-opacity duration-700 ease-out ${
-            fadePoster || !posterReady ? 'opacity-0' : 'opacity-100'
+            fadePoster ? 'opacity-0' : 'opacity-100'
           }`}
         />
       ) : null}

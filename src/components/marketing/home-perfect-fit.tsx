@@ -104,7 +104,7 @@ export function HomePerfectFit() {
               ) : null}
             </div>
           </div>
-          <div className="flex flex-wrap gap-8 border-b border-transparent">
+          <div className="flex flex-wrap gap-8 border-b border-[#E9E9E9]">
             {tabs.map((tab) => {
               const active = tab.id === activeTab?.id;
               return (
@@ -120,12 +120,12 @@ export function HomePerfectFit() {
                   style={active ? { color: brand.forest } : undefined}
                 >
                   <span className="block">{tab.label}</span>
-                  {active ? (
-                    <span
-                      className="mt-3 block h-0.5 w-full rounded-full"
-                      style={{ backgroundColor: brand.forest }}
-                    />
-                  ) : null}
+                  <span
+                    className="mt-3 block h-0.5 w-full rounded-full"
+                    style={{
+                      backgroundColor: active ? brand.forest : 'transparent',
+                    }}
+                  />
                 </button>
               );
             })}

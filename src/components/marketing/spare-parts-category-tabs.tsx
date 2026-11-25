@@ -21,7 +21,7 @@ export function SparePartsCategoryTabs({
 }: SparePartsCategoryTabsProps) {
   const activeCategory = filters.category;
   return (
-    <div className="mb-3 flex flex-wrap gap-6 sm:gap-8">
+    <div className="mb-8 flex flex-wrap gap-6 border-b border-[#E9E9E9] sm:gap-8">
       {tabs.map((tab) => {
         const active =
           (activeCategory ?? undefined) === (tab.slug ?? undefined);
@@ -42,12 +42,12 @@ export function SparePartsCategoryTabs({
             aria-current={active ? 'page' : undefined}
           >
             <span className="block">{tab.label}</span>
-            {active ? (
-              <span
-                className="mt-3 block h-0.5 w-full rounded-full"
-                style={{ backgroundColor: brand.forest }}
-              />
-            ) : null}
+            <span
+              className="mt-3 block h-0.5 w-full rounded-full"
+              style={{
+                backgroundColor: active ? brand.forest : 'transparent',
+              }}
+            />
           </Link>
         );
       })}

@@ -40,9 +40,17 @@ export type NavGroup = {
   items: NavItem[];
 };
 
+export type MarketingFooterContact = {
+  label: string;
+  value: string;
+  /** Optional link (e.g. `tel:`). Plain text when omitted. */
+  href?: string;
+};
+
 export type MarketingFooterColumn = {
   title: string;
-  links: NavItem[];
+  links?: NavItem[];
+  contacts?: MarketingFooterContact[];
 };
 
 /** @deprecated Use buildMarketingNav() with categories from GET /categories */

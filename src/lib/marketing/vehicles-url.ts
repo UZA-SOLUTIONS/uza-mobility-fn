@@ -9,9 +9,6 @@ export function vehiclesHref(filters?: VehiclesSearchParams) {
   if (filters?.useCase) params.set('useCase', filters.useCase);
   if (filters?.q?.trim()) params.set('q', filters.q.trim());
   if (filters?.sort) params.set('sort', filters.sort);
-  if (filters?.page && filters.page > 1) {
-    params.set('page', String(filters.page));
-  }
 
   if (filters?.brand) params.set('brand', filters.brand);
   if (filters?.model) params.set('model', filters.model);

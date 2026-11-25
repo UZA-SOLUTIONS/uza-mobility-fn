@@ -26,7 +26,7 @@ export function PublicPartCard({ part }: PublicPartCardProps) {
   const inStock = part.stockQuantity > 0;
 
   return (
-    <article className="flex flex-col overflow-hidden rounded-2xl border border-[#E9E9E9] bg-white">
+    <article className="group flex flex-col overflow-hidden rounded-2xl border border-[#E9E9E9] bg-white transition-shadow hover:border-[#d6d6d6] hover:shadow-sm">
       <div className="relative aspect-[318/212] w-full bg-[#f4f4f4]">
         {imageUrl ? (
           <Image
@@ -42,7 +42,7 @@ export function PublicPartCard({ part }: PublicPartCardProps) {
           </div>
         )}
       </div>
-      <div className="flex flex-1 flex-col gap-3 border-t border-[#E9E9E9] p-5 sm:p-6">
+      <div className="flex flex-1 flex-col gap-3 border-t border-[#E9E9E9] p-6">
         <div className="space-y-1">
           <h3 className="text-base font-semibold text-[#151515]">
             {part.name}
@@ -62,8 +62,8 @@ export function PublicPartCard({ part }: PublicPartCardProps) {
             type="button"
             size="sm"
             disabled={!inStock}
-            className="h-9 shrink-0 cursor-pointer border-0 text-sm font-semibold hover:opacity-90 disabled:opacity-50"
-            style={{ backgroundColor: brand.white, color: brand.forest }}
+            className="h-9 shrink-0 cursor-pointer border-0 text-sm font-semibold text-white hover:opacity-90 disabled:opacity-50"
+            style={{ backgroundColor: brand.forest }}
           >
             Add to Cart
             <ArrowUpRight className="size-4" />

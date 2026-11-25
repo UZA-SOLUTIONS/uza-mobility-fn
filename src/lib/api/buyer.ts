@@ -38,7 +38,10 @@ import type {
   BuyerPaymentsFilters,
   PublicListingSummary,
 } from '@/types/buyer/commerce';
-import type { PaginatedResult } from '@/types/api/pagination';
+import {
+  PUBLIC_API_PAGE_LIMIT,
+  type PaginatedResult,
+} from '@/types/api/pagination';
 
 export function getBuyerProfile(accessToken?: string) {
   return authenticatedFetch<MeBuyerProfile>('/users/buyer-profile', {
@@ -170,7 +173,7 @@ export function submitFinancingRequest(body: FinancingRequestInput) {
 }
 
 /** Public GET /listings max page size enforced by the API. */
-export const PUBLIC_LISTINGS_PAGE_LIMIT = 48;
+export const PUBLIC_LISTINGS_PAGE_LIMIT = PUBLIC_API_PAGE_LIMIT;
 
 export type BrowsePublishedListingsFilters = {
   q?: string;
